@@ -132,7 +132,7 @@ input{font:inherit;color:var(--ink);background:#0f0c09;border:1px solid var(--li
 .opt b{font:600 14px/1.15 var(--serif);color:var(--ink)}
 .opt span{font:600 11px var(--sans);color:var(--gold-hi);font-variant-numeric:tabular-nums}
 .opt i{font:10px/1.2 var(--sans);font-style:normal;color:var(--muted)}
-.opt.c-sort{border-left-color:var(--arcane)}.opt.c-insp{border-left-color:var(--gold-hi)}.opt.c-rail{border-left-color:#d98a5a}
+.opt.c-sort,.opt.c-sort2{border-left-color:var(--arcane)}.opt.c-insp{border-left-color:var(--gold-hi)}.opt.c-rail{border-left-color:#d98a5a}
 .opt.off{opacity:.38;filter:grayscale(.8);border-left-color:var(--line)}
 .opt.off i{color:#f0a49a}
 /* carte d'objet magique */
@@ -230,7 +230,7 @@ const PJ = {
     actions:[['Épée longue « Éveil de Kira »','1d20 +6','1d8 +4'],['Châtiment divin (après une touche)','—','+2d8 radiant']],
     bonus:'Vœu d\'inimitié · Bénédiction de la Raven Queen',
     effetTxt:'Avantage aux attaques contre la cible du Vœu pendant 1 minute.' },
-  ludo:{ nom:'Ludo Tire-Gousset', joueur:'Charlie', img:IMG.ludo, pos:'center 15%', camp:'dl', desc:'Kender · Barde 3', pv:15, max:21, ca:14, init:'+3', vit:'9 m', pp:12,
+  ludo:{ nom:'Ludo Tire-Gousset', joueur:'Charlie', img:IMG.ludo, pos:'center 15%', camp:'dl', desc:'Kender · Barde 3 · Collège du Savoir', pv:15, max:21, ca:14, init:'+3', vit:'9 m', pp:12,
     ab:[14,16,15,14,14,19], eco:true },
   zephira:{ nom:'Zéphira Amastacia', joueur:'Dominique', img:IMG.zephira, pos:'center 14%', camp:'or', desc:'Fey\'ri · Âme divine 2 / Succube 2', pv:22, max:36, ca:13, pp:9 },
   galinndan:{ nom:'Galinndan Siannadel', joueur:'Charlie', img:IMG.galinndan, pos:'center 16%', camp:'or', desc:'Shadar-kai · Lame psychique 3 / Rôdeur 1', pv:33, max:33, ca:18, pp:15 },
@@ -259,7 +259,7 @@ const MON = {
 };
 
 const S = { ecran:'accueil', role:'pj', ong:{pj:'fiche',mj:'combat'}, perso:'korgan', sous:'tour', effets:{korgan:false,kaelthar:false}, round:3, tour:2, choix:{},
-  res:{ n1:2, n2:1, insp:3, rail:2 }, eco:{ a:false, b:false, r:false, sortA:false, sortB:false } };
+  res:{ n1:2, n2:1, insp:3, rail:2 }, conc:null, chaufTour:false, eco:{ a:false, b:false, r:false, sortA:false, sortB:false } };
 
 /* ===== Mon tour de Ludo : actions, actions bonus et réactions côte à côte ===== */
 const RES = [ ['n1','Sorts niv. 1',4], ['n2','Sorts niv. 2',2], ['insp','Inspiration',4], ['rail','Raillerie',2] ];
@@ -270,12 +270,15 @@ const OPTS = [
   { id:'givre', col:'a', nom:'Rayon de givre', court:'+6 · 1d8', mineur:1, d:'Sort mineur, 18 m. Attaque de sort (+6) : 1d8 froid, et la cible perd 3 m de vitesse jusqu\'à ton prochain tour.' },
   { id:'moquerie', col:'a', nom:'Moquerie cruelle', court:'DD 14 · 1d4', mineur:1, d:'Sort mineur, 18 m. Sauvegarde de Sagesse DD 14 : 1d4 psychiques, et désavantage à sa prochaine attaque.' },
   { id:'murmures', col:'a', nom:'Murmures dissonants', court:'DD 14 · 3d6', cout:'sort', d:'Sort de niveau 1, 18 m. Sauvegarde de Sagesse DD 14 : 3d6 psychiques et la cible fuit (moitié si réussite). +1d6 par niveau au-dessus.' },
-  { id:'feerique', col:'a', nom:'Lumière féerique', court:'DD 14 · zone', cout:'sort', d:'Sort de niveau 1, concentration. Cube de 6 m, sauvegarde de Dextérité DD 14 : avantage aux attaques contre les cibles éclairées.' },
+  { id:'immo', col:'a', nom:'Immobilisation de personne', court:'DD 14 · paralysé', cout:'sort2', conc:1, d:'Sort de niveau 2, 18 m, concentration. Un humanoïde fait une sauvegarde de Sagesse DD 14 ou il est paralysé. Il refait la sauvegarde à la fin de chacun de ses tours.' },
+  { id:'chauffer', col:'a', nom:'Chauffer le métal', court:'2d8 feu', cout:'sort2', conc:1, d:'Sort de niveau 2, 18 m, concentration. Un objet de métal devient brûlant : 2d8 feu à qui le touche, et désavantage s\'il le garde. Aux tours suivants, une action bonus refait les dégâts.' },
+  { id:'rechauffe', col:'b', nom:'Chauffer : relancer', court:'2d8 feu', d:'Tant que tu te concentres sur Chauffer le métal, à partir du tour suivant : une action bonus refait 2d8 feu.' },
   { id:'insp', col:'b', nom:'Inspiration bardique', court:'allié · d6', cout:'insp', d:'Un allié à 18 m qui t\'entend gagne un d6 à ajouter à une attaque, un test ou une sauvegarde dans les 10 minutes.' },
   { id:'mot', col:'b', nom:'Mot de guérison', court:'1d4+4 PV', cout:'sort', d:'Sort de niveau 1, 18 m. Une créature récupère 1d4 + 4 PV. +1d4 par niveau au-dessus.' },
   { id:'raillerie', col:'b', nom:'Raillerie', court:'DD 14 · désav.', cout:'rail', d:'Trait kender. Une créature à 18 m qui t\'entend : sauvegarde de Sagesse DD 14, sinon désavantage à ses attaques contre d\'autres que toi jusqu\'à ton prochain tour.' },
   { id:'bouclier', col:'r', nom:'Bouclier', court:'+5 CA', cout:'sort', d:'Sort de niveau 1, quand une attaque te touche : +5 à la CA jusqu\'à ton prochain tour, l\'attaque peut rater.' },
   { id:'pointes', col:'r', nom:'Pointes argentées', court:'relance', cout:'sort', d:'Sort de niveau 1, quand une créature réussit une attaque, un test ou une sauvegarde : elle relance et garde le plus bas. Un allié gagne l\'avantage.' },
+  { id:'cinglants', col:'r', nom:'Mots cinglants', court:'−d6 ennemi', cout:'insp', d:'Collège du Savoir. Quand une créature à 18 m fait une attaque, un test ou des dégâts : dépense une Inspiration et retire le d6 de son résultat.' },
   { id:'opportunite', col:'r', nom:'Attaque d\'opportunité', court:'+5 · 1d6+3', d:'Quand un ennemi quitte ton allonge : une attaque au hoopak.' },
 ];
 const COLS = [ ['a','Action'], ['b','Action bonus'], ['r','Réaction'] ];
@@ -284,13 +287,17 @@ const slotLibre = () => S.res.n1>0 ? 'n1' : S.res.n2>0 ? 'n2' : null;
 function bloque(o){
   if(S.eco[o.col]) return (o.col==='r' ? 'Réaction déjà utilisée (elle revient à ton prochain tour)' : (o.col==='a'?'Action':'Action bonus')+' déjà utilisée ce tour')+'|Déjà utilisée';
   if(o.cout==='sort' && !slotLibre()) return 'Plus d\'emplacement de sort (repos long)|Plus d\'emplacement';
+  if(o.cout==='sort2' && !S.res.n2) return 'Plus d\'emplacement de niveau 2 (repos long)|Plus de niv. 2';
+  if(o.id==='rechauffe' && S.conc!=='chauffer') return 'Il faut d\'abord lancer Chauffer le métal et garder la concentration|Pas actif';
+  if(o.id==='rechauffe' && S.chaufTour) return 'Lancé ce tour-ci : la relance marche à partir du tour suivant|Tour suivant';
+  if(o.col==='a' && o.cout==='sort2' && S.eco.sortB) return 'Tu as lancé un sort en action bonus : en action, seulement un sort mineur ce tour|Sort en bonus';
   if(o.cout==='insp' && !S.res.insp) return 'Plus d\'Inspiration (repos long)|Plus d\'Inspiration';
   if(o.cout==='rail' && !S.res.rail) return 'Plus de Raillerie (repos long)|Plus de Raillerie';
   if(o.col==='a' && o.cout==='sort' && S.eco.sortB) return 'Tu as lancé un sort en action bonus : en action, seulement un sort mineur ce tour|Sort en bonus';
   if(o.col==='b' && o.cout==='sort' && S.eco.sortA) return 'Tu as lancé un sort de niveau 1+ en action : en bonus, pas d\'autre sort ce tour|Sort en action';
   return '';
 }
-function coutTxt(o){ return o.cout==='sort' ? 'Emplacement' : o.cout==='insp' ? 'Inspiration' : o.cout==='rail' ? 'Raillerie' : o.mineur ? 'Sort mineur' : 'Gratuit'; }
+function coutTxt(o){ return o.cout==='sort' ? 'Emplacement' : o.cout==='sort2' ? 'Emplacement niv. 2' : o.cout==='insp' ? 'Inspiration' : o.cout==='rail' ? 'Raillerie' : o.mineur ? 'Sort mineur' : 'Gratuit'; }
 function monTour(){
   const pips = (k,m) => Array.from({length:m},(_,i)=>`<button class="pip ${i<S.res[k]?'full':''}" onclick="S.res.${k}=${i<S.res[k]?i:i+1};draw()" aria-label="${k} ${i+1}"></button>`).join('');
   return `<div class="frame"><div class="round" style="margin:0 0 8px"><h3 style="font-size:20px;color:var(--gold-hi)">Mon tour</h3><span class="small">Round ${S.round}</span></div>
@@ -298,8 +305,9 @@ function monTour(){
     <div class="eco3">${COLS.map(([c,n])=>`<div class="col ${S.eco[c]?'pris':''}"><p class="kicker">${n}</p><p class="etat">${S.eco[c]?'✓ Utilisée':'◆ Disponible'}</p>
       ${OPTS.filter(o=>o.col===c).map(o=>{ const b=bloque(o); return `<button class="opt ${b?'off':''} ${o.cout?'c-'+o.cout:''}" onclick="voirOpt('${o.id}')"><b>${o.nom}</b><span>${o.court}</span><i>${b?'✕ '+b.split('|')[1]:coutTxt(o)}</i></button>`; }).join('')}
     </div>`).join('')}</div>
+    ${S.conc?`<div class="line" style="margin-top:8px"><span class="chip arc" style="white-space:normal;min-width:0">✦ Concentration : ${OPTS.find(o=>o.id===S.conc).nom}</span><button class="mini" style="min-height:30px;font:12px var(--sans);flex-shrink:0;padding:0 10px" onclick="S.conc=null;draw()">Arrêter</button></div>`:''}
     <p class="small" style="margin-top:8px">Aussi en action : Esquiver · Se désengager · Se cacher · Aider · Foncer. Mouvement : 9 m.</p>
-    <button class="or" style="width:100%;margin-top:10px" onclick="S.eco={a:false,b:false,r:false,sortA:false,sortB:false};draw()">Fin de mon tour</button></div>
+    <button class="or" style="width:100%;margin-top:10px" onclick="S.eco={a:false,b:false,r:false,sortA:false,sortB:false};S.chaufTour=false;S.round++;draw()">Fin de mon tour</button></div>
     <div class="note"><b>Idée de Charlie :</b> tout ce que Ludo peut faire, côte à côte. Ce qui n'est plus possible devient gris, selon les ressources qui restent (touche un losange pour corriger).</div>`;
 }
 function voirOpt(id){
@@ -307,11 +315,14 @@ function voirOpt(id){
   ouvrir(`<header><h2>${o.nom}</h2><button onclick="closeSheet()">✕</button></header>
     <p class="kicker">${COLS.find(c=>c[0]===o.col)[1]} · ${coutTxt(o)}${o.cout==='sort'&&s?' (niv. '+s.slice(1)+')':''}</p>
     <p style="margin:10px 0 14px">${o.d}</p>
+    ${o.conc&&S.conc&&!b?`<p class="note" style="margin-top:0">Tu te concentres déjà sur <b>${OPTS.find(x=>x.id===S.conc).nom}</b> : ce sort-là s'arrêtera.</p>`:''}
     ${b?`<p class="chip mal" style="white-space:normal">${b.split('|')[0]}</p>`:`<button class="or" style="width:100%" onclick="utiliser('${id}')">Utiliser</button>`}`);
 }
 function utiliser(id){
   const o=OPTS.find(x=>x.id===id); if(bloque(o)) return;
   if(o.cout==='sort'){ S.res[slotLibre()]--; if(o.col==='a') S.eco.sortA=true; if(o.col==='b') S.eco.sortB=true; }
+  if(o.cout==='sort2'){ S.res.n2--; S.eco.sortA=true; }
+  if(o.conc){ S.conc=o.id; S.chaufTour = o.id==='chauffer'; }
   if(o.cout==='insp') S.res.insp--;
   if(o.cout==='rail') S.res.rail--;
   S.eco[o.col]=true; closeSheet(); draw();
