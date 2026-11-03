@@ -165,6 +165,47 @@ input{font:inherit;color:var(--ink);background:#0f0c09;border:1px solid var(--li
 .ent.cur .av{border-color:var(--gold-hi)}
 .ent.down{opacity:.4;filter:grayscale(1)}
 .ent.mon h3{color:#f0c6bf}
+/* combat joueur : la table de cartes */
+.seg2{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line2);margin-bottom:12px}
+.seg2 button{border:0;border-radius:0;background:transparent;font-variant:small-caps;letter-spacing:.06em;min-height:38px}
+.seg2 button.on{background:#d8b26a1f;color:var(--gold-hi);box-shadow:inset 0 -2px 0 var(--gold)}
+.strip{list-style:none;margin:0 0 12px;padding:0 0 4px;display:flex;align-items:center;gap:4px;overflow-x:auto;scrollbar-width:none}
+.strip li{position:relative;flex:0 0 auto}
+.strip li img,.strip li b{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;object-fit:cover;border:2px solid var(--gold-lo);font:700 12px var(--serif);font-variant:small-caps}
+.strip li.enn b{border-color:#6b2a22;background:#2a1410;color:#e08b80}
+.strip li small{position:absolute;right:-3px;bottom:-3px;background:var(--bg);border:1px solid var(--line2);border-radius:50%;width:15px;height:15px;font:700 9px/13px var(--sans);text-align:center;color:var(--gold)}
+.strip li.cur img,.strip li.cur b{border-color:var(--gold-hi);box-shadow:0 0 10px #d8b26a99}
+.strip li.down{opacity:.35;filter:grayscale(1)}
+.strip li.fl{color:var(--faint);font-size:14px}
+.tapis{position:relative;padding:10px 8px;border:1px solid #4a3a26;border-radius:6px;background:radial-gradient(120% 80% at 50% 50%,#1f2a1d 0%,#141a12 55%,#0e0f0b 100%);box-shadow:inset 0 0 0 4px #1a130c,inset 0 0 0 5px #6a5232,inset 0 0 40px #000c}
+.tapis .cote{text-align:center;font:600 9px var(--sans);letter-spacing:.3em;text-transform:uppercase;color:#a99c7d99;margin:2px 0 6px}
+.tapis .main{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.tapis .milieu{display:flex;align-items:center;gap:8px;margin:12px 4px;color:var(--gold-lo)}
+.tapis .milieu::before,.tapis .milieu::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,transparent,#8a6d3b88,transparent)}
+.tc{position:relative;display:flex;flex-direction:column;padding:0;min-height:0;text-align:left;background:#120e0b;border:1px solid #6a5232;border-radius:5px;overflow:hidden;box-shadow:0 4px 10px #0009;transition:transform .2s}
+.tc.enn{border-color:#7a3328;background:#160c0a}
+.tc .art{height:78px;overflow:hidden;position:relative}
+.tc .art img{width:100%;height:100%;object-fit:cover}
+.tc .art::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,#120e0b)}
+.tc.enn .art::after{background:linear-gradient(180deg,transparent 50%,#160c0a)}
+.mon-art{height:100%;display:grid;place-items:center;background:radial-gradient(circle at 50% 40%,#3a1712,#120807 75%);position:relative}
+.mon-art svg{width:46px;height:46px;stroke:#b5554a;fill:none;stroke-width:1.2;opacity:.8}
+.mon-art b{position:absolute;bottom:4px;right:6px;font:700 12px var(--serif);font-variant:small-caps;color:#e08b80}
+.tc .tci{padding:5px 6px 7px;display:flex;flex-direction:column;gap:3px;flex:1}
+.tc h4{margin:0;font:600 14px/1.1 var(--serif);font-variant:small-caps;letter-spacing:.04em;color:var(--gold-hi)}
+.tc.enn h4{color:#f0c6bf}
+.tc .pvt{font:600 10px var(--sans);color:var(--muted)}
+.tc .vg{font:600 11px var(--sans);color:var(--muted)}
+.tc .vg.ok{color:var(--life);background:none}.tc .vg.hurt{color:var(--warn);background:none}.tc .vg.crit{color:#f0a49a;background:none}
+.tc .fx{display:flex;flex-direction:column;gap:2px;margin-top:1px}
+.tc .fx span{font:600 9.5px/1.2 var(--sans)}
+.tc .bu{color:var(--gold-hi)}.tc .ma{color:#f0a49a}
+.tc .ordre{position:absolute;top:4px;left:4px;z-index:2;width:20px;height:20px;border-radius:50%;background:#0d0b09e6;border:1px solid var(--gold);color:var(--gold-hi);font:700 11px/18px var(--sans);text-align:center}
+.tc .toi,.tc .joue{position:absolute;top:5px;right:4px;z-index:2;font:700 8.5px var(--sans);letter-spacing:.1em;text-transform:uppercase;padding:2px 5px;border-radius:2px;background:var(--gold);color:#1a1207}
+.tc .joue{top:auto;bottom:auto;right:4px;top:22px;background:var(--gold-hi)}
+.tc.moi{border-color:var(--gold)}
+.tc.cur{border-color:var(--gold-hi);box-shadow:0 0 0 1px var(--gold-hi),0 0 18px #f4d68f66;transform:translateY(-3px)}
+.tc.down{opacity:.4;filter:grayscale(1)}
 /* groupe : cartes portrait */
 .party{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .card{position:relative;aspect-ratio:3/4.4;max-width:100%;overflow:hidden;border:1px solid var(--line2);cursor:pointer}
@@ -381,12 +422,13 @@ function utiliser(id){
 }
 
 let COMBAT = [
-  { id:'galinndan', pj:1, init:21, pv:33, max:33, et:[] },
-  { id:'ombre', mon:'ombre', nom:'Ombre', init:16, pv:9, max:16, et:[] },
-  { id:'kaelthar', pj:1, init:14, pv:31, max:36, et:['Vœu d\'inimitié'] },
-  { id:'goule1', mon:'goule', nom:'Goule', init:12, pv:22, max:22, et:['Effrayé'] },
-  { id:'zephira', pj:1, init:11, pv:22, max:36, et:['Concentration'] },
-  { id:'zomb1', mon:'zombie', nom:'Zombie A', init:6, pv:14, max:22, et:[] },
+  // et : états (règles) · bu : bonus actifs · ma : malus qu'on lui a mis (avec la source) · su : ce que le groupe a appris
+  { id:'galinndan', pj:1, init:21, pv:33, max:33, et:[], bu:['Bénédiction +1d4'] },
+  { id:'ombre', mon:'ombre', nom:'Ombre', init:16, pv:9, max:16, et:[], ma:['Cible du Vœu · Kael\'thar'], su:['Craint le radiant','Se cache dans le noir'] },
+  { id:'kaelthar', pj:1, init:14, pv:31, max:36, et:['Vœu d\'inimitié'], bu:['Bénédiction +1d4'] },
+  { id:'goule1', mon:'goule', nom:'Goule', init:12, pv:22, max:22, et:['Effrayé'], ma:['Effrayée · Abjurer, Kael\'thar'], su:['Griffes qui paralysent'] },
+  { id:'zephira', pj:1, init:11, pv:22, max:36, et:['Concentration'], bu:['Concentration : Bénédiction'] },
+  { id:'zomb1', mon:'zombie', nom:'Zombie A', init:6, pv:14, max:22, et:[], su:['Se relève parfois'] },
   { id:'zomb2', mon:'zombie', nom:'Zombie B', init:6, pv:0, max:22, et:['À terre'] },
 ];
 const ETATS = ['À terre','Agrippé','Assourdi','Aveuglé','Charmé','Effrayé','Empoisonné','Entravé','Étourdi','Inconscient','Invisible','Neutralisé','Paralysé','Pétrifié','Concentration'];
@@ -468,10 +510,53 @@ function fiche(){
     <div class="page" style="padding-top:2px">${c}</div>`;
 }
 
+/* ----- Combat côté joueur : la table de cartes (idée de Mathieu) ----- */
+const MOI = 'kaelthar'; // dans la campagne d'horreur, le joueur de démo joue Kael'thar
+// Bonus et malus d'une carte, sans doublon : bonus en or, malus en rouge
+function effetsCarte(e){
+  const bu = e.pj ? [...(e.bu||[]), ...e.et.filter(x=>x.startsWith('Vœu'))] : [];
+  const ma = e.pj ? e.et.filter(x=>x!=='Concentration' && !x.startsWith('Vœu')) : [...(e.ma||[]), ...e.et.filter(x=>!(e.ma||[]).some(m=>m.startsWith(x.slice(0,6))))];
+  return [bu.filter(x=>!(e.pj && x==='Concentration')), ma];
+}
+function carte(e,i){
+  const p=e.pj?PJ[e.id]:null, [bu,ma]=effetsCarte(e), moi=e.id===MOI;
+  const art = p ? `<img src="${p.img}" alt="" style="object-position:${p.pos}">` : `<div class="mon-art">${ICO.bestiaire}<b>${e.nom.slice(0,2)}</b></div>`;
+  const vie = p ? `<div class="bar"><i class="${cls(e.pv,e.max)}" style="width:${Math.max(0,e.pv/e.max*100)}%"></i></div><small class="pvt">${e.pv} / ${e.max} PV</small>`
+                : `<small class="vg ${e.pv<=0?'':cls(e.pv,e.max)}">${vague(e.pv,e.max)}</small>`;
+  return `<button class="tc ${p?'all':'enn'} ${i===S.tour?'cur':''} ${e.pv<=0?'down':''} ${moi?'moi':''}" onclick="voirCarte(${i})" aria-label="${nomE(e)}">
+    <span class="ordre">${i+1}</span>${moi?'<span class="toi">Toi</span>':''}${i===S.tour?'<span class="joue">Joue</span>':''}
+    <div class="art">${art}</div>
+    <div class="tci"><h4>${nomE(e)}</h4>${vie}
+      <div class="fx">${bu.map(x=>`<span class="bu">✦ ${x.split(' · ')[0]}</span>`).join('')}${ma.map(x=>`<span class="ma">▼ ${x.split(' · ')[0]}</span>`).join('')}</div></div></button>`;
+}
 function combatJoueur(){
-  return `<div class="page"><div class="round"><div><p class="kicker">L'Auberge de l'Ours Rouge</p><h2>Round ${S.round}</h2></div><span class="chip bien">Tour de ${nomE(COMBAT[S.tour])}</span></div>
-    <ol class="init">${COMBAT.map((e,i)=>ligne(e,i,false)).join('')}</ol>
-    <div class="note"><b>Côté joueur :</b> l'ordre des tours et tes alliés en clair. Pour les monstres, juste un état (« Blessé », « En sang »), jamais leurs PV.</div></div>`;
+  const vue = S.vueC||'table';
+  const tete = `<div class="round"><div><p class="kicker">L'Auberge de l'Ours Rouge</p><h2>Round ${S.round}</h2></div><span class="chip bien">Tour de ${nomE(COMBAT[S.tour])}</span></div>
+    <div class="seg2"><button class="${vue==='table'?'on':''}" onclick="S.vueC='table';draw()">La table</button><button class="${vue==='fiche'?'on':''}" onclick="S.vueC='fiche';S.perso=MOI;draw()">Ma fiche</button></div>`;
+  if(vue==='fiche'){ S.perso=MOI; const p=PJ[MOI], e=COMBAT.find(c=>c.id===MOI);
+    return `<div class="page">${tete}
+      <div class="frame" style="display:flex;gap:12px;align-items:center"><img src="${p.img}" alt="" style="width:56px;height:56px;border-radius:50%;object-fit:cover;object-position:${p.pos};border:2px solid var(--gold)">
+        <div style="flex:1"><h3 style="font-size:20px;color:var(--gold-hi)">${p.nom}</h3><div class="bar" style="margin:6px 0 3px"><i class="${cls(e.pv,e.max)}" style="width:${e.pv/e.max*100}%"></i></div><span class="small">${e.pv} / ${e.max} PV · CA ${p.ca}</span></div>
+        <button onclick="ouvrirPV('${MOI}')" aria-label="Changer les PV">PV</button></div>
+      ${monTour()}</div>`; }
+  const enn = COMBAT.map((e,i)=>[e,i]).filter(([e])=>e.mon), all = COMBAT.map((e,i)=>[e,i]).filter(([e])=>e.pj);
+  return `<div class="page">${tete}
+    <ol class="strip">${COMBAT.map((e,i)=>`<li class="${e.mon?'enn':''} ${i===S.tour?'cur':''} ${e.pv<=0?'down':''}">${e.pj?`<img src="${PJ[e.id].img}" alt="" style="object-position:${PJ[e.id].pos}">`:`<b>${e.nom.slice(0,2)}</b>`}<small>${i+1}</small></li>`).join('<li class="fl" aria-hidden="true">›</li>')}</ol>
+    <div class="tapis">
+      <p class="cote">Ennemis</p><div class="main">${enn.map(([e,i])=>carte(e,i)).join('')}</div>
+      <div class="milieu"><span>◆</span></div>
+      <div class="main">${all.map(([e,i])=>carte(e,i)).join('')}</div><p class="cote">Alliés</p>
+    </div>
+    <div class="note"><b>Idée de Mathieu :</b> le combat comme des cartes sur une table. Le chiffre en coin = l'ordre de jeu. Les alliés montrent leurs PV ; les ennemis seulement ce que le groupe a le droit de savoir. Touche une carte pour les détails.</div></div>`;
+}
+function voirCarte(i){
+  const e=COMBAT[i], p=e.pj?PJ[e.id]:null, [bu,ma]=effetsCarte(e);
+  const liste = (t,a,c) => a.length ? `<p class="kicker" style="margin:12px 0 4px">${t}</p>${a.map(x=>`<div class="line"><span class="chip ${c}" style="white-space:normal">${x.split(' · ')[0]}</span>${x.includes(' · ')?`<span class="small" style="font-weight:400;color:var(--muted)">par ${x.split(' · ')[1]}</span>`:''}</div>`).join('')}` : '';
+  ouvrir(`<header><h2>${nomE(e)}</h2><button onclick="closeSheet()">✕</button></header>
+    <p class="kicker">${i+1}${i===0?'er':'e'} dans l'ordre · ${i===S.tour?'joue maintenant':'joue dans '+((i-S.tour+COMBAT.length)%COMBAT.length)+' tour(s)'}</p>
+    ${p?`<p style="margin-top:8px">${p.desc}</p><div class="stats" style="grid-template-columns:repeat(3,1fr)"><div><b>${e.pv}</b><small>PV / ${e.max}</small></div><div><b>${p.ca}</b><small>CA</small></div><div><b>${p.pp}</b><small>Perc. passive</small></div></div>`
+       :`<p style="margin-top:8px">État : <b style="color:var(--gold-hi)">${vague(e.pv,e.max)}</b></p><p class="small" style="margin-top:4px">Ses PV et sa CA restent secrets : le MJ les garde.</p>`}
+    ${liste('Bonus actifs',bu,'bien')}${liste(p?'Malus':'Ce qu\'on lui a fait',ma,'mal')}${liste('Ce que le groupe sait',e.su||[],'arc')}`);
 }
 
 /* ----- MJ ----- */
