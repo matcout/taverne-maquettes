@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Taverne — la piste de dés</title>
+<style>
+/* Piste de dés 3D faite maison (aucune librairie) : idée de Mathieu, style « grimoire noir et or » de la v2. */
+:root{
+  --bg:#0d0b09; --surface2:#1e1813; --line:#3a2f22; --line2:#5a4930;
+  --ink:#ebe2d0; --muted:#a39580; --faint:#76695a;
+  --gold:#d8b26a; --gold-hi:#f4d68f; --gold-lo:#8a6d3b; --blood:#c0392b; --arcane:#a58bdc; --life:#6fae6a;
+  --serif:"Cormorant Garamond","EB Garamond",Garamond,"Iowan Old Style","Palatino Linotype",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--serif)}
+body{background:radial-gradient(120% 60% at 50% 0%,#1d1610 0%,var(--bg) 60%) fixed,var(--bg)}
+h1,h2,h3{margin:0;font-variant:small-caps;letter-spacing:.06em;font-weight:600}
+p{margin:0}
+button{font:inherit;color:inherit;cursor:pointer;background:var(--surface2);border:1px solid var(--line2);border-radius:3px;min-height:40px;padding:0 12px}
+button:focus-visible{outline:2px solid var(--gold-hi);outline-offset:3px}
+button.on{border-color:var(--gold);color:var(--gold-hi);background:#d8b26a1c}
+button.or{background:linear-gradient(180deg,#e7c27a,#b98f45);color:#1a1207;border-color:#f4d68f;font-variant:small-caps;letter-spacing:.06em;font-weight:700}
+.app{max-width:600px;margin:auto;padding:14px 16px 40px}
+.kicker{font:600 10px var(--sans);letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
+.small{font:12px var(--sans);color:var(--muted)}
+.tete{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.tete img,.tete .av{width:52px;height:52px;border-radius:50%;border:2px solid var(--gold);display:grid;place-items:center;background:#2a2016;font:700 18px var(--serif);color:var(--gold-hi)}
+.tete h1{font-size:26px;color:var(--gold-hi);line-height:1}
+/* la piste */
+.piste{position:relative;border-radius:8px;overflow:hidden;border:1px solid #4a3a26;box-shadow:inset 0 0 0 4px #1a130c,inset 0 0 0 5px #6a5232,0 10px 30px #000a}
+.piste canvas{display:block;width:100%;height:360px;touch-action:none;background:radial-gradient(110% 90% at 50% 45%,#22301f 0%,#151c13 55%,#0c0f0a 100%)}
+.piste .aide{position:absolute;left:0;right:0;bottom:10px;text-align:center;font:600 10px var(--sans);letter-spacing:.2em;text-transform:uppercase;color:#a99c7d88;pointer-events:none}
+/* barre de résultat */
+.res{display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px;margin-top:12px;padding:10px 14px;border:1px solid var(--line2);background:linear-gradient(180deg,#19140f,#130f0b);border-radius:4px;min-height:66px}
+.res .quoi{font:600 10px var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+.res .calc{font:600 15px var(--sans);color:var(--muted);margin-top:2px}
+.res .calc b{color:var(--ink)}.res .calc s{color:var(--faint)}
+.res .tot{font:700 44px/1 var(--serif);color:var(--gold-hi);min-width:64px;text-align:right;font-variant-numeric:tabular-nums}
+.res.crit{border-color:var(--gold-hi);box-shadow:0 0 22px #f4d68f55}.res.crit .tot{text-shadow:0 0 16px #f4d68f}
+.res.fail{border-color:var(--blood)}.res.fail .tot{color:#f0a49a}
+.badge{display:inline-block;margin-left:6px;font:700 9px var(--sans);letter-spacing:.12em;padding:2px 6px;border-radius:2px;vertical-align:2px}
+.badge.c{background:var(--gold-hi);color:#1a1207}.badge.f{background:var(--blood);color:#fff}
+/* boutons de jet */
+.sec{margin-top:16px}
+.sec .kicker{margin-bottom:8px}
+.jets{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.jet{display:flex;flex-direction:column;align-items:flex-start;padding:8px 10px;text-align:left;min-height:0}
+.jet b{font:600 16px/1.1 var(--serif);font-variant:small-caps;letter-spacing:.03em}
+.jet span{font:600 12px var(--sans);color:var(--gold-hi)}
+.libres{display:grid;grid-template-columns:repeat(6,1fr);gap:5px}
+.libres button{position:relative;padding:0;min-height:48px;font:700 13px var(--sans)}
+.libres button i{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;border-radius:9px;background:var(--gold);color:#1a1207;font:700 11px/18px var(--sans);font-style:normal}
+.ligne{display:flex;gap:6px;align-items:center;margin-top:8px;flex-wrap:wrap}
+.ligne .mod{display:flex;align-items:center;gap:4px}
+.ligne .mod b{min-width:34px;text-align:center;font:700 16px var(--sans)}
+.ligne .mod button{width:36px;padding:0}
+.seg{display:flex;border:1px solid var(--line2);border-radius:3px;overflow:hidden}
+.seg button{border:0;border-radius:0;min-height:34px;font:600 12px var(--sans);background:transparent;padding:0 10px}
+.seg button.on{background:var(--gold);color:#1a1207}
+.histo .l{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font:13px var(--sans)}
+.histo .l:last-child{border-bottom:0}
+.histo .l b{font:700 17px var(--serif);color:var(--gold-hi)}
+.histo .qui{color:var(--muted)}
+.note{font:13px/1.5 var(--sans);color:#d9cfe9;border-left:2px solid var(--arcane);background:#a58bdc12;padding:9px 11px;margin:14px 0 0;border-radius:0 3px 3px 0}
+.note b{color:var(--arcane)}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <p class="muted" style="padding:30px 0;text-align:center">Ouvre ce fichier dans Chrome ou Safari pour voir la maquette.</p>
+</div>
+<script>
+/* ================= Les dés en 3D (géométrie maison) ================= */
+const PHI=(1+Math.sqrt(5))/2;
+const sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]], add=(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]];
+const mul=(a,k)=>[a[0]*k,a[1]*k,a[2]*k], dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+const len=a=>Math.hypot(a[0],a[1],a[2]), norm=a=>mul(a,1/len(a));
+const moy=pts=>mul(pts.reduce(add,[0,0,0]),1/pts.length);
+
+// Remet les sommets d'une face dans l'ordre autour de son centre
+function ordonner(V,f){
+  const c=moy(f.map(i=>V[i])), n=norm(c), u=norm(sub(V[f[0]],c)), w=cross(n,u);
+  return f.slice().sort((a,b)=>{const pa=sub(V[a],c),pb=sub(V[b],c);return Math.atan2(dot(pa,w),dot(pa,u))-Math.atan2(dot(pb,w),dot(pb,u));});
+}
+function solide(V,F){ // normalise la taille, calcule les normales
+  const r=Math.max(...V.map(len)); V=V.map(v=>mul(v,1/r));
+  const faces=F.map(f=>{ const c=moy(f.map(i=>V[i])); let n=norm(cross(sub(V[f[1]],V[f[0]]),sub(V[f[2]],V[f[0]]))); if(dot(n,c)<0) n=mul(n,-1); return {f,c,n}; });
+  return {V,faces};
+}
+function icosa(){
+  const V=[];[-1,1].forEach(a=>[-1,1].forEach(b=>{V.push([0,a,b*PHI]);V.push([a,b*PHI,0]);V.push([b*PHI,0,a]);}));
+  const F=[];
+  for(let i=0;i<12;i++)for(let j=i+1;j<12;j++)for(let k=j+1;k<12;k++){
+    const e=(x,y)=>Math.abs(len(sub(V[x],V[y]))-2)<1e-6; if(e(i,j)&&e(j,k)&&e(i,k)) F.push([i,j,k]); }
+  return {V,F};
+}
+const GEO={
+  4:()=>{const V=[[1,1,1],[1,-1,-1],[-1,1,-1],[-1,-1,1]];return solide(V,[[0,1,2],[0,1,3],[0,2,3],[1,2,3]]);},
+  6:()=>{const V=[];[-1,1].forEach(x=>[-1,1].forEach(y=>[-1,1].forEach(z=>V.push([x,y,z]))));
+    const F=[];[0,1,2].forEach(ax=>[-1,1].forEach(s=>{F.push(ordonner(V,V.map((v,i)=>v[ax]===s?i:-1).filter(i=>i>=0)));}));return solide(V,F);},
+  8:()=>{const V=[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]];const F=[];[0,1].forEach(a=>[2,3].forEach(b=>[4,5].forEach(c=>F.push([a,b,c]))));return solide(V,F);},
+  10:()=>{const a=.1,h=a*(1+Math.cos(Math.PI/5))/(1-Math.cos(Math.PI/5)),V=[[0,0,h],[0,0,-h]];
+    for(let i=0;i<5;i++){V.push([Math.cos(i*2*Math.PI/5),Math.sin(i*2*Math.PI/5),a]);V.push([Math.cos((i+.5)*2*Math.PI/5),Math.sin((i+.5)*2*Math.PI/5),-a]);}
+    const U=i=>2+2*(i%5),L=i=>3+2*(i%5),F=[];for(let i=0;i<5;i++){F.push([0,U(i),L(i),U(i+1)]);F.push([1,L(i),U(i+1),L(i+1)]);}
+    const s=solide(V,F); s.V=s.V.map(v=>[v[0]*1.05,v[1]*1.05,v[2]*1.05]); return s;},
+  12:()=>{const I=icosa(),C=I.F.map(f=>moy(f.map(i=>I.V[i])));const F=I.V.map((v,vi)=>ordonner(C,I.F.map((f,fi)=>f.includes(vi)?fi:-1).filter(x=>x>=0)));return solide(C,F);},
+  20:()=>{const I=icosa();return solide(I.V,I.F);},
+};
+const FORMES={}; for(const k in GEO) FORMES[k]=GEO[k]();
+
+// Rotation : matrice 3×3 en tableau de lignes
+const ident=()=>[[1,0,0],[0,1,0],[0,0,1]];
+const mm=(A,B)=>A.map(r=>[0,1,2].map(j=>r[0]*B[0][j]+r[1]*B[1][j]+r[2]*B[2][j]));
+const mv=(A,v)=>A.map(r=>dot(r,v));
+function rot(axe,ang){ if(ang===0||len(axe)===0) return ident(); const [x,y,z]=norm(axe),c=Math.cos(ang),s=Math.sin(ang),t=1-c;
+  return [[t*x*x+c,t*x*y-s*z,t*x*z+s*y],[t*x*y+s*z,t*y*y+c,t*y*z-s*x],[t*x*z-s*y,t*y*z+s*x,t*z*z+c]]; }
+function hasard(){ let R=ident(); for(let i=0;i<3;i++) R=mm(rot([Math.random()-.5,Math.random()-.5,Math.random()-.5],Math.random()*6.3),R); return R; }
+
+/* ================= Habillage des dés ================= */
+const PEAUX={
+  rubis:{nom:'Rubis',base:[178,28,38],chiffre:'#fff3e6',bord:'#4a0a0e'},
+  nuit:{nom:'Nuit et or',base:[30,24,20],chiffre:'#f4d68f',bord:'#8a6d3b'},
+  os:{nom:'Os',base:[226,214,188],chiffre:'#2b2116',bord:'#7a6a4e'},
+  arcane:{nom:'Arcane',base:[92,66,170],chiffre:'#efe6ff',bord:'#24124d'},
+};
+let PEAU='rubis';
+const LUM=norm([-.45,.6,1]);
+
+/* ================= La piste : physique simple ================= */
+const cv={el:null,ctx:null,w:0,h:0,dpr:1};
+let DES=[], anim=0, apresArret=null;
+const TAILLE=40; // rayon d'un dé en pixels
+
+function nouveauDe(faces,x,y,vx,vy){
+  return {faces,x,y,z:0,vx,vy,vz:420+Math.random()*260,R:hasard(),w:[(Math.random()-.5)*30,(Math.random()-.5)*30,(Math.random()-.5)*30],etat:'roule',val:0,ecarte:false};
+}
+function lancerDes(liste,instant){
+  DES=[]; const n=liste.length;
+  liste.forEach((f,i)=>{
+    const x=cv.w*(.25+.5*Math.random()), y=cv.h-TAILLE-4;
+    const d=nouveauDe(f,x,y,(Math.random()-.5)*520,-(620+Math.random()*420));
+    if(instant){ // pour les captures : dés déjà posés
+      d.x=cv.w*(n===1?.5:.3+.4*i/(Math.max(1,n-1)))+(i%2?10:-10); d.y=cv.h*.45+(i%2?-30:25); d.vz=0;
+      poser(d,instant[i]); }
+    DES.push(d);
+  });
+  if(!anim){ let t0=performance.now(); const pas=t=>{ const dt=Math.min(.033,(t-t0)/1000); t0=t; avancer(dt); dessiner(); anim = DES.some(d=>d.etat!=='pose') ? requestAnimationFrame(pas) : 0; if(!anim && apresArret) { const f=apresArret; apresArret=null; f(); } }; anim=requestAnimationFrame(pas); }
+}
+// Met une face donnée face à nous (valeur v), avec une rotation au hasard dans le plan
+function poser(d,v){
+  const F=FORMES[d.faces].faces[v-1].n; let R=rot(cross(F,[0,0,1]),Math.acos(Math.max(-1,Math.min(1,F[2]))));
+  if(len(cross(F,[0,0,1]))<1e-6 && F[2]<0) R=rot([1,0,0],Math.PI);
+  d.R=mm(rot([0,0,1],(Math.random()-.5)*1.2),R); d.etat='pose'; d.val=v; d.z=0; d.vx=d.vy=d.vz=0;
+}
+function avancer(dt){
+  const g=2400;
+  for(const d of DES){
+    if(d.etat==='pose') continue;
+    if(d.etat==='roule'){
+      d.vz-=g*dt; d.z+=d.vz*dt;
+      if(d.z<=0){ d.z=0; if(Math.abs(d.vz)>90){ d.vz=-d.vz*.42; d.w=add(mul(d.w,.7),[(Math.random()-.5)*8,(Math.random()-.5)*8,(Math.random()-.5)*8]); } else d.vz=0; }
+      const sol=d.z<=0.5;
+      if(sol){ const k=Math.exp(-2.6*dt); d.vx*=k; d.vy*=k;
+        const wr=mul(cross([0,0,1],[d.vx,-d.vy,0]),1/TAILLE); d.w=add(d.w,mul(sub(wr,d.w),Math.min(1,dt*7))); }
+      d.x+=d.vx*dt; d.y+=d.vy*dt;
+      const r=TAILLE;
+      if(d.x<r){d.x=r;d.vx=Math.abs(d.vx)*.6;} if(d.x>cv.w-r){d.x=cv.w-r;d.vx=-Math.abs(d.vx)*.6;}
+      if(d.y<r){d.y=r;d.vy=Math.abs(d.vy)*.6;} if(d.y>cv.h-r){d.y=cv.h-r;d.vy=-Math.abs(d.vy)*.6;}
+      d.R=mm(rot(d.w,len(d.w)*dt),d.R);
+      if(sol && d.vz===0 && Math.hypot(d.vx,d.vy)<22) d.etat='cale';
+    }
+    if(d.etat==='cale'){ // il se couche sur la face la plus proche de nous
+      let best=0,bz=-2; FORMES[d.faces].faces.forEach((f,i)=>{const z=mv(d.R,f.n)[2]; if(z>bz){bz=z;best=i;}});
+      const n=mv(d.R,FORMES[d.faces].faces[best].n), ang=Math.acos(Math.max(-1,Math.min(1,n[2])));
+      d.x+=d.vx*dt; d.y+=d.vy*dt; d.vx*=.85; d.vy*=.85;
+      if(ang<0.01){ d.etat='pose'; d.val=best+1; } else d.R=mm(rot(cross(n,[0,0,1]),Math.min(ang,ang*dt*9+.004)),d.R);
+    }
+  }
+  // les dés se poussent entre eux
+  for(let i=0;i<DES.length;i++)for(let j=i+1;j<DES.length;j++){
+    const a=DES[i],b=DES[j],dx=b.x-a.x,dy=b.y-a.y,dd=Math.hypot(dx,dy)||1,m=TAILLE*1.9;
+    if(dd<m){ const p=(m-dd)/2,ux=dx/dd,uy=dy/dd; if(a.etat!=='pose'){a.x-=ux*p;a.y-=uy*p;} if(b.etat!=='pose'){b.x+=ux*p;b.y+=uy*p;}
+      const rv=(b.vx-a.vx)*ux+(b.vy-a.vy)*uy; if(rv<0){ a.vx+=rv*ux*.8;a.vy+=rv*uy*.8;b.vx-=rv*ux*.8;b.vy-=rv*uy*.8; } }
+  }
+}
+function dessiner(){
+  const c=cv.ctx; c.setTransform(cv.dpr,0,0,cv.dpr,0,0); c.clearRect(0,0,cv.w,cv.h);
+  const P=PEAUX[PEAU];
+  for(const d of [...DES].sort((a,b)=>a.z-b.z)){
+    const s=TAILLE*(1+d.z/520), S=FORMES[d.faces];
+    // ombre
+    c.save(); c.globalAlpha=(d.ecarte?.18:.45)*Math.max(.25,1-d.z/400); c.fillStyle='#000';
+    c.beginPath(); c.ellipse(d.x+6+d.z*.12,d.y+8+d.z*.18,s*.95,s*.8,0,0,7); c.filter='blur(6px)'; c.fill(); c.restore();
+    c.save(); if(d.ecarte) c.globalAlpha=.35;
+    const V=S.V.map(v=>mv(d.R,v)), pr=v=>[d.x+v[0]*s,d.y-v[1]*s];
+    const vis=S.faces.map((f,i)=>({f,i,n:mv(d.R,f.n),c:mv(d.R,f.c)})).filter(o=>o.n[2]>0.02).sort((a,b)=>a.c[2]-b.c[2]);
+    for(const o of vis){
+      const lam=Math.max(0,dot(o.n,LUM)), refl=sub(mul(o.n,2*dot(o.n,LUM)),LUM), spec=Math.pow(Math.max(0,refl[2]),24);
+      const k=.38+.62*lam, col=P.base.map(v=>Math.min(255,Math.round(v*k+255*spec*.55)));
+      c.beginPath(); o.f.f.forEach((vi,j)=>{const p=pr(V[vi]); j?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]);}); c.closePath();
+      c.fillStyle=`rgb(${col})`; c.fill(); c.lineWidth=1.2; c.strokeStyle=P.bord; c.lineJoin='round'; c.stroke();
+      // le chiffre, peint sur la face
+      const cc=pr(o.c), up=norm(sub(V[o.f.f[0]],o.c)), rt=cross(up,o.n);
+      const t=o.n[2]; if(t<.25) continue;
+      const fs=d.faces===20?.5:d.faces===12?.5:d.faces===10?.42:d.faces===8?.55:d.faces===6?.75:.55;
+      c.save(); c.setTransform(cv.dpr*rt[0],-cv.dpr*rt[1],-cv.dpr*up[0],cv.dpr*up[1],cv.dpr*cc[0],cv.dpr*cc[1]);
+      const lab=String(o.i+1); c.font=`700 ${s*fs}px Georgia,serif`; c.textAlign='center'; c.textBaseline='middle';
+      c.globalAlpha*=Math.min(1,(t-.25)*3); c.fillStyle=P.chiffre; c.fillText(lab,0,d.faces===20?s*.08:0);
+      if(lab==='6'||lab==='9') c.fillRect(-s*fs*.22,s*fs*.38,s*fs*.44,s*fs*.06);
+      c.restore();
+    }
+    // lueur des coups critiques
+    if(d.etat==='pose' && d.faces===20 && !d.ecarte && (d.val===20||d.val===1)){ c.globalCompositeOperation='lighter'; const g=c.createRadialGradient(d.x,d.y,s*.4,d.x,d.y,s*1.6);
+      g.addColorStop(0,d.val===20?'#f4d68f55':'#c0392b55'); g.addColorStop(1,'#0000'); c.fillStyle=g; c.fillRect(d.x-s*2,d.y-s*2,s*4,s*4); }
+    c.restore();
+  }
+}
+function taille(){ const r=cv.el.getBoundingClientRect(); cv.dpr=Math.min(2,window.devicePixelRatio||1); cv.w=r.width; cv.h=r.height;
+  cv.el.width=r.width*cv.dpr; cv.el.height=r.height*cv.dpr; dessiner(); }
+
+/* ================= L'écran ================= */
+// Kael'thar, paladin 4 (exemple) : jets tout prêts
+const JETS=[
+  {nom:'Épée longue',quoi:'Attaque',d:[20],mod:6},
+  {nom:'Épée longue',quoi:'Dégâts',d:[8],mod:4},
+  {nom:'Châtiment divin',quoi:'Dégâts radiants',d:[8,8],mod:0},
+  {nom:'Sauvegarde Sagesse',quoi:'Sauvegarde',d:[20],mod:3},
+];
+const S={libres:{4:0,6:0,8:0,10:0,12:0,20:0},mod:0,av:'normal',vu:'groupe',dernier:null,
+  histo:[{t:'Initiative',v:15,calc:'14 + 1'},{t:'Épée longue · dégâts',v:9,calc:'5 + 4'},{t:'Perception',v:6,calc:'5 + 1'}]};
+function lancer(spec){
+  // avantage / désavantage : un d20 en plus, on garde le meilleur (ou le pire)
+  let des=spec.d.slice(); const av=des.length===1&&des[0]===20&&S.av!=='normal';
+  if(av) des.push(20);
+  S.dernier={...spec,av:av?S.av:null,etat:'roule'}; maj();
+  apresArret=()=>fini();
+  lancerDes(des,spec.instant);
+}
+function fini(){
+  const L=S.dernier, vals=DES.map(d=>d.val); let garde=vals.map(()=>true);
+  if(L.av){ const i=L.av==='avantage'?(vals[0]>=vals[1]?1:0):(vals[0]<=vals[1]?1:0); garde[i]=false; DES[i].ecarte=true; dessiner(); }
+  const somme=vals.reduce((a,v,i)=>a+(garde[i]?v:0),0)+L.mod;
+  const d20=L.d.length===1&&L.d[0]===20?vals.find((v,i)=>garde[i]):null;
+  L.vals=vals; L.garde=garde; L.total=somme; L.crit=d20===20; L.fail=d20===1; L.etat='fini';
+  L.calc=vals.map((v,i)=>garde[i]?`<b>${v}</b>`:`<s>${v}</s>`).join(' + ')+(L.mod?` ${L.mod>0?'+':'−'} ${Math.abs(L.mod)}`:'');
+  S.histo.unshift({t:`${L.nom} · ${L.quoi.toLowerCase()}`,v:somme,calc:L.calc.replace(/<s>(\d+)<\/s>/g,'($1 écarté)').replace(/<[^>]+>/g,'')}); S.histo=S.histo.slice(0,5);
+  maj();
+}
+function lancerLibre(){
+  const d=[]; for(const f of [20,12,10,8,6,4]) for(let i=0;i<S.libres[f];i++) d.push(+f);
+  if(!d.length) return;
+  const nom=Object.entries(S.libres).filter(([,n])=>n).map(([f,n])=>n+'d'+f).reverse().join(' + ');
+  lancer({nom,quoi:'Jet libre',d,mod:S.mod});
+}
+const sg=n=>(n>=0?'+':'−')+Math.abs(n);
+function maj(){
+  const L=S.dernier;
+  document.getElementById('res').outerHTML=`<div class="res ${L&&L.etat==='fini'?(L.crit?'crit':L.fail?'fail':''):''}" id="res">
+    <div><p class="quoi">${L?L.nom+' · '+L.quoi+(L.av?' · '+L.av:''):'Prêt à lancer'}${L&&L.crit?'<span class="badge c">Critique !</span>':''}${L&&L.fail?'<span class="badge f">Échec critique</span>':''}</p>
+      <p class="calc">${L?(L.etat==='fini'?L.calc:L.d.map(f=>'d'+f).join(' + ')+(L.mod?' '+sg(L.mod):'')+' …'):'Touche un jet ci-dessous, les dés roulent sur la piste.'}</p></div>
+    <div class="tot">${L&&L.etat==='fini'?L.total:'—'}</div></div>`;
+  document.getElementById('bas').innerHTML=`
+    <div class="sec"><p class="kicker">Jets de Kael'thar</p><div class="jets">${JETS.map((j,i)=>`<button class="jet" onclick="lancer(JETS[${i}])"><b>${j.nom}</b><span>${j.quoi} · ${j.d.length>1?j.d.length+'d'+j.d[0]:'1d'+j.d[0]}${j.mod?' '+sg(j.mod):''}</span></button>`).join('')}</div>
+      <div class="ligne"><div class="seg" role="group" aria-label="Avantage">${[['desavantage','Désavantage'],['normal','Normal'],['avantage','Avantage']].map(([k,l])=>`<button class="${S.av===k?'on':''}" onclick="S.av='${k}';maj()">${l}</button>`).join('')}</div></div></div>
+    <div class="sec"><p class="kicker">Jet libre</p><div class="libres">${[4,6,8,10,12,20].map(f=>`<button onclick="S.libres[${f}]++;maj()" oncontextmenu="S.libres[${f}]=0;maj();return false" aria-label="Ajouter un d${f}">d${f}${S.libres[f]?`<i>${S.libres[f]}</i>`:''}</button>`).join('')}</div>
+      <div class="ligne"><div class="mod"><button onclick="S.mod--;maj()" aria-label="Moins">−</button><b>${sg(S.mod)}</b><button onclick="S.mod++;maj()" aria-label="Plus">+</button></div>
+        <button onclick="S.libres={4:0,6:0,8:0,10:0,12:0,20:0};S.mod=0;maj()">Vider</button><button class="or" style="flex:1" onclick="lancerLibre()">Lancer</button></div></div>
+    <div class="sec"><p class="kicker">Qui voit mes jets</p><div class="seg" style="display:inline-flex">${[['groupe','Tout le groupe'],['mj','Moi et le MJ'],['moi','Moi seul']].map(([k,l])=>`<button class="${S.vu===k?'on':''}" onclick="S.vu='${k}';maj()">${l}</button>`).join('')}</div></div>
+    <div class="sec"><p class="kicker">Couleur des dés</p><div class="seg" style="display:inline-flex">${Object.entries(PEAUX).map(([k,p])=>`<button class="${PEAU===k?'on':''}" onclick="PEAU='${k}';maj();dessiner()">${p.nom}</button>`).join('')}</div></div>
+    <div class="sec"><p class="kicker">Derniers jets</p><div class="histo">${S.histo.map(h=>`<div class="l"><span>${h.t}<br><span class="qui">${h.calc}</span></span><b>${h.v}</b></div>`).join('')}</div></div>
+    <div class="note"><b>Idée de Mathieu :</b> des dés qui roulent vraiment sur l'écran, faits maison (aucun outil externe). Les bons dés partent d'un seul bouton depuis « Mon tour ». Ceux qui préfèrent leurs vrais dés pourront taper leur résultat.</div>`;
+}
+document.getElementById('app').innerHTML=`
+  <div class="tete"><div class="av">K</div><div><p class="kicker">Kael'thar · round 3</p><h1>La piste de dés</h1></div></div>
+  <div class="piste"><canvas id="piste" aria-label="Piste de dés"></canvas><p class="aide">Touche la piste pour relancer</p></div>
+  <div id="res"></div><div id="bas"></div>`;
+cv.el=document.getElementById('piste'); cv.ctx=cv.el.getContext('2d'); taille(); addEventListener('resize',taille);
+cv.el.addEventListener('click',()=>{ if(S.dernier) lancer(S.dernier); });
+maj();
+// Au démarrage : quelques dés déjà posés pour montrer le rendu
+DEMARRAGE();
+function DEMARRAGE(){ setTimeout(()=>lancer({...JETS[0]}),300); }
+</script>
+</body>
+</html>
