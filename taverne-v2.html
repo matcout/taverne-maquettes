@@ -57,7 +57,7 @@ input{font:inherit;color:var(--ink);background:#0f0c09;border:1px solid var(--li
 .ok{background:linear-gradient(90deg,#4f8a4c,var(--life))}.hurt{background:linear-gradient(90deg,#a8702a,var(--warn))}.crit{background:linear-gradient(90deg,#8e2219,var(--blood))}
 /* navigation du bas */
 .nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:600px;display:grid;background:#0a0807f2;border-top:1px solid var(--line2);padding:6px 4px calc(8px + env(safe-area-inset-bottom,0px));z-index:15}
-.nav button{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:2px;font:600 10px var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--faint);min-height:52px}
+.nav button{border:0;background:transparent;padding:0 2px;min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px;font:600 10px var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--faint);min-height:52px}
 .nav svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.5}
 .nav button.on{color:var(--gold-hi)}
 .nav button.on svg{filter:drop-shadow(0 0 6px #d8b26a88)}
@@ -407,6 +407,7 @@ const DICE = (() => {
 
 /* ===== Icônes (traits fins) ===== */
 const ICO = {
+  grimoire:'<svg viewBox="0 0 24 24"><path d="M12 6c-2-1.5-5-2-8-1.5V19c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5V4.5C17 4 14 4.5 12 6z"/><path d="M12 6v14.5"/><path d="m16 9 .6 1.3 1.4.2-1 1 .2 1.4-1.2-.7-1.2.7.2-1.4-1-1 1.4-.2z"/></svg>',
   loupe:'<svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>',
   d20:'<svg viewBox="0 0 24 24"><path d="M12 2 21 7v10l-9 5-9-5V7z"/><path d="M12 2 7.5 9h9zM3 7l4.5 2L12 17l4.5-8L21 7M7.5 9 3 17M16.5 9 21 17M12 17v5M3 17h18"/></svg>',
   fiche:'<svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"/><path d="M9 9h6M9 13h6M9 17h4"/></svg>',
@@ -604,9 +605,10 @@ function draw(){
   const p = PJ[S.perso];
   const vivant = S.ecran==='camp' && S.role==='pj' && S.ong.pj==='fiche' && S.effets[S.perso];
   $('app').className = 'app' + (vivant ? ' '+p.effet : '');
-  $('app').innerHTML = `<div class="demo"><b>MAQUETTE V2</b><button class="mini" onclick="S.ecran='accueil';draw()">Accueil</button><button class="mini loupe" onclick="grimoire()" aria-label="Chercher dans le grimoire">${ICO.loupe} Grimoire</button>
+  $('app').innerHTML = `<div class="demo"><b>MAQUETTE V2</b><button class="mini" onclick="S.ecran='accueil';draw()">Accueil</button>
     <div class="seg"><button class="${S.role==='pj'?'on':''}" onclick="role('pj')">Joueur</button><button class="${S.role==='mj'?'on':''}" onclick="role('mj')">MJ</button></div></div>`
     + (S.ecran==='accueil' ? accueil() : S.role==='pj' ? vueJoueur() : vueMJ());
+  if(S.ecran!=='accueil' && S.ong[S.role]==='grimoire') grimListe();
 }
 
 function accueil(){
@@ -627,9 +629,9 @@ function accueil(){
 /* ----- Joueur ----- */
 function vueJoueur(){
   const t=S.ong.pj;
-  return (t==='fiche'?fiche():t==='combat'?combatJoueur():t==='groupe'?groupe(false):journal(false))
+  return (t==='fiche'?fiche():t==='combat'?combatJoueur():t==='groupe'?groupe(false):t==='grimoire'?grimPage():journal(false))
     + (t==='fiche'||t==='combat' ? `<button class="de-flot" onclick="ouvrirLibre()" aria-label="Lancer des dés">${ICO.d20}</button>` : '')
-    + nav([['fiche','Fiche'],['combat','Combat'],['groupe','Groupe'],['journal','Journal']],t);
+    + nav([['fiche','Fiche'],['combat','Combat'],['groupe','Groupe'],['journal','Journal'],['grimoire','Grimoire']],t);
 }
 
 function fiche(){
@@ -719,8 +721,8 @@ function voirCarte(i){
 /* ----- MJ ----- */
 function vueMJ(){
   const t=S.ong.mj;
-  return (t==='combat'?combatMJ():t==='bestiaire'?bestiaire():t==='groupe'?groupe(true):journal(true))
-    + nav([['combat','Combat'],['bestiaire','Bestiaire'],['groupe','Groupe'],['journal','Journal']],t);
+  return (t==='combat'?combatMJ():t==='bestiaire'?bestiaire():t==='groupe'?groupe(true):t==='grimoire'?grimPage():journal(true))
+    + nav([['combat','Combat'],['bestiaire','Bestiaire'],['groupe','Groupe'],['journal','Journal'],['grimoire','Grimoire']],t);
 }
 
 function ligne(e,i,mj){
@@ -876,6 +878,14 @@ function grimoire(){
   grimListe();
   const i=$('grimQ'); if(i && !window.SANS_FOCUS){ i.focus(); i.setSelectionRange(i.value.length,i.value.length); }
 }
+// Le grimoire comme onglet du menu du bas
+function grimPage(){
+  GRIM = GRIM || indexGrimoire();
+  return `<div class="page"><p class="kicker">SRD 5.1 en français · ${GRIM.length} entrées</p><h2 style="font-size:26px;color:var(--gold-hi);margin-bottom:10px">Grimoire</h2>
+    <input id="grimQ" value="${GRIM_Q.replace(/"/g,'&quot;')}" placeholder="Chercher : goule, boule de feu, à terre…" aria-label="Chercher dans le grimoire" oninput="GRIM_Q=this.value;grimListe()" autocomplete="off">
+    <div class="conds" style="margin:8px 0 6px">${GTYPES.map(t=>`<button class="${GRIM_F===t?'on':''}" onclick="GRIM_F='${t}';draw()">${t}</button>`).join('')}</div>
+    <div id="grimL"></div><p class="attrib">${ATTRIB}</p></div>`;
+}
 function grimListe(){
   const res=chercher(), n=res.length;
   $('grimL').innerHTML = `<p class="small" style="margin-bottom:6px">${n} résultat${n>1?'s':''}${n>60?' · les 60 premiers':''}</p>`
@@ -886,7 +896,7 @@ function grimVoir(i){
   const e=GRIM[i];
   ouvrir(`<header><h2>${e.nom}</h2><button onclick="closeSheet()">✕</button></header><p class="kicker">${e.type} · ${e.sous}</p>
     <div class="srd ${e.type==='Créature'?'stat':''}">${e.html}</div>
-    <div style="display:flex;gap:6px;margin-top:14px"><button onclick="grimoire()">‹ Retour</button></div>
+    <div style="display:flex;gap:6px;margin-top:14px"><button onclick="S.ong[S.role]==='grimoire'?closeSheet():grimoire()">‹ Retour</button></div>
     <p class="attrib">${e.type==='Maison'?'Entrée maison.':'Source : SRD 5.1 (CC-BY-4.0), Wizards of the Coast LLC.'}</p>`);
   $('sheet').scrollTop=0;
 }
