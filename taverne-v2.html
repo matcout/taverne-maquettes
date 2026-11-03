@@ -119,6 +119,22 @@ input{font:inherit;color:var(--ink);background:#0f0c09;border:1px solid var(--li
 .pips{display:flex;gap:8px}
 .pip{width:18px;height:18px;min-height:0;padding:0;transform:rotate(45deg);border:1px solid var(--gold);background:transparent;border-radius:0}
 .pip.full{background:var(--gold)}
+/* Mon tour : ressources + 3 colonnes */
+.reste{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;padding:8px 0 12px;border-bottom:1px solid var(--line);margin-bottom:12px}
+.reste small{display:block;font:600 10px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.reste .pips{gap:9px;padding-left:3px}.reste .pip{width:14px;height:14px}
+.eco3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.col{display:flex;flex-direction:column;gap:6px;min-width:0}
+.col .kicker{font-size:9px;letter-spacing:.12em;text-align:center}
+.col .etat{font:600 10px var(--sans);text-align:center;color:var(--life)}
+.col.pris .etat{color:var(--faint)}
+.opt{display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left;padding:7px 7px 6px;min-height:0;border-color:var(--line2);background:#17120e;border-left:2px solid var(--gold-lo)}
+.opt b{font:600 14px/1.15 var(--serif);color:var(--ink)}
+.opt span{font:600 11px var(--sans);color:var(--gold-hi);font-variant-numeric:tabular-nums}
+.opt i{font:10px/1.2 var(--sans);font-style:normal;color:var(--muted)}
+.opt.c-sort{border-left-color:var(--arcane)}.opt.c-insp{border-left-color:var(--gold-hi)}.opt.c-rail{border-left-color:#d98a5a}
+.opt.off{opacity:.38;filter:grayscale(.8);border-left-color:var(--line)}
+.opt.off i{color:#f0a49a}
 /* carte d'objet magique */
 .objet{display:grid;grid-template-columns:96px 1fr;gap:12px;align-items:start}
 .objet img{width:96px;height:140px;object-fit:cover;object-position:62% 30%;border:1px solid var(--line2)}
@@ -214,7 +230,8 @@ const PJ = {
     actions:[['Épée longue « Éveil de Kira »','1d20 +6','1d8 +4'],['Châtiment divin (après une touche)','—','+2d8 radiant']],
     bonus:'Vœu d\'inimitié · Bénédiction de la Raven Queen',
     effetTxt:'Avantage aux attaques contre la cible du Vœu pendant 1 minute.' },
-  ludo:{ nom:'Ludo Tire-Gousset', joueur:'Charlie', img:IMG.ludo, pos:'center 15%', camp:'dl', desc:'Kender · Barde 3', pv:15, max:21, ca:14, pp:12 },
+  ludo:{ nom:'Ludo Tire-Gousset', joueur:'Charlie', img:IMG.ludo, pos:'center 15%', camp:'dl', desc:'Kender · Barde 3', pv:15, max:21, ca:14, init:'+3', vit:'9 m', pp:12,
+    ab:[14,16,15,14,14,19], eco:true },
   zephira:{ nom:'Zéphira Amastacia', joueur:'Dominique', img:IMG.zephira, pos:'center 14%', camp:'or', desc:'Fey\'ri · Âme divine 2 / Succube 2', pv:22, max:36, ca:13, pp:9 },
   galinndan:{ nom:'Galinndan Siannadel', joueur:'Charlie', img:IMG.galinndan, pos:'center 16%', camp:'or', desc:'Shadar-kai · Lame psychique 3 / Rôdeur 1', pv:33, max:33, ca:18, pp:15 },
 };
@@ -241,7 +258,64 @@ const MON = {
     actions:[['Morsure','+4 au toucher, allonge 1,50 m. Touché : 7 (2d4 + 2) perforants. Sauvegarde de Force DD 11 ou la cible tombe à terre.']] },
 };
 
-const S = { ecran:'accueil', role:'pj', ong:{pj:'fiche',mj:'combat'}, perso:'korgan', sous:'tour', effets:{korgan:false,kaelthar:false}, round:3, tour:2, choix:{} };
+const S = { ecran:'accueil', role:'pj', ong:{pj:'fiche',mj:'combat'}, perso:'korgan', sous:'tour', effets:{korgan:false,kaelthar:false}, round:3, tour:2, choix:{},
+  res:{ n1:2, n2:1, insp:3, rail:2 }, eco:{ a:false, b:false, r:false, sortA:false, sortB:false } };
+
+/* ===== Mon tour de Ludo : actions, actions bonus et réactions côte à côte ===== */
+const RES = [ ['n1','Sorts niv. 1',4], ['n2','Sorts niv. 2',2], ['insp','Inspiration',4], ['rail','Raillerie',2] ];
+// cout : 'sort' = un emplacement (le plus bas disponible), 'insp' = Inspiration bardique, 'rail' = Raillerie
+const OPTS = [
+  { id:'hoopak', col:'a', nom:'Hoopak', court:'+5 · 1d6+3', d:'Attaque au corps à corps (+5), 1d6 + 3 perforants. Ou à distance comme une fronde : 1d4 + 3 contondants.' },
+  { id:'rapiere', col:'a', nom:'Rapière', court:'+5 · 1d8+3', d:'Attaque au corps à corps (+5), 1d8 + 3 perforants.' },
+  { id:'givre', col:'a', nom:'Rayon de givre', court:'+6 · 1d8', mineur:1, d:'Sort mineur, 18 m. Attaque de sort (+6) : 1d8 froid, et la cible perd 3 m de vitesse jusqu\'à ton prochain tour.' },
+  { id:'moquerie', col:'a', nom:'Moquerie cruelle', court:'DD 14 · 1d4', mineur:1, d:'Sort mineur, 18 m. Sauvegarde de Sagesse DD 14 : 1d4 psychiques, et désavantage à sa prochaine attaque.' },
+  { id:'murmures', col:'a', nom:'Murmures dissonants', court:'DD 14 · 3d6', cout:'sort', d:'Sort de niveau 1, 18 m. Sauvegarde de Sagesse DD 14 : 3d6 psychiques et la cible fuit (moitié si réussite). +1d6 par niveau au-dessus.' },
+  { id:'feerique', col:'a', nom:'Lumière féerique', court:'DD 14 · zone', cout:'sort', d:'Sort de niveau 1, concentration. Cube de 6 m, sauvegarde de Dextérité DD 14 : avantage aux attaques contre les cibles éclairées.' },
+  { id:'insp', col:'b', nom:'Inspiration bardique', court:'allié · d6', cout:'insp', d:'Un allié à 18 m qui t\'entend gagne un d6 à ajouter à une attaque, un test ou une sauvegarde dans les 10 minutes.' },
+  { id:'mot', col:'b', nom:'Mot de guérison', court:'1d4+4 PV', cout:'sort', d:'Sort de niveau 1, 18 m. Une créature récupère 1d4 + 4 PV. +1d4 par niveau au-dessus.' },
+  { id:'raillerie', col:'b', nom:'Raillerie', court:'DD 14 · désav.', cout:'rail', d:'Trait kender. Une créature à 18 m qui t\'entend : sauvegarde de Sagesse DD 14, sinon désavantage à ses attaques contre d\'autres que toi jusqu\'à ton prochain tour.' },
+  { id:'bouclier', col:'r', nom:'Bouclier', court:'+5 CA', cout:'sort', d:'Sort de niveau 1, quand une attaque te touche : +5 à la CA jusqu\'à ton prochain tour, l\'attaque peut rater.' },
+  { id:'pointes', col:'r', nom:'Pointes argentées', court:'relance', cout:'sort', d:'Sort de niveau 1, quand une créature réussit une attaque, un test ou une sauvegarde : elle relance et garde le plus bas. Un allié gagne l\'avantage.' },
+  { id:'opportunite', col:'r', nom:'Attaque d\'opportunité', court:'+5 · 1d6+3', d:'Quand un ennemi quitte ton allonge : une attaque au hoopak.' },
+];
+const COLS = [ ['a','Action'], ['b','Action bonus'], ['r','Réaction'] ];
+const slotLibre = () => S.res.n1>0 ? 'n1' : S.res.n2>0 ? 'n2' : null;
+// Pourquoi une option est impossible maintenant (ou '' si elle est possible)
+function bloque(o){
+  if(S.eco[o.col]) return (o.col==='r' ? 'Réaction déjà utilisée (elle revient à ton prochain tour)' : (o.col==='a'?'Action':'Action bonus')+' déjà utilisée ce tour')+'|Déjà utilisée';
+  if(o.cout==='sort' && !slotLibre()) return 'Plus d\'emplacement de sort (repos long)|Plus d\'emplacement';
+  if(o.cout==='insp' && !S.res.insp) return 'Plus d\'Inspiration (repos long)|Plus d\'Inspiration';
+  if(o.cout==='rail' && !S.res.rail) return 'Plus de Raillerie (repos long)|Plus de Raillerie';
+  if(o.col==='a' && o.cout==='sort' && S.eco.sortB) return 'Tu as lancé un sort en action bonus : en action, seulement un sort mineur ce tour|Sort en bonus';
+  if(o.col==='b' && o.cout==='sort' && S.eco.sortA) return 'Tu as lancé un sort de niveau 1+ en action : en bonus, pas d\'autre sort ce tour|Sort en action';
+  return '';
+}
+function coutTxt(o){ return o.cout==='sort' ? 'Emplacement' : o.cout==='insp' ? 'Inspiration' : o.cout==='rail' ? 'Raillerie' : o.mineur ? 'Sort mineur' : 'Gratuit'; }
+function monTour(){
+  const pips = (k,m) => Array.from({length:m},(_,i)=>`<button class="pip ${i<S.res[k]?'full':''}" onclick="S.res.${k}=${i<S.res[k]?i:i+1};draw()" aria-label="${k} ${i+1}"></button>`).join('');
+  return `<div class="frame"><div class="round" style="margin:0 0 8px"><h3 style="font-size:20px;color:var(--gold-hi)">Mon tour</h3><span class="small">Round ${S.round}</span></div>
+    <div class="reste">${RES.map(([k,n,m])=>`<div><small>${n}</small><div class="pips">${pips(k,m)}</div></div>`).join('')}</div>
+    <div class="eco3">${COLS.map(([c,n])=>`<div class="col ${S.eco[c]?'pris':''}"><p class="kicker">${n}</p><p class="etat">${S.eco[c]?'✓ Utilisée':'◆ Disponible'}</p>
+      ${OPTS.filter(o=>o.col===c).map(o=>{ const b=bloque(o); return `<button class="opt ${b?'off':''} ${o.cout?'c-'+o.cout:''}" onclick="voirOpt('${o.id}')"><b>${o.nom}</b><span>${o.court}</span><i>${b?'✕ '+b.split('|')[1]:coutTxt(o)}</i></button>`; }).join('')}
+    </div>`).join('')}</div>
+    <p class="small" style="margin-top:8px">Aussi en action : Esquiver · Se désengager · Se cacher · Aider · Foncer. Mouvement : 9 m.</p>
+    <button class="or" style="width:100%;margin-top:10px" onclick="S.eco={a:false,b:false,r:false,sortA:false,sortB:false};draw()">Fin de mon tour</button></div>
+    <div class="note"><b>Idée de Charlie :</b> tout ce que Ludo peut faire, côte à côte. Ce qui n'est plus possible devient gris, selon les ressources qui restent (touche un losange pour corriger).</div>`;
+}
+function voirOpt(id){
+  const o=OPTS.find(x=>x.id===id), b=bloque(o), s=slotLibre();
+  ouvrir(`<header><h2>${o.nom}</h2><button onclick="closeSheet()">✕</button></header>
+    <p class="kicker">${COLS.find(c=>c[0]===o.col)[1]} · ${coutTxt(o)}${o.cout==='sort'&&s?' (niv. '+s.slice(1)+')':''}</p>
+    <p style="margin:10px 0 14px">${o.d}</p>
+    ${b?`<p class="chip mal" style="white-space:normal">${b.split('|')[0]}</p>`:`<button class="or" style="width:100%" onclick="utiliser('${id}')">Utiliser</button>`}`);
+}
+function utiliser(id){
+  const o=OPTS.find(x=>x.id===id); if(bloque(o)) return;
+  if(o.cout==='sort'){ S.res[slotLibre()]--; if(o.col==='a') S.eco.sortA=true; if(o.col==='b') S.eco.sortB=true; }
+  if(o.cout==='insp') S.res.insp--;
+  if(o.cout==='rail') S.res.rail--;
+  S.eco[o.col]=true; closeSheet(); draw();
+}
 
 let COMBAT = [
   { id:'galinndan', pj:1, init:21, pv:33, max:33, et:[] },
@@ -303,18 +377,18 @@ function fiche(){
   if(S.sous==='tour') c=`
     <div class="frame"><div class="hp"><button onclick="ouvrirPV('${S.perso}')" aria-label="Retirer des PV">−</button><div class="mid"><strong>${p.pv}</strong> <span class="muted">/ ${p.max} PV</span><div class="bar" style="margin:8px 0 4px"><i class="${cls(p.pv,p.max)}" style="width:${p.pv/p.max*100}%"></i></div><span class="small">PV temporaires : 0</span></div><button onclick="ouvrirPV('${S.perso}')" aria-label="Ajouter des PV">+</button></div></div>
     <div class="stats"><div><b>${p.ca}</b><small>CA</small></div><div><b>${p.init}</b><small>Initiative</small></div><div><b>${p.vit}</b><small>Vitesse</small></div><div><b>${p.pp}</b><small>Perc. passive</small></div></div>
-    <div class="effets"><button class="${p.effet} ${on?'on':''}" onclick="basculer()">${on?'✦ '+p.effetNom+' en cours':'+ '+p.effetNom}</button><button>+ Bonus / malus</button></div>
+    ${p.eco ? monTour() : `<div class="effets"><button class="${p.effet} ${on?'on':''}" onclick="basculer()">${on?'✦ '+p.effetNom+' en cours':'+ '+p.effetNom}</button><button>+ Bonus / malus</button></div>
     <div class="frame"><div class="round" style="margin:0"><h3 style="font-size:20px;color:var(--gold-hi)">Mon tour</h3><span class="small">Round ${S.round}</span></div>
       <p class="kicker" style="margin-top:10px">Action</p>
       ${p.actions.map(([n,a,d])=>`<div class="line">${n}<span>${a} · ${d}${on&&p.effet==='rage'&&d!=='—'?' +2':''}</span></div>`).join('')}
       <p class="kicker" style="margin-top:10px">Action bonus</p><p>${p.bonus}</p>
       ${on?`<p style="margin-top:8px;color:${p.effet==='rage'?'#f0a49a':'#cdbaf5'}">${p.effetTxt}</p>`:''}
     </div>
-    <div class="note"><b>Carte vivante :</b> touche « ${p.effetNom} » : le portrait et le cadre changent de couleur. Les dés restent réels, l'app montre quoi lancer.</div>`;
+    <div class="note"><b>Carte vivante :</b> touche « ${p.effetNom} » : le portrait et le cadre changent de couleur. Les dés restent réels, l'app montre quoi lancer.</div>`}`;
   if(S.sous==='carac') c=`
     <div class="abil">${['FOR','DEX','CON','INT','SAG','CHA'].map((n,i)=>`<div><small>${n}</small><b>${sg(mod(p.ab[i]))}</b><i>${p.ab[i]}</i></div>`).join('')}</div>
-    <div class="frame" style="margin-top:12px"><p class="kicker">Sauvegardes maîtrisées</p>${S.perso==='korgan'?'<div class="line">Force<span>+6</span></div><div class="line">Constitution<span>+5</span></div>':'<div class="line">Sagesse<span>+3</span></div><div class="line">Charisme<span>+5</span></div>'}</div>`;
-  if(S.sous==='ress') c=`<div class="frame">${p.res.map(([n,v,m,r])=>`<div class="line"><div>${n}<div class="small">Repos ${r}</div></div>${m<=4?`<div class="pips">${Array.from({length:m},(_,i)=>`<button class="pip ${i<v?'full':''}" aria-label="${n} ${i+1}"></button>`).join('')}</div>`:`<span>${v} / ${m}</span>`}</div>`).join('')}</div>
+    <div class="frame" style="margin-top:12px"><p class="kicker">Sauvegardes maîtrisées</p>${S.perso==='korgan'?'<div class="line">Force<span>+6</span></div><div class="line">Constitution<span>+5</span></div>':S.perso==='ludo'?'<div class="line">Dextérité<span>+5</span></div><div class="line">Charisme<span>+6</span></div>':'<div class="line">Sagesse<span>+3</span></div><div class="line">Charisme<span>+5</span></div>'}</div>`;
+  if(S.sous==='ress') c=`<div class="frame">${(p.res||RES.map(([k,n,m])=>[n,S.res[k],m,'long'])).map(([n,v,m,r])=>`<div class="line"><div>${n}<div class="small">Repos ${r}</div></div>${m<=4?`<div class="pips">${Array.from({length:m},(_,i)=>`<button class="pip ${i<v?'full':''}" aria-label="${n} ${i+1}"></button>`).join('')}</div>`:`<span>${v} / ${m}</span>`}</div>`).join('')}</div>
     <div class="g3" style="grid-template-columns:1fr 1fr"><button>Repos court</button><button>Repos long</button></div>`;
   if(S.sous==='sac') c=`
     <div class="frame"><div class="objet"><img src="${IMG.mace}" alt="Mace de la Flamme Sacrée"><div><h3>Mace de la Flamme Sacrée</h3><p class="rare">Arme (masse), très rare · harmonisation : clerc ou paladin</p>
@@ -323,9 +397,9 @@ function fiche(){
       ${rule()}<p><b style="color:var(--gold);font-variant:small-caps">Allongement sacré.</b> Une chaîne de lumière relie le manche à la tête : l'attaque gagne 4,50 m de portée.</p>
       <p class="small" style="margin-top:8px">Objet d'exemple tiré des cartes du groupe.</p></div>
     <div class="frame"><div class="line">Rations ×5<span>2,5 kg</span></div><div class="line">Corde de chanvre (15 m)<span>5 kg</span></div><div class="line">Bourse<span>12 po · 30 pa</span></div></div>`;
-  if(S.sous==='hist') c=`<div class="frame"><p>${S.perso==='korgan'?'Fils de Kaerth le forgeron. Frère d\'Asterak, qui rêve d\'être chevalier de Solamnie. Lié à Ludo par l\'amitié des familles de-Orilg et Tire-Gousset.':'Chasseur silencieux au service de la Raven Queen. Loyal, peu bavard. Il traque ce qui revient de la mort.'}</p></div>`;
+  if(S.sous==='hist') c=`<div class="frame"><p>${S.perso==='ludo'?'Kender curieux, toujours une poche de trop. Ami d\'enfance de Korgan : les familles Tire-Gousset et de-Orilg se connaissent depuis toujours.':S.perso==='korgan'?'Fils de Kaerth le forgeron. Frère d\'Asterak, qui rêve d\'être chevalier de Solamnie. Lié à Ludo par l\'amitié des familles de-Orilg et Tire-Gousset.':'Chasseur silencieux au service de la Raven Queen. Loyal, peu bavard. Il traque ce qui revient de la mort.'}</p></div>`;
   return `<div class="hero"><img src="${p.img}" alt="${p.nom}" style="object-position:${p.pos}">
-      <div class="who">${['korgan','kaelthar'].map(i=>`<button class="${S.perso===i?'on':''}" onclick="S.perso='${i}';S.sous='tour';draw()">${PJ[i].nom.split(' ')[0]}</button>`).join('')}</div>
+      <div class="who">${['korgan','ludo','kaelthar'].map(i=>`<button class="${S.perso===i?'on':''}" onclick="S.perso='${i}';S.sous='tour';draw()">${PJ[i].nom.split(' ')[0]}</button>`).join('')}</div>
       <div class="t"><p class="kicker">Joueur · ${p.joueur}</p><h1>${p.nom}</h1><p class="sub">${p.desc}</p></div></div>
     <div class="tabs">${tabs.map(([i,l])=>`<button class="${S.sous===i?'on':''}" onclick="S.sous='${i}';draw()">${l}</button>`).join('')}</div>
     <div class="page" style="padding-top:2px">${c}</div>`;
