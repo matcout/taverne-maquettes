@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Taverne — style Moderne</title>
+<style>
+:root{--bg:#14121a;--surface:#1c1922;--surface2:#24202c;--border:#39313f;--line:#302a39;--text:#ece8e1;--muted:#aaa2b5;--label:#bcb2c7;--gold:#f0cf5c;--accent:#c9a227;--green:#57a875;--amber:#d5a23b;--red:#cf5757;--blue:#6f9be0;--rage:#b8322f;--r-s:8px;--r-m:12px;--r-l:16px;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+h1,h2,h3{font-family:Georgia,"Times New Roman",serif;margin:0}
+p{margin:0}
+button{font:inherit;color:inherit;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-s);min-height:40px;padding:0 12px;cursor:pointer}
+button.primary{background:var(--accent);color:#1a1405;border-color:var(--accent);font-weight:700}
+button.ghost{background:transparent}
+input,select,textarea{font:inherit;color:var(--text);background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-s);padding:10px;width:100%}
+.app{max-width:600px;margin:auto;min-height:100vh;padding-bottom:90px;position:relative;transition:box-shadow .3s}
+.app.raging{box-shadow:inset 0 0 0 4px var(--rage),inset 0 0 60px #b8322f55}
+/* bandeau maquette */
+.demo{position:sticky;top:0;z-index:20;background:#2b1f3a;border-bottom:1px solid #4b3a63;padding:8px 12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px}
+.demo b{color:#d9b8ff;letter-spacing:.08em}
+.demo .seg{display:flex;border:1px solid #4b3a63;border-radius:999px;overflow:hidden;margin-left:auto}
+.demo .seg button{border:0;border-radius:0;min-height:30px;background:transparent;font-size:12px}
+.demo .seg button.on{background:#d9b8ff;color:#1b1226;font-weight:700}
+.demo .home-btn{min-height:30px;font-size:12px;background:transparent;border-color:#4b3a63}
+.page{padding:14px 16px}
+.eyebrow{font:600 11px system-ui;text-transform:uppercase;letter-spacing:.14em;color:var(--accent)}
+.muted{color:var(--muted);font-size:12px}
+.box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-m);padding:12px;margin-bottom:10px}
+.row{display:flex;align-items:center;gap:8px}
+.between{justify-content:space-between}
+.note{border-left:3px solid #d9b8ff;background:#d9b8ff14;padding:8px 10px;border-radius:0 var(--r-s) var(--r-s) 0;font-size:12px;color:#e6d6fb;margin:10px 0}
+.note b{color:#d9b8ff}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 8px;border-radius:999px;background:var(--surface2);border:1px solid var(--border);color:var(--label);white-space:nowrap}
+.chip.bad{border-color:#cf575788;color:var(--red)}
+.chip.good{border-color:#57a87588;color:#9fdcb4}
+.chip.gold{border-color:var(--accent);color:var(--gold)}
+.bar{height:6px;background:var(--border);border-radius:999px;overflow:hidden}
+.bar i{display:block;height:100%}
+.ok{background:var(--green)}.hurt{background:var(--amber)}.crit{background:var(--red)}
+/* nav du bas */
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:600px;display:grid;background:#110f16f5;border-top:1px solid var(--line);padding:8px 4px calc(8px + env(safe-area-inset-bottom,0px));z-index:15}
+.nav button{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;color:var(--muted);min-height:52px}
+.nav button span{font-size:20px}
+.nav button.on{color:var(--gold)}
+/* accueil */
+.hero-home{padding:34px 20px 10px;text-align:center}
+.hero-home h1{font-size:32px;margin:10px 0 6px}
+.login{display:grid;gap:8px;margin:14px 0}
+.camp{display:flex;gap:12px;align-items:center;cursor:pointer}
+.camp .ico{width:54px;height:54px;border-radius:var(--r-m);display:grid;place-items:center;font-size:28px;background:var(--surface2);flex-shrink:0}
+.camp h2{font-size:18px}
+.role{font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;text-transform:uppercase;letter-spacing:.08em}
+.role.mj{background:#d9b8ff;color:#1b1226}.role.pj{background:var(--accent);color:#1a1405}
+/* fiche */
+.hero{padding:16px 16px 8px;display:flex;gap:12px;align-items:center}
+.portrait{width:70px;height:70px;border-radius:50%;display:grid;place-items:center;font-size:34px;background:radial-gradient(circle,#4a3a2a,#22191a);border:2px solid var(--accent);flex-shrink:0}
+.raging .portrait{border-color:var(--rage);box-shadow:0 0 18px var(--rage)}
+.hero h1{font-size:26px}
+.hp{display:flex;align-items:center;gap:10px}
+.hp strong{font-size:40px;color:var(--gold);line-height:1}
+.hp .mid{flex:1;text-align:center}
+.hp button{font-size:24px;width:48px}
+.stats4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:8px 0}
+.stats4 div{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-m);text-align:center;padding:8px 2px}
+.stats4 b{display:block;font-size:19px}
+.stats4 small{font-size:10px;color:var(--label)}
+.abil{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.abil div{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-m);text-align:center;padding:8px 2px}
+.abil small{font-size:10px;color:var(--label);text-transform:uppercase;letter-spacing:.08em}
+.abil b{display:block;font-size:22px;color:var(--gold)}
+.abil i{font-style:normal;font-size:12px;color:var(--muted)}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:0 16px 8px}
+.tabs button{min-height:34px;font-size:12px;border-radius:999px;white-space:nowrap}
+.tabs button.on{background:var(--accent);color:#1a1405;border-color:var(--accent);font-weight:700}
+.line{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:7px 0;border-bottom:1px solid var(--line)}
+.line:last-child{border-bottom:0}
+.line span{color:var(--gold);white-space:nowrap}
+.pips{display:flex;gap:6px}
+.pip{width:20px;height:20px;border-radius:50%;border:1px solid var(--gold);min-height:0;padding:0}
+.pip.full{background:var(--gold)}
+/* combat MJ */
+.round{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.round h2{font-size:20px}
+.init{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.ent{display:grid;grid-template-columns:38px 1fr auto;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-m);padding:9px 10px;cursor:pointer}
+.ent.pc{border-left:4px solid var(--accent)}
+.ent.mon{border-left:4px solid var(--red)}
+.ent.current{outline:2px solid var(--gold);background:#2a2416}
+.ent.down{opacity:.45}
+.ent .n{font-size:20px;font-weight:700;text-align:center;color:var(--gold)}
+.ent .n small{display:block;font-size:9px;color:var(--muted);font-weight:400}
+.ent h3{font-family:system-ui;font-size:14px;font-weight:700}
+.ent .meta{font-size:11px;color:var(--muted);margin:2px 0 5px}
+.ent .chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.ent .right{text-align:right;font-size:12px}
+.ent .right b{font-size:18px}
+.legend{display:flex;gap:12px;font-size:11px;color:var(--muted);margin:8px 0}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+/* bestiaire */
+.mon-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}
+.mon-row:last-child{border-bottom:0}
+.mon-row h3{font-family:system-ui;font-size:14px}
+.qty{display:flex;align-items:center;gap:4px}
+.qty button{width:34px;min-height:34px;padding:0}
+/* bloc de stats */
+.statblock h2{font-size:22px;color:var(--red)}
+.statblock .sub{font-style:italic;font-size:12px;color:var(--muted);margin-bottom:8px}
+.statblock hr{border:0;border-top:2px solid #cf575766;margin:8px 0}
+.statblock p{font-size:13px;line-height:1.55;margin:4px 0}
+.statblock p b{color:var(--text)}
+.statblock .abil b{font-size:16px}
+.act{font-size:13px;line-height:1.55;margin:6px 0}
+.act b{color:var(--gold)}
+/* feuille (sheet) */
+.veil{position:fixed;inset:0;background:#000a;z-index:30;display:none}
+.veil.open{display:block}
+.sheet{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(100%,600px);max-height:90vh;overflow:auto;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-l) var(--r-l) 0 0;padding:16px 16px 24px;z-index:31;display:none}
+.sheet.open{display:block}
+.sheet header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.sheet header h2{font-size:20px}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}
+.keypad button{min-height:46px;font-size:20px}
+.hpout{text-align:center;font-size:48px;color:var(--gold);padding:6px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.conds{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.conds button{min-height:32px;font-size:12px;border-radius:999px}
+.conds button.on{background:#cf575733;border-color:var(--red);color:var(--red)}
+.party{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.party .box{margin:0}
+.party h3{font-family:system-ui;font-size:14px}
+.journal-entry h3{font-size:16px;margin-bottom:4px}
+.journal-entry p{font-size:13px;line-height:1.55;color:var(--label)}
+.secret{border:1px dashed #d9b8ff88;background:#d9b8ff0d}
+.toggle{display:flex;align-items:center;gap:8px;font-size:13px;margin-top:8px}
+.toggle input{width:20px;height:20px;accent-color:var(--gold)}
+</style>
+<style>
+/* Moderne : app de téléphone épurée, fond clair, cartes blanches, gros boutons, vert sapin */
+:root{--bg:#f2f3ef;--surface:#ffffff;--surface2:#f2f3ef;--border:#e2e4dc;--line:#ecede7;--text:#1b1f1a;--muted:#6b7166;--label:#4c5348;--gold:#1f6b4f;--accent:#1f6b4f;--green:#2f9a63;--amber:#d08a1c;--red:#d2483d;--rage:#d2483d;--r-s:14px;--r-m:18px;--r-l:24px;color-scheme:light}
+html,body{background:var(--bg);color:var(--text);font-family:-apple-system,"SF Pro Text","Segoe UI",Roboto,system-ui,sans-serif}
+h1,h2,h3{font-family:-apple-system,"SF Pro Display","Segoe UI",Roboto,system-ui,sans-serif;font-weight:750;letter-spacing:-.02em}
+button{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-s);min-height:46px;font-weight:600}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+input,select,textarea{background:var(--surface2);border:0;border-radius:var(--r-s);padding:14px}
+.demo{background:#1b1f1a;border:0;color:#fff}
+.demo b{color:#9fe0bf}
+.demo .seg{border-color:#3a4237}
+.demo .seg button{color:#dfe6dc;font-weight:600}
+.demo .seg button.on{background:#9fe0bf;color:#10261b}
+.demo .home-btn{color:#dfe6dc;border-color:#3a4237;min-height:30px}
+.page{padding:16px}
+.eyebrow{font:600 12px -apple-system,system-ui,sans-serif;letter-spacing:.02em;text-transform:none;color:var(--muted)}
+.box{border:0;border-radius:var(--r-m);box-shadow:0 1px 2px #1b1f1a0f,0 4px 16px #1b1f1a0d;padding:16px;margin-bottom:12px}
+.note{border:0;border-radius:var(--r-m);background:#e3efe8;color:#24463a;padding:12px 14px}
+.note b{color:var(--accent)}
+.chip{background:var(--surface2);border:0;color:var(--label);font-weight:600;padding:4px 10px}
+.chip.bad{background:#fbe4e1;color:#a83228}
+.chip.gold{background:#dcefe5;color:var(--accent)}
+.bar{background:#e6e8e1;height:8px}
+.nav{left:50%;bottom:12px;width:calc(100% - 24px);max-width:560px;border-radius:26px;background:#ffffffee;border:0;box-shadow:0 8px 30px #1b1f1a26;backdrop-filter:blur(10px);padding:6px}
+.nav button{font-size:11px;font-weight:600;border-radius:20px}
+.nav button.on{color:var(--accent);background:#e3efe8}
+.app{padding-bottom:110px}
+.hero-home h1{font-size:34px}
+.camp .ico{background:#e3efe8;border-radius:16px}
+.role{border-radius:999px;text-transform:none;letter-spacing:0;font-size:11px}
+.role.mj{background:#1b1f1a;color:#fff}.role.pj{background:#dcefe5;color:var(--accent)}
+.portrait{background:#e3efe8;border:0;border-radius:24px}
+.app.raging{box-shadow:none;background:linear-gradient(180deg,#fde3df 0,#f2f3ef 320px)}
+.raging .portrait{background:#fbd1cb;box-shadow:0 0 0 3px var(--rage)}
+.raging .hp strong{color:var(--rage)}
+.hp{gap:14px}
+.hp strong{color:var(--text);font-size:46px}
+.hp button{width:56px;height:56px;border-radius:50%;background:var(--surface2);border:0}
+.stats4 div,.abil div{background:var(--surface);border:0;border-radius:var(--r-m);box-shadow:0 1px 2px #1b1f1a0f}
+.stats4 b{font-size:21px}
+.abil b{color:var(--accent)}
+.tabs button{border:0;background:var(--surface);font-weight:600;min-height:38px;box-shadow:0 1px 2px #1b1f1a14}
+.tabs button.on{background:var(--text);color:#fff}
+.line{padding:11px 0;font-size:14px}
+.line span{color:var(--accent);font-weight:700}
+.pip{border:2px solid var(--accent);width:24px;height:24px}
+.pip.full{background:var(--accent)}
+.init{gap:10px}
+.ent{border:0;border-radius:var(--r-m);box-shadow:0 1px 2px #1b1f1a0f,0 4px 14px #1b1f1a0a;padding:12px 14px}
+.ent.pc{border-left:0;box-shadow:inset 4px 0 0 var(--accent),0 1px 2px #1b1f1a0f}
+.ent.mon{border-left:0;box-shadow:inset 4px 0 0 var(--red),0 1px 2px #1b1f1a0f}
+.ent.current{outline:3px solid var(--accent);background:#f3faf6}
+.ent .n{color:var(--text)}
+.ent h3{font-size:15px}
+.legend{font-size:12px}
+.statblock h2{color:var(--text);font-size:24px}
+.statblock hr{border-top:1px solid var(--line)}
+.statblock p b{color:var(--text)}
+.act b{color:var(--accent)}
+.sheet{background:var(--surface);border:0;border-radius:28px 28px 0 0;box-shadow:0 -10px 40px #1b1f1a33;padding:20px 18px 28px}
+.sheet::before{content:"";display:block;width:40px;height:5px;border-radius:9px;background:#d4d7ce;margin:-8px auto 12px}
+.veil{background:#1b1f1a59}
+.keypad button{background:var(--surface2);border:0;font-size:22px;min-height:54px}
+.hpout{color:var(--text);font-weight:700}
+.conds button{border:0;background:var(--surface2);font-weight:600}
+.conds button.on{background:#fbe4e1;color:#a83228}
+.secret{border:2px dashed #c9cdc2;background:#fafaf7;box-shadow:none}
+.journal-entry p{color:var(--label)}
+.toggle input{accent-color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="app" id="app"><div class="page" style="padding-top:40px;text-align:center">
+  <p class="eyebrow">La Taverne · maquette v1</p>
+  <h1 style="margin:12px 0">Cette visionneuse n'affiche pas la maquette</h1>
+  <p class="muted" style="font-size:14px;line-height:1.6">L'aperçu de Telegram (ou de l'iPhone) ne fait pas marcher les pages interactives.<br><br>
+  <b style="color:var(--gold)">Android :</b> ⋮ → « Ouvrir avec » → Chrome.<br>
+  <b style="color:var(--gold)">iPhone :</b> Partager → « Enregistrer dans Fichiers », puis ouvrir avec Safari ou Chrome.<br>
+  <b style="color:var(--gold)">Ordinateur :</b> télécharger le fichier, puis double-cliquer dessus.</p>
+</div></div>
+<div class="veil" id="veil" onclick="closeSheet()"></div>
+<div class="sheet" id="sheet"></div>
+
+<script>
+/* ============ DONNÉES D'EXEMPLE (maquette, rien n'est enregistré) ============ */
+const S = {
+  screen: 'home',          // home | campaign
+  role: 'pj',              // pj | mj
+  tab: { pj: 'fiche', mj: 'combat' },
+  ficheTab: 'combat',
+  rage: false,
+  korgan: { hp: 34, max: 41, rages: 2 },
+  round: 2, turn: 2,
+  showMonsterHp: false,
+  pick: {},
+};
+
+const PARTY = [
+  { id:'korgan', name:'Korgan de-Orilg', who:'Alex', icon:'🐂', desc:'Minotaure · Barbare 3 (Zélote)', ca:16, max:41, pp:14, initB:3 },
+  { id:'asterak', name:'Asterak de-Orilg', who:'Sam', icon:'🛡️', desc:'Minotaure · Clerc 3 (Guerre)', ca:18, max:27, pp:13, initB:0 },
+  { id:'ludo', name:'Ludo Tire-Gousset', who:'Charlie', icon:'🎻', desc:'Kender · Barde 3', ca:14, max:21, pp:12, initB:3 },
+];
+
+// Créatures du SRD 5.1 (règles libres de D&D 5e 2014)
+const BESTIARY = {
+  gobelin: { name:'Gobelin', type:'Humanoïde (gobelinoïde) de taille P, neutre mauvais', ca:'15 (armure de cuir, bouclier)', caN:15, hp:7, hpF:'2d6', speed:'9 m', fp:'1/4 (50 PX)', ab:[8,14,10,10,8,8], initB:2,
+    extra:['<b>Compétences</b> Discrétion +6','<b>Sens</b> vision dans le noir 18 m, Perception passive 9','<b>Langues</b> commun, gobelin'],
+    traits:[['Fuite agile','Peut se désengager ou se cacher par une action bonus à chacun de ses tours.']],
+    actions:[['Cimeterre','Attaque d\'arme au corps à corps : +4 au toucher, allonge 1,50 m. Touché : 5 (1d6 + 2) tranchants.'],['Arc court','Attaque d\'arme à distance : +4 au toucher, portée 24/96 m. Touché : 5 (1d6 + 2) perforants.']] },
+  loup: { name:'Loup', type:'Bête de taille M, sans alignement', ca:'13 (armure naturelle)', caN:13, hp:11, hpF:'2d8 + 2', speed:'12 m', fp:'1/4 (50 PX)', ab:[12,15,12,3,12,6], initB:2,
+    extra:['<b>Compétences</b> Discrétion +4, Perception +3','<b>Sens</b> Perception passive 13'],
+    traits:[['Odorat et ouïe aiguisés','Avantage aux tests de Sagesse (Perception) basés sur l\'ouïe ou l\'odorat.'],['Tactique de groupe','Avantage à l\'attaque si un allié non neutralisé est à 1,50 m de la cible.']],
+    actions:[['Morsure','Attaque d\'arme au corps à corps : +4 au toucher, allonge 1,50 m. Touché : 7 (2d4 + 2) perforants. Si la cible est une créature, elle doit réussir une sauvegarde de Force DD 11 ou tomber à terre.']] },
+  hobgobelin: { name:'Hobgobelin', type:'Humanoïde (gobelinoïde) de taille M, loyal mauvais', ca:'18 (cotte de mailles, bouclier)', caN:18, hp:11, hpF:'2d8 + 2', speed:'9 m', fp:'1/2 (100 PX)', ab:[13,12,12,10,10,9], initB:1,
+    extra:['<b>Sens</b> vision dans le noir 18 m, Perception passive 10','<b>Langues</b> commun, gobelin'],
+    traits:[['Avantage martial','Une fois par tour, +7 (2d6) dégâts si un allié non neutralisé est à 1,50 m de la cible.']],
+    actions:[['Épée longue','Attaque d\'arme au corps à corps : +3 au toucher, allonge 1,50 m. Touché : 5 (1d8 + 1) tranchants, ou 6 (1d10 + 1) à deux mains.'],['Arc long','Attaque d\'arme à distance : +3 au toucher, portée 45/180 m. Touché : 5 (1d8 + 1) perforants.']] },
+  squelette: { name:'Squelette', type:'Mort-vivant de taille M, loyal mauvais', ca:'13 (restes d\'armure)', caN:13, hp:13, hpF:'2d8 + 4', speed:'9 m', fp:'1/4 (50 PX)', ab:[10,14,15,6,8,5], initB:2,
+    extra:['<b>Vulnérabilités</b> contondant','<b>Immunités</b> poison ; épuisement, empoisonné','<b>Sens</b> vision dans le noir 18 m, Perception passive 9'],
+    traits:[],
+    actions:[['Épée courte','Attaque d\'arme au corps à corps : +4 au toucher, allonge 1,50 m. Touché : 5 (1d6 + 2) perforants.'],['Arc court','Attaque d\'arme à distance : +4 au toucher, portée 24/96 m. Touché : 5 (1d6 + 2) perforants.']] },
+  ogre: { name:'Ogre', type:'Géant de taille G, chaotique mauvais', ca:'11 (armure de peaux)', caN:11, hp:59, hpF:'7d10 + 21', speed:'12 m', fp:'2 (450 PX)', ab:[19,8,16,5,7,7], initB:-1,
+    extra:['<b>Sens</b> vision dans le noir 18 m, Perception passive 8','<b>Langues</b> commun, géant'],
+    traits:[],
+    actions:[['Massue','Attaque d\'arme au corps à corps : +6 au toucher, allonge 1,50 m. Touché : 13 (2d8 + 4) contondants.'],['Javeline','Attaque d\'arme au corps à corps ou à distance : +6 au toucher, allonge 1,50 m ou portée 9/36 m. Touché : 11 (2d6 + 4) perforants.']] },
+};
+
+let COMBAT = [
+  { id:'ludo', kind:'pc', init:19, hp:15, max:21, conds:[] },
+  { id:'loup1', kind:'mon', mon:'loup', label:'Loup', init:17, hp:4, max:11, conds:[] },
+  { id:'korgan', kind:'pc', init:15, hp:34, max:41, conds:['Rage'] },
+  { id:'gob1', kind:'mon', mon:'gobelin', label:'Gobelin A', init:12, hp:7, max:7, conds:[] },
+  { id:'gob2', kind:'mon', mon:'gobelin', label:'Gobelin B', init:12, hp:0, max:7, conds:['À terre'] },
+  { id:'asterak', kind:'pc', init:8, hp:27, max:27, conds:[] },
+  { id:'ogre', kind:'mon', mon:'ogre', label:'Ogre', init:6, hp:41, max:59, conds:['Empoisonné'] },
+];
+
+const CONDITIONS = ['À terre','Agrippé','Assourdi','Aveuglé','Charmé','Effrayé','Empoisonné','Entravé','Étourdi','Inconscient','Invisible','Neutralisé','Paralysé','Pétrifié','Concentration'];
+
+const JOURNAL = [
+  { t:'Séance du 30 octobre', who:'Dominique (MJ)', body:'Le groupe quitte Vogler vers l\'est sur la piste de Sir Dorian. Embuscade de gobelins et d\'un ogre au gué. Korgan passe niveau 3.', secret:false },
+  { t:'Notes secrètes du MJ', who:'Dominique (MJ)', body:'L\'ogre porte une lettre scellée : à révéler seulement si quelqu\'un fouille le corps.', secret:true },
+  { t:'Ce que Ludo a « emprunté »', who:'Charlie', body:'Une bague en cuivre, trois boutons dorés et une carte froissée du marais.', secret:false },
+];
+
+/* ============ OUTILS ============ */
+const mod = s => Math.floor((s-10)/2);
+const fmt = n => (n>=0?'+':'')+n;
+const pc = id => PARTY.find(p=>p.id===id);
+const nameOf = e => e.kind==='pc' ? pc(e.id).name.split(' ')[0] : e.label;
+const hpClass = (h,m) => h/m>.5?'ok':h/m>.25?'hurt':'crit';
+const vague = (h,m) => h<=0?'À terre':h/m>.75?'Indemne':h/m>.5?'Égratigné':h/m>.25?'Blessé':'En sang';
+const $ = id => document.getElementById(id);
+
+function setRole(r){ S.role=r; if(S.screen==='home') S.screen='campaign'; render(); }
+function go(t){ S.tab[S.role]=t; render(); window.scrollTo(0,0); }
+
+/* ============ RENDU ============ */
+function render(){
+  const app = $('app');
+  app.className = 'app' + (S.role==='pj' && S.rage && S.screen==='campaign' ? ' raging' : '');
+  let html = `<div class="demo"><b>MAQUETTE · MODERNE</b><button class="home-btn" onclick="S.screen='home';render()">⌂ Accueil</button>
+    <div class="seg"><button class="${S.role==='pj'?'on':''}" onclick="setRole('pj')">Voir comme joueur</button><button class="${S.role==='mj'?'on':''}" onclick="setRole('mj')">Voir comme MJ</button></div></div>`;
+  if (S.screen==='home') html += homeView();
+  else if (S.role==='pj') html += pjView();
+  else html += mjView();
+  app.innerHTML = html;
+}
+
+function homeView(){
+  return `<div class="hero-home"><p class="eyebrow">La Taverne</p><h1>Bienvenue, aventurier</h1><p class="muted">Chacun a son compte. Une campagne = un MJ et ses joueurs.</p></div>
+  <div class="page">
+    <div class="box login"><p class="eyebrow">Connexion</p><input placeholder="Courriel ou pseudo" value="korgan.demo"><input type="password" value="••••••••"><button class="primary" onclick="setRole('pj')">Entrer dans la Taverne</button></div>
+    <p class="eyebrow" style="margin:16px 0 8px">Mes campagnes</p>
+    <div class="box camp" onclick="setRole('pj')"><div class="ico">🐉</div><div style="flex:1"><div class="row between"><h2>L'Ombre de la Reine Dragon</h2></div><p class="muted">Dragonlance · MJ : Dominique · 3 joueurs</p><p style="margin-top:6px"><span class="role pj">Joueur</span> <span class="muted">Korgan de-Orilg, niv. 3</span></p></div></div>
+    <div class="box camp" onclick="setRole('pj')"><div class="ico">🐻</div><div style="flex:1"><h2>L'Auberge de l'Ours Rouge</h2><p class="muted">Horreur · 3 joueurs</p><p style="margin-top:6px"><span class="role pj">Joueur</span> <span class="muted">Kael'thar, niv. 4</span></p></div></div>
+    <div class="box camp" onclick="setRole('mj')"><div class="ico">🗺️</div><div style="flex:1"><h2>Ma campagne de test</h2><p class="muted">Exemple : ici, c'est toi le MJ</p><p style="margin-top:6px"><span class="role mj">MJ</span></p></div></div>
+    <button style="width:100%">+ Créer une campagne (je deviens MJ)</button>
+    <div class="note"><b>Idée :</b> le MJ crée la campagne et envoie un lien d'invitation. Chaque joueur y crée ou y apporte son personnage. Une même personne peut être joueur dans une campagne et MJ dans une autre.</div>
+  </div>`;
+}
+
+/* ---------- JOUEUR ---------- */
+function pjView(){
+  const t = S.tab.pj;
+  let body = t==='fiche'?ficheView(): t==='combat'?pjCombatView(): t==='groupe'?groupeView(false): journalView(false);
+  return body + nav([['fiche','🐂','Ma fiche'],['combat','⚔️','Combat'],['groupe','👥','Groupe'],['notes','📜','Notes']], t);
+}
+
+function ficheView(){
+  const k = S.korgan, h = k.hp/k.max;
+  const tabs = [['combat','Mon tour'],['carac','Caractéristiques'],['ress','Ressources'],['sac','Sac'],['histoire','Histoire']];
+  let inner='';
+  if (S.ficheTab==='combat') inner = `
+    <div class="box hp"><button onclick="openHpPc()">−</button><div class="mid"><strong>${k.hp}</strong> <span class="muted">/ ${k.max} PV</span><div class="bar" style="margin:6px 0"><i class="${hpClass(k.hp,k.max)}" style="width:${h*100}%"></i></div><small class="muted">PV temp. : 0</small></div><button onclick="openHpPc()">+</button></div>
+    <div class="stats4"><div><b>16</b><small>CA</small></div><div><b>+3</b><small>Initiative</small></div><div><b>9 m</b><small>Vitesse</small></div><div><b>14</b><small>Perception passive</small></div></div>
+    <div class="row" style="flex-wrap:wrap;gap:6px;margin-bottom:10px">
+      <button class="${S.rage?'primary':''}" onclick="toggleRage()" ${!S.rage&&k.rages===0?'disabled':''}>${S.rage?'🔥 Rage en cours ×':'+ Rage'}</button>
+      <button onclick="">+ Bonus / malus</button>
+    </div>
+    <div class="box"><div class="row between"><h2 style="font-size:16px">Mon tour</h2><span class="muted">Round ${S.round}</span></div>
+      <p class="eyebrow" style="margin-top:8px">Action</p>
+      <div class="line">Maul (marteau à deux mains)<span>1d20 +6 · 2d6 +4${S.rage?' +2':''}</span></div>
+      <div class="line">Coup de cornes<span>1d20 +6 · 1d6 +4${S.rage?' +2':''}</span></div>
+      ${S.rage?'<div class="line">Fureur divine (1re touche du tour)<span>+1d6 +1 radiant</span></div>':''}
+      <p class="eyebrow" style="margin-top:8px">Action bonus</p>
+      <p class="muted" style="font-size:13px">${S.rage?'Rage active · Attaque téméraire (avantage, mais on t\'attaque avec avantage)':'Rage · Attaque téméraire'}</p>
+      ${S.rage?'<p class="muted" style="margin-top:6px;color:var(--red)">Résistance aux dégâts contondants, perforants, tranchants. Avantage aux tests et sauvegardes de Force.</p>':''}
+    </div>
+    <div class="note"><b>Comme dans l'app de Korgan :</b> les dés restent réels. L'app te montre quoi lancer et quoi ajouter. La Rage change toute la carte (bordure rouge).</div>`;
+  if (S.ficheTab==='carac') inner = `
+    <div class="abil">${[['For',18],['Dex',16],['Con',16],['Int',14],['Sag',14],['Cha',14]].map(([n,s])=>`<div><small>${n}</small><b>${fmt(mod(s))}</b><i>${s}</i></div>`).join('')}</div>
+    <div class="box" style="margin-top:10px"><p class="eyebrow">Sauvegardes</p>
+      <div class="line">Force ●<span>+6</span></div><div class="line">Constitution ●<span>+5</span></div><div class="line">Dextérité<span>+3</span></div></div>
+    <div class="box"><p class="eyebrow">Compétences maîtrisées</p>
+      <div class="line">Athlétisme<span>+6</span></div><div class="line">Intimidation<span>+4</span></div><div class="line">Perception<span>+4</span></div></div>
+    <p class="muted">● = maîtrise (bonus +2)</p>`;
+  if (S.ficheTab==='ress') inner = `
+    <div class="box"><div class="line">Rage <small class="muted">· repos long</small><div class="pips">${[0,1,2].map(i=>`<button class="pip ${i<k.rages?'full':''}" onclick="S.korgan.rages=${i<k.rages?i:i+1};render()"></button>`).join('')}</div></div>
+    <div class="line">Dés de vie (d12) <span>3/3</span></div></div>
+    <div class="row"><button style="flex:1">Repos court</button><button style="flex:1">Repos long</button></div>`;
+  if (S.ficheTab==='sac') inner = `<div class="box"><div class="line">Maul<span>5,5 kg</span></div><div class="line">Armure (exemple)<span>—</span></div><div class="line">Rations ×5<span>5 kg</span></div><div class="line">Bourse<span>12 po · 30 pa</span></div></div><p class="muted">Repris de l'app de Korgan : objets, poids, charge et bourse.</p>`;
+  if (S.ficheTab==='histoire') inner = `<div class="box"><p style="font-size:13px;line-height:1.6">Fils de Kaerth le forgeron. Frère d'Asterak, qui rêve d'être chevalier de Solamnie. Lié à Ludo par l'amitié des familles de-Orilg et Tire-Gousset.</p></div><div class="toggle"><input type="checkbox" checked> Visible par le groupe</div><div class="toggle"><input type="checkbox"> Secret : seulement moi et le MJ</div>`;
+  return `<div class="hero"><div class="portrait">🐂</div><div><p class="eyebrow">Joueur · Alex</p><h1>Korgan de-Orilg</h1><p class="muted">Minotaure · Barbare 3 · Voie du Zélote (Kiri-Jolith)</p></div></div>
+    <div class="tabs">${tabs.map(([id,l])=>`<button class="${S.ficheTab===id?'on':''}" onclick="S.ficheTab='${id}';render()">${l}</button>`).join('')}</div>
+    <div class="page" style="padding-top:4px">${inner}</div>`;
+}
+
+function pjCombatView(){
+  const order = [...COMBAT];
+  return `<div class="page"><div class="round"><h2>Combat · Round ${S.round}</h2><span class="chip gold">Tour de ${nameOf(order[S.turn])}</span></div>
+    <ol class="init">${order.map((e,i)=>{
+      const isPc = e.kind==='pc';
+      return `<li class="ent ${e.kind} ${i===S.turn?'current':''} ${e.hp<=0?'down':''}" style="cursor:default"><div class="n">${i+1}</div><div><h3>${nameOf(e)}${e.id==='korgan'?' (toi)':''}</h3>
+        ${isPc?`<div class="bar" style="margin-top:4px"><i class="${hpClass(e.hp,e.max)}" style="width:${Math.max(0,e.hp/e.max*100)}%"></i></div>`:`<div class="meta">${vague(e.hp,e.max)}</div>`}
+        ${e.conds.length?`<div class="chips">${e.conds.map(c=>`<span class="chip ${c==='Rage'?'gold':'bad'}">${c}</span>`).join('')}</div>`:''}</div>
+        <div class="right">${isPc?`<b>${e.hp}</b><span class="muted">/${e.max}</span>`:'<span class="muted">?</span>'}</div></li>`;}).join('')}</ol>
+    ${S.turn===2?'<div class="box" style="margin-top:10px;border-color:var(--gold)"><b>C\'est ton tour !</b><p class="muted">Ta fiche « Mon tour » est prête.</p></div>':''}
+    <div class="note"><b>Ce que voit un joueur :</b> l'ordre des tours et qui joue, ses alliés en clair. Pour les monstres, seulement un état vague (« Blessé », « En sang »), jamais leurs PV ni leurs stats. C'est le MJ qui mène le combat.</div></div>`;
+}
+
+/* ---------- MJ ---------- */
+function mjView(){
+  const t = S.tab.mj;
+  let body = t==='combat'?mjCombatView(): t==='bestiaire'?bestiaireView(): t==='groupe'?groupeView(true): journalView(true);
+  return body + nav([['combat','⚔️','Combat'],['bestiaire','🐺','Bestiaire'],['groupe','👥','Groupe'],['notes','📜','Notes']], t);
+}
+
+function mjCombatView(){
+  return `<div class="page">
+    <div class="round"><div><p class="eyebrow">Écran du MJ</p><h2>Round ${S.round}</h2></div>
+      <div class="row"><button onclick="prevTurn()">◀</button><button class="primary" onclick="nextTurn()">Tour suivant ▶</button></div></div>
+    <div class="legend"><span><i style="background:var(--accent)"></i>Joueurs</span><span><i style="background:var(--red)"></i>Créatures</span><span>Touchez une ligne pour agir</span></div>
+    <ol class="init">${COMBAT.map((e,i)=>{
+      const isPc=e.kind==='pc', m = isPc?null:BESTIARY[e.mon], ca = isPc?pc(e.id).ca:m.caN;
+      return `<li class="ent ${e.kind} ${i===S.turn?'current':''} ${e.hp<=0?'down':''}" onclick="openEntity(${i})">
+        <div class="n">${e.init}<small>init.</small></div>
+        <div><h3>${nameOf(e)} ${isPc?`<span class="muted" style="font-weight:400">· ${pc(e.id).who}</span>`:''}</h3>
+          <div class="meta">CA ${ca}${isPc?' · Perc. passive '+pc(e.id).pp:' · FP '+m.fp.split(' ')[0]}</div>
+          <div class="bar"><i class="${hpClass(e.hp,e.max)}" style="width:${Math.max(0,e.hp/e.max*100)}%"></i></div>
+          ${e.conds.length?`<div class="chips">${e.conds.map(c=>`<span class="chip ${c==='Rage'?'gold':'bad'}">${c}</span>`).join('')}</div>`:''}</div>
+        <div class="right"><b>${e.hp}</b><span class="muted">/${e.max}</span><br><span class="muted">PV</span></div></li>`;}).join('')}</ol>
+    <div class="row" style="margin-top:10px;gap:6px"><button style="flex:1" onclick="go('bestiaire')">+ Ajouter des créatures</button><button style="flex:1" onclick="endCombat()">Fin du combat</button></div>
+    <div class="note"><b>Comment ça marche :</b> l'ordre se trie tout seul par initiative. Touchez une créature pour voir sa fiche complète, lui retirer des PV ou lui mettre un état (à terre, empoisonné…). Les PV des joueurs viennent de leurs fiches : quand Alex se soigne sur son téléphone, l'écran du MJ le voit.</div>
+  </div>`;
+}
+
+function bestiaireView(){
+  const list = Object.entries(BESTIARY);
+  return `<div class="page"><p class="eyebrow">Bestiaire</p><h2 style="margin-bottom:10px">Préparer une rencontre</h2>
+    <input placeholder="🔍 Chercher une créature (loup, squelette…)" style="margin-bottom:10px">
+    <div class="box">${list.map(([id,m])=>`<div class="mon-row"><div style="flex:1;cursor:pointer" onclick="openStat('${id}')"><h3>${m.name}</h3><p class="muted">FP ${m.fp.split(' ')[0]} · CA ${m.caN} · PV ${m.hp} (${m.hpF})</p></div>
+      <div class="qty"><button onclick="pickQ('${id}',-1)">−</button><b style="width:22px;text-align:center">${S.pick[id]||0}</b><button onclick="pickQ('${id}',1)">+</button></div></div>`).join('')}</div>
+    <button class="primary" style="width:100%" onclick="addPicked()" ${Object.values(S.pick).some(v=>v>0)?'':'disabled'}>Ajouter au combat${totalPick()?' ('+totalPick()+')':''}</button>
+    <div class="note"><b>Les créatures :</b> celles des règles libres de D&D 5e (le « SRD », environ 300 monstres). Le MJ pourra aussi créer ses propres monstres ou modifier une créature (un « gobelin chef » avec plus de PV…).</div>
+    <div class="note"><b>Question pour le MJ :</b> pour l'initiative des monstres, l'app la lance pour lui (plus rapide quand il y a 6 gobelins), ou il lance ses vrais dés et l'entre à la main ? On peut offrir les deux.</div>
+  </div>`;
+}
+
+function groupeView(isMj){
+  return `<div class="page"><p class="eyebrow">${isMj?'Vue du MJ':'Mon groupe'}</p><h2 style="margin-bottom:10px">Le groupe</h2>
+    <div class="party">${PARTY.map(p=>{const e=COMBAT.find(c=>c.id===p.id);return `<div class="box"><div style="font-size:26px">${p.icon}</div><h3>${p.name}</h3><p class="muted">${p.desc}</p><p class="muted">Joué par ${p.who}</p>
+      <div class="bar" style="margin:6px 0"><i class="${hpClass(e.hp,e.max)}" style="width:${e.hp/e.max*100}%"></i></div>
+      <p style="font-size:12px">PV ${e.hp}/${e.max} · CA ${p.ca}${isMj?' · PP '+p.pp:''}</p></div>`;}).join('')}</div>
+    ${isMj?'<div class="note"><b>Pour le MJ :</b> d\'un coup d\'œil, les PV, la CA et la Perception passive de tout le monde, pratique pour les jets cachés. Il peut aussi ouvrir la fiche complète de chaque joueur.</div>':'<div class="note"><b>Pour les joueurs :</b> on voit les autres personnages du groupe. Les infos marquées « secret » restent cachées (seuls le joueur et le MJ les voient).</div>'}
+  </div>`;
+}
+
+function journalView(isMj){
+  return `<div class="page"><p class="eyebrow">Journal de campagne</p><h2 style="margin-bottom:10px">Notes de session</h2>
+    ${JOURNAL.filter(j=>isMj||!j.secret).map(j=>`<div class="box journal-entry ${j.secret?'secret':''}"><div class="row between"><h3>${j.t}</h3>${j.secret?'<span class="chip">🔒 MJ seulement</span>':''}</div><p class="muted" style="margin-bottom:6px">par ${j.who}</p><p>${j.body}</p></div>`).join('')}
+    <button style="width:100%">+ Nouvelle note${isMj?' (publique ou secrète)':''}</button>
+    <div class="note"><b>Idée :</b> tout le monde peut écrire dans le journal partagé (comme le Journal de l'app de Korgan, avec photos). Le MJ a en plus des notes secrètes que les joueurs ne voient pas.</div></div>`;
+}
+
+function nav(items, cur){
+  return `<nav class="nav" style="grid-template-columns:repeat(${items.length},1fr)">${items.map(([id,ic,l])=>`<button class="${cur===id?'on':''}" onclick="go('${id}')"><span>${ic}</span>${l}</button>`).join('')}</nav>`;
+}
+
+/* ============ ACTIONS ============ */
+function toggleRage(){
+  if(!S.rage){ if(S.korgan.rages===0) return; S.korgan.rages--; S.rage=true; addCond('korgan','Rage'); }
+  else { S.rage=false; COMBAT.find(c=>c.id==='korgan').conds = COMBAT.find(c=>c.id==='korgan').conds.filter(c=>c!=='Rage'); }
+  render();
+}
+function addCond(id,c){ const e=COMBAT.find(x=>x.id===id); if(!e.conds.includes(c)) e.conds.push(c); }
+function nextTurn(){ S.turn++; if(S.turn>=COMBAT.length){S.turn=0;S.round++;} render(); }
+function prevTurn(){ S.turn--; if(S.turn<0){S.turn=COMBAT.length-1;S.round=Math.max(1,S.round-1);} render(); }
+function endCombat(){ openSheet(`<header><h2>Fin du combat ?</h2><button onclick="closeSheet()">✕</button></header><p class="muted">Les créatures sont retirées. Le MJ voit les PX gagnés : ici, 2 gobelins + 1 loup + 1 ogre = 600 PX, soit 200 PX par joueur.</p><div class="row" style="margin-top:12px"><button style="flex:1" onclick="closeSheet()">Annuler</button><button class="primary" style="flex:1" onclick="closeSheet()">Terminer</button></div>`); }
+function pickQ(id,d){ S.pick[id]=Math.max(0,(S.pick[id]||0)+d); render(); }
+function totalPick(){ return Object.values(S.pick).reduce((a,b)=>a+b,0); }
+function addPicked(){
+  for(const [id,n] of Object.entries(S.pick)){
+    const m=BESTIARY[id];
+    for(let i=0;i<n;i++){
+      const count = COMBAT.filter(c=>c.mon===id).length;
+      const letter = String.fromCharCode(65+count);
+      const roll = 1+Math.floor(Math.random()*20)+m.initB;
+      COMBAT.push({ id:id+Date.now()+i, kind:'mon', mon:id, label:m.name+' '+letter, init:roll, hp:m.hp, max:m.hp, conds:[] });
+    }
+  }
+  const cur = COMBAT[S.turn];
+  COMBAT.sort((a,b)=>b.init-a.init);
+  S.turn = COMBAT.indexOf(cur);
+  S.pick={}; S.tab.mj='combat'; render();
+}
+
+/* ---------- feuilles ---------- */
+let hpDigits='', hpTarget=null;
+function openSheet(html){ $('sheet').innerHTML=html; $('sheet').classList.add('open'); $('veil').classList.add('open'); }
+function closeSheet(){ $('sheet').classList.remove('open'); $('veil').classList.remove('open'); }
+
+function statBlock(m){
+  const names=['FOR','DEX','CON','INT','SAG','CHA'];
+  return `<div class="statblock"><h2>${m.name}</h2><p class="sub">${m.type}</p><hr>
+    <p><b>Classe d'armure</b> ${m.ca}</p><p><b>Points de vie</b> ${m.hp} (${m.hpF})</p><p><b>Vitesse</b> ${m.speed}</p><hr>
+    <div class="abil">${m.ab.map((s,i)=>`<div><small>${names[i]}</small><b>${s}</b><i>${fmt(mod(s))}</i></div>`).join('')}</div><hr>
+    ${m.extra.map(x=>`<p>${x}</p>`).join('')}<p><b>Facteur de puissance</b> ${m.fp}</p><hr>
+    ${m.traits.map(([n,d])=>`<p class="act"><b>${n}.</b> ${d}</p>`).join('')}
+    <p class="eyebrow" style="margin-top:8px">Actions</p>
+    ${m.actions.map(([n,d])=>`<p class="act"><b>${n}.</b> ${d}</p>`).join('')}</div>`;
+}
+function openStat(id){ openSheet(`<header><span></span><button onclick="closeSheet()">✕</button></header>${statBlock(BESTIARY[id])}`); }
+
+function openEntity(i){
+  hpTarget=i; hpDigits='';
+  const e=COMBAT[i], isPc=e.kind==='pc';
+  openSheet(`<header><h2>${nameOf(e)}</h2><button onclick="closeSheet()">✕</button></header>
+    <p class="muted">PV actuels : <b style="color:var(--gold)">${e.hp}</b> / ${e.max}</p>
+    <div class="hpout" id="hpout">0</div>
+    <div class="keypad">${[1,2,3,4,5,6,7,8,9].map(d=>`<button onclick="hpKey('${d}')">${d}</button>`).join('')}<button onclick="hpKey('C')">Effacer</button><button onclick="hpKey('0')">0</button><button onclick="hpKey('<')">⌫</button></div>
+    <div class="grid3"><button class="primary" onclick="applyHp(-1)">Dégâts</button><button onclick="applyHp(1)">Soin</button><button onclick="applyHp(0)">Moitié (résist.)</button></div>
+    <p class="eyebrow" style="margin-top:14px">États</p>
+    <div class="conds">${CONDITIONS.map(c=>`<button class="${e.conds.includes(c)?'on':''}" onclick="toggleCond(${i},'${c}')">${c}</button>`).join('')}</div>
+    ${isPc?`<div class="note"><b>Joueur :</b> ses PV sont synchronisés avec la fiche du joueur. Le MJ peut lui retirer des PV (« tu prends 8 dégâts »), le joueur le voit tout de suite.</div>`:`<details style="margin-top:14px"><summary class="eyebrow" style="cursor:pointer">Fiche de la créature</summary><div style="margin-top:8px">${statBlock(BESTIARY[e.mon])}</div></details>`}`);
+}
+function hpKey(k){ if(k==='C') hpDigits=''; else if(k==='<') hpDigits=hpDigits.slice(0,-1); else hpDigits=(hpDigits+k).replace(/^0+(?=\d)/,'').slice(0,4); $('hpout').textContent=hpDigits||'0'; }
+function applyHp(sign){
+  const n=Number(hpDigits)||0, e=COMBAT[hpTarget];
+  if(sign===1) e.hp=Math.min(e.max,e.hp+n);
+  else e.hp=Math.max(0,e.hp-(sign===0?Math.floor(n/2):n));
+  if(e.id==='korgan') S.korgan.hp=e.hp;
+  if(e.hp===0 && !e.conds.includes('À terre') && e.kind==='mon') e.conds.push('À terre');
+  closeSheet(); render();
+}
+function toggleCond(i,c){ const e=COMBAT[i]; e.conds = e.conds.includes(c)?e.conds.filter(x=>x!==c):[...e.conds,c]; if(e.id==='korgan') S.rage=e.conds.includes('Rage'); openEntity(i); render(); }
+function openHpPc(){ openEntity(COMBAT.findIndex(c=>c.id==='korgan')); }
+
+render();
+</script>
+</body>
+</html>
