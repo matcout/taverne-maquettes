@@ -376,8 +376,8 @@ function bloque(o){
   if(o.id==='repousse' && !apresTouche()) return 'Juste après une touche avec l\'action Attaquer|Après une touche';
   if(o.id==='rechauffe' && S.conc[id]!=='chauffer') return 'Il faut d\'abord lancer Chauffer le métal et garder la concentration|Pas actif';
   if(o.id==='rechauffe' && S.chaufTour) return 'Lancé ce tour-ci : la relance marche à partir du tour suivant|Tour suivant';
-  if(o.col==='a' && !o.libre && o.cout?.startsWith('sort') && e.sortB) return 'Tu as lancé un sort en action bonus : en action, seulement un sort mineur ce tour|Sort en bonus';
-  if(o.col==='b' && o.cout?.startsWith('sort') && e.sortA) return 'Tu as lancé un sort de niveau 1+ en action : en bonus, pas d\'autre sort ce tour|Sort en action';
+  if(o.col==='a' && !o.libre && (o.cout||'').startsWith('sort') && e.sortB) return 'Tu as lancé un sort en action bonus : en action, seulement un sort mineur ce tour|Sort en bonus';
+  if(o.col==='b' && (o.cout||'').startsWith('sort') && e.sortA) return 'Tu as lancé un sort de niveau 1+ en action : en bonus, pas d\'autre sort ce tour|Sort en action';
   return '';
 }
 function coutTxt(o){ if(o.libre) return 'Sans action'; if(o.cout==='sort') return 'Emplacement'; if(o.cout==='sort2') return 'Emplacement niv. 2';
