@@ -443,9 +443,9 @@ const PJ = {
     actions:[['Maul (marteau à deux mains)','1d20 +6','2d6 +4'],['Coup de cornes','1d20 +6','1d6 +4']],
     bonus:'Rage · Attaque téméraire',
     effetTxt:'Résistance aux dégâts contondants, perforants et tranchants. Avantage aux tests et sauvegardes de Force. Fureur divine : +1d6 +1 radiant sur la 1re touche du tour.' },
-  kaelthar:{ nom:'Kael\'thar', joueur:'Alex', img:IMG.kaelthar, pos:'center 15%', camp:'or', desc:'Shadar-kai · Paladin 4 · Serment de Vengeance', pv:31, max:36, ca:19, init:'+1', vit:'9 m', pp:12,
-    ab:[16,12,14,10,12,16], effet:'voeu', effetNom:'Vœu d\'inimitié', res:[['Conduit divin',1,1,'court'],['Emplacements niv. 1',2,3,'long'],['Imposition des mains',15,20,'long']],
-    actions:[['Épée longue « Éveil de Kira »','1d20 +6','1d8 +4'],['Châtiment divin (après une touche)','—','+2d8 radiant']],
+  kaelthar:{ nom:'Kael\'thar', joueur:'Alex', img:IMG.kaelthar, pos:'center 15%', camp:'or', desc:'Shadar-kai · Paladin 4 · Serment de Vengeance', pv:31, max:40, ca:19, init:'+1', vit:'9 m', pp:14,
+    ab:[20,13,16,9,14,16], effet:'voeu', effetNom:'Vœu d\'inimitié', res:[['Conduit divin',1,1,'court'],['Emplacements niv. 1',2,3,'long'],['Imposition des mains',15,20,'long']],
+    actions:[['Épée longue « Éveil de Kira »','1d20 +7','1d8 +5'],['Châtiment divin (après une touche)','—','+2d8 radiant']],
     bonus:'Vœu d\'inimitié · Bénédiction de la Raven Queen',
     effetTxt:'Avantage aux attaques contre la cible du Vœu pendant 1 minute.' },
   ludo:{ nom:'Ludo Tire-Gousset', joueur:'Charlie', img:IMG.ludo, pos:'center 15%', camp:'dl', desc:'Kender · Barde 3 · Collège du Savoir', pv:15, max:21, ca:14, init:'+4', initDetail:'DEX +3 · Touche-à-tout +1', vit:'9 m', pp:12,
@@ -520,7 +520,7 @@ const TOUR = {
   kaelthar:{ res:[['cd','Conduit divin',1,'court'],['n1','Sorts niv. 1',3,'long'],['rq','Raven Queen',2,'long'],['imp','Imposition des mains',20,'long']],
     note:'<b>Carte vivante :</b> le Vœu d\'inimitié passe la fiche en violet. Châtiment divin se choisit juste après une touche, sans prendre d\'action.',
     opts:[
-    { id:'epee', col:'a', atk:1, nom:'Épée longue', court:'+6 · 1d8+4', d:'« Éveil de Kira ». Attaque au corps à corps (+6), 1d8 + 4 tranchants (1d10 à deux mains).' },
+    { id:'epee', col:'a', atk:1, nom:'Épée longue', court:'+7 · 1d8+5', d:'« Éveil de Kira ». Attaque au corps à corps (+7), 1d8 + 5 tranchants (1d10 à deux mains).' },
     { id:'chatiment', col:'a', libre:1, cout:'sort', nom:'Châtiment divin', court:'+2d8 radiant', d:'Juste après une touche au corps à corps, sans action : un emplacement pour +2d8 radiants (+1d8 contre un mort-vivant ou un fiélon, +1d8 par niveau au-dessus).' },
     { id:'fleau', col:'a', cout:'sort', conc:1, nom:'Fléau', court:'DD 13 · −1d4', d:'Sort de serment, niveau 1, 9 m, concentration. Jusqu\'à 3 créatures, sauvegarde de Charisme DD 13 : elles retirent 1d4 à leurs attaques et sauvegardes.' },
     { id:'abjurer', col:'a', cout:'cd', nom:'Abjurer l\'ennemi', court:'DD 13 · effrayé', d:'Conduit divin. Une créature à 18 m, sauvegarde de Sagesse DD 13 (désavantage pour un fiélon ou un mort-vivant) : effrayée 1 minute et vitesse 0.' },
@@ -528,7 +528,7 @@ const TOUR = {
     { id:'voeu', col:'b', cout:'cd', nom:'Vœu d\'inimitié', court:'avantage 1 min', d:'Conduit divin. Une créature à 3 m : avantage à tes attaques contre elle pendant 1 minute.' },
     { id:'marque', col:'b', cout:'sort', conc:1, nom:'Marque du chasseur', court:'+1d6 · 27 m', d:'Sort de serment, niveau 1, 27 m, concentration. +1d6 dégâts à chaque attaque d\'arme qui touche la cible. Si elle tombe à 0 PV, une action bonus déplace la marque.' },
     { id:'raven', col:'b', cout:'rq', nom:'Bénédiction de la Raven Queen', court:'téléport 9 m', d:'Shadar-kai. Téléportation de 9 m vers un espace que tu vois, puis résistance à tous les dégâts jusqu\'au début de ton prochain tour.' },
-    { id:'opportunite', col:'r', atk:1, nom:'Attaque d\'opportunité', court:'+6 · 1d8+4', d:'Quand un ennemi quitte ton allonge : un coup d\'épée.' },
+    { id:'opportunite', col:'r', atk:1, nom:'Attaque d\'opportunité', court:'+7 · 1d8+5', d:'Quand un ennemi quitte ton allonge : un coup d\'épée.' },
   ]},
 };
 const COLS = [ ['a','Action'], ['b','Action bonus'], ['r','Réaction'] ];
@@ -607,7 +607,7 @@ const CAPS = {
     {nom:'Châtiment divin', src:'Paladin 2', txt:'Après une touche au corps à corps : un emplacement pour +2d8 radiants (+1d8 contre mort-vivant ou fiélon).', eff:'Dans « Mon tour »'},
     {nom:'Santé divine', src:'Paladin 3', txt:'Tu es immunisé contre les maladies.'},
     {nom:'Conduit divin : Vœu d\'inimitié, Abjurer l\'ennemi', src:'Serment de Vengeance 3', txt:'Une fois par repos court : avantage contre une cible, ou effrayer et immobiliser un ennemi.', eff:'Dans « Mon tour »'},
-    {nom:'Amélioration de caractéristique ou don', src:'Paladin 4', txt:'Choisi au niveau 4 : +2 à une caractéristique, +1 à deux, ou un don.', eff:'À préciser : qu\'as-tu pris ?'},
+    {nom:'Amélioration de caractéristique : +2 Force', src:'Paladin 4', txt:'Force 18 → 20 (modificateur +5) : attaques et dégâts au corps à corps, Athlétisme, sauvegardes de Force.', eff:'Compté : épée +7, dégâts 1d8+5'},
     {nom:'Bénédiction de la Raven Queen', src:'Shadar-kai', txt:'Action bonus : téléportation de 9 m, puis résistance à tous les dégâts jusqu\'à ton prochain tour.', eff:'Dans « Mon tour »'},
     {nom:'Résistance nécrotique, vision dans le noir, transe', src:'Shadar-kai', txt:'Résistance aux dégâts nécrotiques. Tu vois dans le noir à 18 m. 4 h de transe valent un repos long.'},
     {nom:'Éveil de Kira (arme d\'alerte)', src:'Objet', txt:'Tes alliés à 9 m ont l\'avantage à l\'initiative.'},
@@ -652,7 +652,7 @@ let COMBAT = [
   // et : états (règles) · bu : bonus actifs · ma : malus qu'on lui a mis (avec la source) · su : ce que le groupe a appris
   { id:'galinndan', pj:1, init:21, pv:33, max:33, et:[], bu:['Bénédiction +1d4'] },
   { id:'ombre', mon:'ombre', nom:'Ombre', init:16, pv:9, max:16, et:[], ma:['Cible du Vœu · Kael\'thar'], su:['Craint le radiant','Se cache dans le noir'] },
-  { id:'kaelthar', pj:1, init:14, pv:31, max:36, et:['Vœu d\'inimitié'], bu:['Bénédiction +1d4'] },
+  { id:'kaelthar', pj:1, init:14, pv:31, max:40, et:['Vœu d\'inimitié'], bu:['Bénédiction +1d4'] },
   { id:'goule1', mon:'goule', nom:'Goule', init:12, pv:22, max:22, et:['Effrayé'], ma:['Effrayée · Abjurer, Kael\'thar'], su:['Griffes qui paralysent'] },
   { id:'zephira', pj:1, init:11, pv:22, max:36, et:['Concentration'], bu:['Concentration : Bénédiction'] },
   { id:'zomb1', mon:'zombie', nom:'Zombie A', init:6, pv:14, max:22, et:[], su:['Se relève parfois'] },
@@ -693,7 +693,7 @@ function accueil(){
     <div class="camp" style="min-height:120px" onclick="choisirRole('mj')"><div class="in"><span class="role mj">MJ</span><h2 style="margin-top:6px">Ma campagne de test</h2><p class="small">Ici, c'est toi qui mènes le jeu.</p></div></div>
     <button style="width:100%">+ Créer une campagne</button>
     <div class="note"><b>Idée :</b> le MJ crée la campagne et envoie un lien d'invitation. On peut être joueur ici et MJ ailleurs.</div>
-    <p class="small" style="text-align:center;margin-top:14px">Version de la maquette : 2026-11-04 d</p>
+    <p class="small" style="text-align:center;margin-top:14px">Version de la maquette : 2026-11-04 f</p>
   </div>`;
 }
 
