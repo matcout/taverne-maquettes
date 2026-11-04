@@ -521,12 +521,19 @@ const TOUR = {
     note:'<b>Carte vivante :</b> le Vœu d\'inimitié passe la fiche en violet. Châtiment divin se choisit juste après une touche, sans prendre d\'action.',
     opts:[
     { id:'epee', col:'a', atk:1, nom:'Épée longue', court:'+7 · 1d8+5', d:'« Éveil de Kira ». Attaque au corps à corps (+7), 1d8 + 5 tranchants (1d10 à deux mains).' },
+    { id:'javelot', col:'a', atk:1, nom:'Javelot', court:'+7 · 1d6+5', d:'Arme de jet (portée 9/36 m) ou de corps à corps. Attaque +7, 1d6 + 5 perforants. Tu en portes 5.' },
+    { id:'soins', col:'a', cout:'sort', nom:'Soins', court:'1d8+3 PV', d:'Sort préparé, niveau 1, toucher. La créature touchée récupère 1d8 + 3 PV (+1d8 par niveau d\'emplacement au-dessus).' },
+    { id:'benediction', col:'a', cout:'sort', conc:1, nom:'Bénédiction', court:'3 cibles · +1d4', d:'Sort préparé, niveau 1, 9 m, concentration (1 min). Jusqu\'à 3 créatures ajoutent 1d4 à leurs attaques et à leurs sauvegardes. Pas de sauvegarde pour les ennemis.' },
+    { id:'protmal', col:'a', cout:'sort', conc:1, nom:'Protection contre le mal et le bien', court:'désavantage contre toi', d:'Sort préparé, niveau 1, toucher, concentration (10 min). Contre les aberrations, célestes, élémentaires, fées, fiélons et morts-vivants : désavantage pour attaquer la cible, et elle ne peut pas être charmée, effrayée ni possédée par eux.' },
+    { id:'heroisme', col:'a', cout:'sort', conc:1, nom:'Héroïsme', court:'sans peur · 3 PV temp.', d:'Sort préparé, niveau 1, toucher, concentration (1 min). La cible est immunisée contre la peur et gagne 3 PV temporaires au début de chacun de ses tours.' },
     { id:'chatiment', col:'a', libre:1, cout:'sort', nom:'Châtiment divin', court:'+2d8 radiant', d:'Juste après une touche au corps à corps, sans action : un emplacement pour +2d8 radiants (+1d8 contre un mort-vivant ou un fiélon, +1d8 par niveau au-dessus).' },
     { id:'fleau', col:'a', cout:'sort', conc:1, nom:'Fléau', court:'DD 13 · −1d4', d:'Sort de serment, niveau 1, 9 m, concentration. Jusqu\'à 3 créatures, sauvegarde de Charisme DD 13 : elles retirent 1d4 à leurs attaques et sauvegardes.' },
     { id:'abjurer', col:'a', cout:'cd', nom:'Abjurer l\'ennemi', court:'DD 13 · effrayé', d:'Conduit divin. Une créature à 18 m, sauvegarde de Sagesse DD 13 (désavantage pour un fiélon ou un mort-vivant) : effrayée 1 minute et vitesse 0.' },
     { id:'imposition', col:'a', cout:'imp', nom:'Imposition des mains', court:'5 PV', d:'Touche une créature et rends-lui des PV pris dans ta réserve (ici 5), ou dépense 5 PV de réserve pour guérir une maladie ou un poison.' },
     { id:'voeu', col:'b', cout:'cd', nom:'Vœu d\'inimitié', court:'avantage 1 min', d:'Conduit divin. Une créature à 3 m : avantage à tes attaques contre elle pendant 1 minute.' },
     { id:'marque', col:'b', cout:'sort', conc:1, nom:'Marque du chasseur', court:'+1d6 · 27 m', d:'Sort de serment, niveau 1, 27 m, concentration. +1d6 dégâts à chaque attaque d\'arme qui touche la cible. Si elle tombe à 0 PV, une action bonus déplace la marque.' },
+    { id:'courroux', col:'b', cout:'sort', conc:1, nom:'Châtiment courroucé', court:'+1d6 psy · DD 13', d:'Sort préparé, niveau 1, concentration (1 min). Ta prochaine touche au corps à corps fait +1d6 psychiques, et la cible fait une sauvegarde de Sagesse DD 13 ou elle est effrayée. Pour s\'en libérer, elle utilise son action pour un test de Sagesse DD 13.' },
+    { id:'bouclierfoi', col:'b', cout:'sort', conc:1, nom:'Bouclier de la foi', court:'+2 CA · 18 m', d:'Sort préparé, niveau 1, 18 m, concentration (10 min). Toi ou un allié gagnez +2 à la CA.' },
     { id:'raven', col:'b', cout:'rq', nom:'Bénédiction de la Raven Queen', court:'téléport 9 m', d:'Shadar-kai. Téléportation de 9 m vers un espace que tu vois, puis résistance à tous les dégâts jusqu\'au début de ton prochain tour.' },
     { id:'opportunite', col:'r', atk:1, nom:'Attaque d\'opportunité', court:'+7 · 1d8+5', d:'Quand un ennemi quitte ton allonge : un coup d\'épée.' },
   ]},
@@ -693,7 +700,7 @@ function accueil(){
     <div class="camp" style="min-height:120px" onclick="choisirRole('mj')"><div class="in"><span class="role mj">MJ</span><h2 style="margin-top:6px">Ma campagne de test</h2><p class="small">Ici, c'est toi qui mènes le jeu.</p></div></div>
     <button style="width:100%">+ Créer une campagne</button>
     <div class="note"><b>Idée :</b> le MJ crée la campagne et envoie un lien d'invitation. On peut être joueur ici et MJ ailleurs.</div>
-    <p class="small" style="text-align:center;margin-top:14px">Version de la maquette : 2026-11-04 f</p>
+    <p class="small" style="text-align:center;margin-top:14px">Version de la maquette : 2026-11-04 g</p>
   </div>`;
 }
 
