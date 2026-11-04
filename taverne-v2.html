@@ -566,8 +566,17 @@ function monTour(){
       ${T.opts.filter(o=>o.col===c).map(o=>{ const b=bloque(o); return `<button class="opt ${b?'off':''} ${o.cout?'c-'+o.cout:''} ${o.libre?'libre':''}" onclick="voirOpt('${o.id}')"><b>${o.nom}</b><span>${courtAff(o)}</span><i>${b?'✕ '+b.split('|')[1]:coutTxt(o)}</i></button>`; }).join('')}
     </div>`).join('')}</div>
     <p class="small" style="margin-top:8px">Aussi en action : Esquiver · Se désengager · Se cacher · Aider${id==='korgan'?'':' · Foncer'}. Mouvement : ${p.vit}.</p>
-    <button class="or" style="width:100%;margin-top:10px" onclick="S.eco.${id}=eco0();S.chaufTour=false;S.round++;draw()">Fin de mon tour</button></div>
+    <button class="or" style="width:100%;margin-top:10px" onclick="S.eco.${id}=eco0();S.chaufTour=false;S.round++;draw()">Fin de mon tour</button>
+    <div class="g3" style="grid-template-columns:1fr 1fr;margin-top:6px"><button onclick="repos('court')">Repos court</button><button onclick="repos('long')">Repos long</button></div></div>
     <div class="note">${T.note}</div>`;
+}
+// Repos : le court rend ce qui revient au repos court, le long rend tout (et les PV)
+function repos(type){
+  const id=S.perso, r=R(), rendus=[];
+  for(const [k,n,m,quand] of TOUR[id].res) if(type==='long' || quand==='court'){ if(r[k]<m) rendus.push(n); r[k]=m; }
+  if(type==='long'){ const p=PJ[id]; if(p.pv<p.max) rendus.push('PV'); p.pv=p.max; const e=COMBAT.find(c=>c.id===id); if(e) e.pv=e.max; S.conc[id]=null; }
+  S.eco[id]=eco0(); draw();
+  resultat({nom:type==='long'?'Repos long':'Repos court', quoi:PJ[id].nom.split(' ')[0], texte: rendus.length ? 'Récupéré : '+rendus.join(', ') : 'Rien à récupérer', tot:'✓'});
 }
 function voirOpt(id){
   const o=opt(id), b=bloque(o), s=slotLibre(), c=S.conc[S.perso];
@@ -635,7 +644,7 @@ function accueil(){
     <div class="camp" style="min-height:120px" onclick="choisirRole('mj')"><div class="in"><span class="role mj">MJ</span><h2 style="margin-top:6px">Ma campagne de test</h2><p class="small">Ici, c'est toi qui mènes le jeu.</p></div></div>
     <button style="width:100%">+ Créer une campagne</button>
     <div class="note"><b>Idée :</b> le MJ crée la campagne et envoie un lien d'invitation. On peut être joueur ici et MJ ailleurs.</div>
-    <p class="small" style="text-align:center;margin-top:14px">Version de la maquette : 2026-11-04 b</p>
+    <p class="small" style="text-align:center;margin-top:14px">Version de la maquette : 2026-11-04 c</p>
   </div>`;
 }
 
@@ -649,7 +658,7 @@ function vueJoueur(){
 
 function fiche(){
   const p=PJ[S.perso], on=S.effets[S.perso];
-  const tabs=[['tour','Mon tour'],['carac','Caractéristiques'],['ress','Ressources'],['sac','Sac'],['hist','Histoire']];
+  const tabs=[['tour','Mon tour'],['carac','Caractéristiques'],['sac','Sac'],['hist','Histoire']];
   let c='';
   if(S.sous==='tour') c=`
     <div class="frame"><div class="hp"><button onclick="ouvrirPV('${S.perso}')" aria-label="Retirer des PV">−</button><div class="mid"><strong>${p.pv}</strong> <span class="muted">/ ${p.max} PV</span><div class="bar" style="margin:8px 0 4px"><i class="${cls(p.pv,p.max)}" style="width:${p.pv/p.max*100}%"></i></div><span class="small">PV temporaires : 0</span></div><button onclick="ouvrirPV('${S.perso}')" aria-label="Ajouter des PV">+</button></div></div>
