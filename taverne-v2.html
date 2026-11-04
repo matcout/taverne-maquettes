@@ -283,6 +283,7 @@ input{font:inherit;color:var(--ink);background:#0f0c09;border:1px solid var(--li
 .libres button i{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;border-radius:9px;background:var(--gold);color:#1a1207;font:700 11px/18px var(--sans);font-style:normal}
 @media (prefers-reduced-motion:reduce){.des-res{transition:none}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.prep{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid rgba(201,162,92,.2);cursor:pointer}.prep input{width:20px;height:20px;margin-top:2px;accent-color:#c9a25c;flex-shrink:0}.prep span{display:flex;flex-direction:column;gap:2px}.prep small{opacity:.75;font-size:12px}.prep.off{opacity:.45}
 </style>
 </head>
 <body>
@@ -478,7 +479,7 @@ const MON = {
 
 const S = { ecran:'accueil', role:'pj', ong:{pj:'fiche',mj:'combat'}, perso:'korgan', sous:'tour', effets:{korgan:false,kaelthar:false}, round:3, tour:2, choix:{},
   res:{ ludo:{ n1:2, n2:1, insp:3, rail:2 }, korgan:{ rage:2 }, kaelthar:{ cd:1, n1:2, rq:2, imp:15 } },
-  conc:{}, chaufTour:false, eco:{} };
+  conc:{}, prep:{ kaelthar:['soins','benediction','protmal','courroux','bouclierfoi'] }, chaufTour:false, eco:{} };
 const eco0 = () => ({ a:false, b:false, r:false, sortA:false, sortB:false, aId:null });
 ['ludo','korgan','kaelthar'].forEach(i => S.eco[i] = eco0());
 const R = () => S.res[S.perso], E = () => S.eco[S.perso];
@@ -517,23 +518,31 @@ const TOUR = {
     { id:'repousse', col:'b', nom:'Cornes martelantes', court:'DD 14 · 3 m', d:'Minotaure. Juste après une touche avec l\'action Attaquer : la cible fait une sauvegarde de Force DD 14 ou elle est repoussée de 3 m.' },
     { id:'opportunite', col:'r', atk:1, nom:'Attaque d\'opportunité', court:'+6 · 2d6+4', d:'Quand un ennemi quitte ton allonge : un coup de maul.' },
   ]},
-  kaelthar:{ res:[['cd','Conduit divin',1,'court'],['n1','Sorts niv. 1',3,'long'],['rq','Raven Queen',2,'long'],['imp','Imposition des mains',20,'long']],
+  kaelthar:{ prepMax:5, res:[['cd','Conduit divin',1,'court'],['n1','Sorts niv. 1',3,'long'],['rq','Raven Queen',2,'long'],['imp','Imposition des mains',20,'long']],
     note:'<b>Carte vivante :</b> le Vœu d\'inimitié passe la fiche en violet. Châtiment divin se choisit juste après une touche, sans prendre d\'action.',
     opts:[
     { id:'epee', col:'a', atk:1, nom:'Épée longue', court:'+7 · 1d8+5', d:'« Éveil de Kira ». Attaque au corps à corps (+7), 1d8 + 5 tranchants (1d10 à deux mains).' },
     { id:'javelot', col:'a', atk:1, nom:'Javelot', court:'+7 · 1d6+5', d:'Arme de jet (portée 9/36 m) ou de corps à corps. Attaque +7, 1d6 + 5 perforants. Tu en portes 5.' },
-    { id:'soins', col:'a', cout:'sort', nom:'Soins', court:'1d8+3 PV', d:'Sort préparé, niveau 1, toucher. La créature touchée récupère 1d8 + 3 PV (+1d8 par niveau d\'emplacement au-dessus).' },
-    { id:'benediction', col:'a', cout:'sort', conc:1, nom:'Bénédiction', court:'3 cibles · +1d4', d:'Sort préparé, niveau 1, 9 m, concentration (1 min). Jusqu\'à 3 créatures ajoutent 1d4 à leurs attaques et à leurs sauvegardes. Pas de sauvegarde pour les ennemis.' },
-    { id:'protmal', col:'a', cout:'sort', conc:1, nom:'Protection contre le mal et le bien', court:'désavantage contre toi', d:'Sort préparé, niveau 1, toucher, concentration (10 min). Contre les aberrations, célestes, élémentaires, fées, fiélons et morts-vivants : désavantage pour attaquer la cible, et elle ne peut pas être charmée, effrayée ni possédée par eux.' },
-    { id:'heroisme', col:'a', cout:'sort', conc:1, nom:'Héroïsme', court:'sans peur · 3 PV temp.', d:'Sort préparé, niveau 1, toucher, concentration (1 min). La cible est immunisée contre la peur et gagne 3 PV temporaires au début de chacun de ses tours.' },
+    { id:'soins', prep:1, col:'a', cout:'sort', nom:'Soins', court:'1d8+3 PV', d:'Sort préparé, niveau 1, toucher. La créature touchée récupère 1d8 + 3 PV (+1d8 par niveau d\'emplacement au-dessus).' },
+    { id:'benediction', prep:1, col:'a', cout:'sort', conc:1, nom:'Bénédiction', court:'3 cibles · +1d4', d:'Sort préparé, niveau 1, 9 m, concentration (1 min). Jusqu\'à 3 créatures ajoutent 1d4 à leurs attaques et à leurs sauvegardes. Pas de sauvegarde pour les ennemis.' },
+    { id:'protmal', prep:1, col:'a', cout:'sort', conc:1, nom:'Protection contre le mal et le bien', court:'désavantage contre toi', d:'Sort préparé, niveau 1, toucher, concentration (10 min). Contre les aberrations, célestes, élémentaires, fées, fiélons et morts-vivants : désavantage pour attaquer la cible, et elle ne peut pas être charmée, effrayée ni possédée par eux.' },
+    { id:'heroisme', prep:1, col:'a', cout:'sort', conc:1, nom:'Héroïsme', court:'sans peur · 3 PV temp.', d:'Sort préparé, niveau 1, toucher, concentration (1 min). La cible est immunisée contre la peur et gagne 3 PV temporaires au début de chacun de ses tours.' },
+    { id:'injonction', prep:1, col:'a', cout:'sort', nom:'Injonction', court:'DD 13 · 1 mot', d:'Sort, niveau 1, 18 m. Un ordre d\'un mot (Approche, Fuis, Lâche, À terre, Halte). Sauvegarde de Sagesse DD 13, sinon la cible obéit à son prochain tour.' },
+    { id:'detectmal', prep:1, col:'a', cout:'sort', conc:1, nom:'Détection du mal et du bien', court:'9 m · 10 min', d:'Sort, niveau 1, concentration (10 min). Tu sens les aberrations, célestes, élémentaires, fées, fiélons et morts-vivants à 9 m, et où ils sont. Peut se lancer en rituel.' },
+    { id:'detectpoison', prep:1, col:'a', cout:'sort', conc:1, nom:'Détection du poison et des maladies', court:'9 m · 10 min', d:'Sort, niveau 1, concentration (10 min). Tu sens les poisons, les créatures venimeuses et les maladies à 9 m. Peut se lancer en rituel.' },
+    { id:'purif', prep:1, col:'a', cout:'sort', nom:'Purification de nourriture et d\'eau', court:'rituel · 3 m', d:'Sort, niveau 1, 3 m. Rend saines la nourriture et l\'eau dans une sphère de 1,50 m. Peut se lancer en rituel (sans emplacement, 10 min de plus).' },
     { id:'chatiment', col:'a', libre:1, cout:'sort', nom:'Châtiment divin', court:'+2d8 radiant', d:'Juste après une touche au corps à corps, sans action : un emplacement pour +2d8 radiants (+1d8 contre un mort-vivant ou un fiélon, +1d8 par niveau au-dessus).' },
     { id:'fleau', col:'a', cout:'sort', conc:1, nom:'Fléau', court:'DD 13 · −1d4', d:'Sort de serment, niveau 1, 9 m, concentration. Jusqu\'à 3 créatures, sauvegarde de Charisme DD 13 : elles retirent 1d4 à leurs attaques et sauvegardes.' },
     { id:'abjurer', col:'a', cout:'cd', nom:'Abjurer l\'ennemi', court:'DD 13 · effrayé', d:'Conduit divin. Une créature à 18 m, sauvegarde de Sagesse DD 13 (désavantage pour un fiélon ou un mort-vivant) : effrayée 1 minute et vitesse 0.' },
     { id:'imposition', col:'a', cout:'imp', nom:'Imposition des mains', court:'5 PV', d:'Touche une créature et rends-lui des PV pris dans ta réserve (ici 5), ou dépense 5 PV de réserve pour guérir une maladie ou un poison.' },
     { id:'voeu', col:'b', cout:'cd', nom:'Vœu d\'inimitié', court:'avantage 1 min', d:'Conduit divin. Une créature à 3 m : avantage à tes attaques contre elle pendant 1 minute.' },
     { id:'marque', col:'b', cout:'sort', conc:1, nom:'Marque du chasseur', court:'+1d6 · 27 m', d:'Sort de serment, niveau 1, 27 m, concentration. +1d6 dégâts à chaque attaque d\'arme qui touche la cible. Si elle tombe à 0 PV, une action bonus déplace la marque.' },
-    { id:'courroux', col:'b', cout:'sort', conc:1, nom:'Châtiment courroucé', court:'+1d6 psy · DD 13', d:'Sort préparé, niveau 1, concentration (1 min). Ta prochaine touche au corps à corps fait +1d6 psychiques, et la cible fait une sauvegarde de Sagesse DD 13 ou elle est effrayée. Pour s\'en libérer, elle utilise son action pour un test de Sagesse DD 13.' },
-    { id:'bouclierfoi', col:'b', cout:'sort', conc:1, nom:'Bouclier de la foi', court:'+2 CA · 18 m', d:'Sort préparé, niveau 1, 18 m, concentration (10 min). Toi ou un allié gagnez +2 à la CA.' },
+    { id:'courroux', prep:1, col:'b', cout:'sort', conc:1, nom:'Châtiment courroucé', court:'+1d6 psy · DD 13', d:'Sort préparé, niveau 1, concentration (1 min). Ta prochaine touche au corps à corps fait +1d6 psychiques, et la cible fait une sauvegarde de Sagesse DD 13 ou elle est effrayée. Pour s\'en libérer, elle utilise son action pour un test de Sagesse DD 13.' },
+    { id:'bouclierfoi', prep:1, col:'b', cout:'sort', conc:1, nom:'Bouclier de la foi', court:'+2 CA · 18 m', d:'Sort préparé, niveau 1, 18 m, concentration (10 min). Toi ou un allié gagnez +2 à la CA.' },
+    { id:'duel', prep:1, col:'b', cout:'sort', conc:1, nom:'Duel forcé', court:'DD 13 · 9 m', d:'Sort, niveau 1, 9 m, concentration (1 min). Sauvegarde de Sagesse DD 13, sinon la cible est désavantagée contre les autres que toi et doit rester à moins de 9 m de toi.' },
+    { id:'faveur', prep:1, col:'b', cout:'sort', conc:1, nom:'Faveur divine', court:'+1d4 radiant', d:'Sort, niveau 1, concentration (1 min). Tes attaques d\'arme font +1d4 radiants.' },
+    { id:'brulant', prep:1, col:'b', cout:'sort', conc:1, nom:'Châtiment brûlant', court:'+1d6 feu · DD 13', d:'Sort, niveau 1, concentration (1 min). Ta prochaine touche fait +1d6 feu et la cible s\'embrase : 1d6 feu au début de ses tours, jusqu\'à réussir une sauvegarde de Constitution DD 13.' },
+    { id:'tonnerre', prep:1, col:'b', cout:'sort', conc:1, nom:'Châtiment tonitruant', court:'+2d6 tonnerre', d:'Sort, niveau 1, concentration (1 min). Ta prochaine touche fait +2d6 tonnerre. Sauvegarde de Force DD 13, sinon la cible est repoussée de 3 m et tombe à terre.' },
     { id:'raven', col:'b', cout:'rq', nom:'Bénédiction de la Raven Queen', court:'téléport 9 m', d:'Shadar-kai. Téléportation de 9 m vers un espace que tu vois, puis résistance à tous les dégâts jusqu\'au début de ton prochain tour.' },
     { id:'opportunite', col:'r', atk:1, nom:'Attaque d\'opportunité', court:'+7 · 1d8+5', d:'Quand un ennemi quitte ton allonge : un coup d\'épée.' },
   ]},
@@ -576,8 +585,9 @@ function monTour(){
     <div class="reste">${T.res.map(([k,n,m])=>`<div><small>${n}</small>${pips(k,m)}</div>`).join('')}</div>
     ${etats.map(([c,t,f,x])=>`<div class="line" style="padding-top:0"><span class="chip ${c}" style="white-space:normal;min-width:0">${t}</span><button class="mini" style="min-height:30px;font:12px var(--sans);flex-shrink:0;padding:0 10px" onclick="${f}">Arrêter</button></div>${x?`<p class="small" style="margin:6px 0 10px">${x}</p>`:''}`).join('')}
     <div class="eco3">${COLS.map(([c,n])=>`<div class="col ${e[c]?'pris':''}"><p class="kicker">${n}</p><p class="etat">${e[c]?'✓ Utilisée':'◆ Disponible'}</p>
-      ${T.opts.filter(o=>o.col===c).map(o=>{ const b=bloque(o); return `<button class="opt ${b?'off':''} ${o.cout?'c-'+o.cout:''} ${o.libre?'libre':''}" onclick="voirOpt('${o.id}')"><b>${o.nom}</b><span>${courtAff(o)}</span><i>${b?'✕ '+b.split('|')[1]:coutTxt(o)}</i></button>`; }).join('')}
+      ${T.opts.filter(o=>o.col===c && (!o.prep || (S.prep[id]||[]).includes(o.id))).map(o=>{ const b=bloque(o); return `<button class="opt ${b?'off':''} ${o.cout?'c-'+o.cout:''} ${o.libre?'libre':''}" onclick="voirOpt('${o.id}')"><b>${o.nom}</b><span>${courtAff(o)}</span><i>${b?'✕ '+b.split('|')[1]:coutTxt(o)}</i></button>`; }).join('')}
     </div>`).join('')}</div>
+    ${T.prepMax?`<button style="width:100%;margin-top:10px" onclick="prepSorts()">📖 Sorts préparés : ${(S.prep[id]||[]).length}/${T.prepMax} · changer</button>`:''}
     <p class="small" style="margin-top:8px">Aussi en action : Esquiver · Se désengager · Se cacher · Aider${id==='korgan'?'':' · Foncer'}. Mouvement : ${p.vit}.</p>
     <button class="or" style="width:100%;margin-top:10px" onclick="S.eco.${id}=eco0();S.chaufTour=false;S.round++;draw()">Fin de mon tour</button>
     <div class="g3" style="grid-template-columns:1fr 1fr;margin-top:6px"><button onclick="repos('court')">Repos court</button><button onclick="repos('long')">Repos long</button></div></div>
@@ -632,7 +642,25 @@ function repos(type){
   for(const [k,n,m,quand] of TOUR[id].res) if(type==='long' || quand==='court'){ if(r[k]<m) rendus.push(n); r[k]=m; }
   if(type==='long'){ const p=PJ[id]; if(p.pv<p.max) rendus.push('PV'); p.pv=p.max; const e=COMBAT.find(c=>c.id===id); if(e) e.pv=e.max; S.conc[id]=null; }
   S.eco[id]=eco0(); draw();
+  if(type==='long' && TOUR[id].prepMax) setTimeout(prepSorts, 1800);
   resultat({nom:type==='long'?'Repos long':'Repos court', quoi:PJ[id].nom.split(' ')[0], texte: rendus.length ? 'Récupéré : '+rendus.join(', ') : 'Rien à récupérer', tot:'✓'});
+}
+/* Sorts préparés : le paladin les choisit après chaque repos long (CHA + moitié du niveau) */
+function prepSorts(){
+  const id=S.perso, T=TOUR[id], L=S.prep[id]||(S.prep[id]=[]), n=L.length;
+  const ligne=o=>{ const on=L.includes(o.id), off=!on&&n>=T.prepMax;
+    return `<label class="prep ${off?'off':''}"><input type="checkbox" ${on?'checked':''} ${off?'disabled':''} onchange="basculerPrep('${o.id}')"><span><b>${o.nom}</b><small>${COLS.find(x=>x[0]===o.col)[1]} · ${o.court}${o.conc?' · concentration':''}</small></span></label>`; };
+  ouvrir(`<header><h2>Sorts préparés</h2><button onclick="closeSheet();draw()">✕</button></header>
+    <p class="kicker">${n} / ${T.prepMax} choisis · à refaire après chaque repos long</p>
+    <p class="small" style="margin:6px 0 12px">Fléau et Marque du chasseur (sorts de serment) sont toujours préparés et ne comptent pas.</p>
+    ${T.opts.filter(o=>o.prep).map(ligne).join('')}
+    <button class="or" style="width:100%;margin-top:12px" onclick="closeSheet();draw()">C'est bon</button>`);
+}
+function basculerPrep(oid){
+  const L=S.prep[S.perso], i=L.indexOf(oid);
+  if(i>=0){ L.splice(i,1); if(S.conc[S.perso]===oid) S.conc[S.perso]=null; }
+  else if(L.length<TOUR[S.perso].prepMax) L.push(oid);
+  prepSorts();
 }
 function voirOpt(id){
   const o=opt(id), b=bloque(o), s=slotLibre(), c=S.conc[S.perso];
@@ -700,7 +728,7 @@ function accueil(){
     <div class="camp" style="min-height:120px" onclick="choisirRole('mj')"><div class="in"><span class="role mj">MJ</span><h2 style="margin-top:6px">Ma campagne de test</h2><p class="small">Ici, c'est toi qui mènes le jeu.</p></div></div>
     <button style="width:100%">+ Créer une campagne</button>
     <div class="note"><b>Idée :</b> le MJ crée la campagne et envoie un lien d'invitation. On peut être joueur ici et MJ ailleurs.</div>
-    <p class="small" style="text-align:center;margin-top:14px">Version de la maquette : 2026-11-04 g</p>
+    <p class="small" style="text-align:center;margin-top:14px">Version de la maquette : 2026-11-04 h</p>
   </div>`;
 }
 
