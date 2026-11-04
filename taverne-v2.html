@@ -609,7 +609,7 @@ const cls = (h,m) => h/m>.5?'ok':h/m>.25?'hurt':'crit';
 const vague = (h,m) => h<=0?'Hors de combat':h/m>.75?'Indemne':h/m>.5?'Égratigné':h/m>.25?'Blessé':'En sang';
 const nomE = e => e.pj ? PJ[e.id].nom.split(' ')[0] : e.nom;
 const rule = () => '<div class="rule"><i>◆</i></div>';
-function role(r){ S.role=r; if(S.ecran==='accueil') S.ecran='camp'; draw(); }
+function choisirRole(r){ S.role=r; if(S.ecran==='accueil') S.ecran='camp'; draw(); }
 function go(t){ S.ong[S.role]=t; draw(); scrollTo(0,0); }
 
 /* ===== Rendu ===== */
@@ -618,7 +618,7 @@ function draw(){
   const vivant = S.ecran==='camp' && S.role==='pj' && S.ong.pj==='fiche' && S.effets[S.perso];
   $('app').className = 'app' + (vivant ? ' '+p.effet : '');
   $('app').innerHTML = `<div class="demo"><b>MAQUETTE V2</b><button class="mini" onclick="S.ecran='accueil';draw()">Accueil</button>
-    <div class="seg"><button class="${S.role==='pj'?'on':''}" onclick="role('pj')">Joueur</button><button class="${S.role==='mj'?'on':''}" onclick="role('mj')">MJ</button></div></div>`
+    <div class="seg"><button class="${S.role==='pj'?'on':''}" onclick="choisirRole('pj')">Joueur</button><button class="${S.role==='mj'?'on':''}" onclick="choisirRole('mj')">MJ</button></div></div>`
     + (S.ecran==='accueil' ? accueil() : S.role==='pj' ? vueJoueur() : vueMJ());
   if(S.ecran!=='accueil' && S.ong[S.role]==='grimoire') grimListe();
 }
@@ -627,15 +627,15 @@ function accueil(){
   const av = ids => `<div class="avatars">${ids.map(i=>`<img src="${PJ[i].img}" alt="${PJ[i].nom}">`).join('')}</div>`;
   return `<div class="crest">${ICO.blason}<h1>La Taverne</h1><p>Le carnet de campagne du groupe</p></div>
   <div class="page">
-    <div class="frame" style="display:grid;gap:8px"><p class="kicker">Connexion</p><input value="alex.demo" aria-label="Pseudo"><input type="password" value="motdepasse" aria-label="Mot de passe"><button class="or" onclick="role('pj')">Entrer dans la Taverne</button></div>
+    <div class="frame" style="display:grid;gap:8px"><p class="kicker">Connexion</p><input value="alex.demo" aria-label="Pseudo"><input type="password" value="motdepasse" aria-label="Mot de passe"><button class="or" onclick="choisirRole('pj')">Entrer dans la Taverne</button></div>
     ${rule()}
     <p class="kicker" style="margin-bottom:10px">Mes campagnes</p>
-    <div class="camp" onclick="S.perso='kaelthar';role('pj')"><img src="${IMG.kaelthar}" alt="" style="object-position:center 12%"><div class="in"><span class="role pj">Joueur</span><h2 style="margin-top:6px">L'Auberge de l'Ours Rouge</h2><p class="small">Horreur · 3 aventuriers · prochaine séance vendredi</p>${av(['kaelthar','zephira','galinndan'])}</div></div>
-    <div class="camp" onclick="S.perso='korgan';role('pj')"><img src="${IMG.bateau}" alt="" style="object-position:center 55%"><div class="in"><span class="role pj">Joueur</span><h2 style="margin-top:6px">L'Ombre de la Reine Dragon</h2><p class="small">Dragonlance · MJ : Dominique · 3 aventuriers</p>${av(['korgan','ludo'])}</div></div>
-    <div class="camp" style="min-height:120px" onclick="role('mj')"><div class="in"><span class="role mj">MJ</span><h2 style="margin-top:6px">Ma campagne de test</h2><p class="small">Ici, c'est toi qui mènes le jeu.</p></div></div>
+    <div class="camp" onclick="S.perso='kaelthar';choisirRole('pj')"><img src="${IMG.kaelthar}" alt="" style="object-position:center 12%"><div class="in"><span class="role pj">Joueur</span><h2 style="margin-top:6px">L'Auberge de l'Ours Rouge</h2><p class="small">Horreur · 3 aventuriers · prochaine séance vendredi</p>${av(['kaelthar','zephira','galinndan'])}</div></div>
+    <div class="camp" onclick="S.perso='korgan';choisirRole('pj')"><img src="${IMG.bateau}" alt="" style="object-position:center 55%"><div class="in"><span class="role pj">Joueur</span><h2 style="margin-top:6px">L'Ombre de la Reine Dragon</h2><p class="small">Dragonlance · MJ : Dominique · 3 aventuriers</p>${av(['korgan','ludo'])}</div></div>
+    <div class="camp" style="min-height:120px" onclick="choisirRole('mj')"><div class="in"><span class="role mj">MJ</span><h2 style="margin-top:6px">Ma campagne de test</h2><p class="small">Ici, c'est toi qui mènes le jeu.</p></div></div>
     <button style="width:100%">+ Créer une campagne</button>
     <div class="note"><b>Idée :</b> le MJ crée la campagne et envoie un lien d'invitation. On peut être joueur ici et MJ ailleurs.</div>
-    <p class="small" style="text-align:center;margin-top:14px">Version de la maquette : 2026-11-04 a</p>
+    <p class="small" style="text-align:center;margin-top:14px">Version de la maquette : 2026-11-04 b</p>
   </div>`;
 }
 
