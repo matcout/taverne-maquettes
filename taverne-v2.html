@@ -98,6 +98,12 @@ input{font:inherit;color:var(--ink);background:#0f0c09;border:1px solid var(--li
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0}
 .stats div{text-align:center;border:1px solid var(--line);padding:8px 2px;background:#120e0b}
 .stats b{display:block;font-size:22px;color:var(--ink);font-variant-numeric:tabular-nums}
+.stats .det{display:block;font:600 9px/1.2 var(--sans);font-style:normal;color:var(--gold);margin-top:2px}
+.cap{padding:9px 0;border-bottom:1px solid var(--line)}.cap:last-child{border-bottom:0}
+.cap h3{font-size:17px;color:var(--gold-hi);display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.cap h3 .chip{font-variant:normal;letter-spacing:0}
+.cap p{font-size:15px;margin-top:2px}
+.cap .eff{font:600 11px var(--sans);color:var(--life);margin-top:3px}
 .stats small{font:10px var(--sans);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 .abil{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
 .abil div{text-align:center;border:1px solid var(--line);padding:6px 0;background:#120e0b}
@@ -442,7 +448,7 @@ const PJ = {
     actions:[['Épée longue « Éveil de Kira »','1d20 +6','1d8 +4'],['Châtiment divin (après une touche)','—','+2d8 radiant']],
     bonus:'Vœu d\'inimitié · Bénédiction de la Raven Queen',
     effetTxt:'Avantage aux attaques contre la cible du Vœu pendant 1 minute.' },
-  ludo:{ nom:'Ludo Tire-Gousset', joueur:'Charlie', img:IMG.ludo, pos:'center 15%', camp:'dl', desc:'Kender · Barde 3 · Collège du Savoir', pv:15, max:21, ca:14, init:'+3', vit:'9 m', pp:12,
+  ludo:{ nom:'Ludo Tire-Gousset', joueur:'Charlie', img:IMG.ludo, pos:'center 15%', camp:'dl', desc:'Kender · Barde 3 · Collège du Savoir', pv:15, max:21, ca:14, init:'+4', initDetail:'DEX +3 · Touche-à-tout +1', vit:'9 m', pp:12,
     ab:[14,16,15,14,14,19], eco:true },
   zephira:{ nom:'Zéphira Amastacia', joueur:'Dominique', img:IMG.zephira, pos:'center 14%', camp:'or', desc:'Fey\'ri · Âme divine 2 / Succube 2', pv:22, max:36, ca:13, pp:9 },
   galinndan:{ nom:'Galinndan Siannadel', joueur:'Charlie', img:IMG.galinndan, pos:'center 16%', camp:'or', desc:'Shadar-kai · Lame psychique 3 / Rôdeur 1', pv:33, max:33, ca:18, pp:15 },
@@ -570,6 +576,49 @@ function monTour(){
     <div class="g3" style="grid-template-columns:1fr 1fr;margin-top:6px"><button onclick="repos('court')">Repos court</button><button onclick="repos('long')">Repos long</button></div></div>
     <div class="note">${T.note}</div>`;
 }
+/* ===== Capacités et dons (demande de Xavier) : textes résumés avec nos mots ===== */
+// src : d'où vient la capacité · eff : ce que l'app compte déjà dans la fiche
+const CAPS = {
+  ludo:[
+    {nom:'Touche-à-tout', src:'Barde 2', txt:'Ajoute la moitié de ton bonus de maîtrise (+1) à tous les tests de caractéristique où tu n\'as pas la maîtrise. L\'initiative est un test de Dextérité : elle compte aussi.', eff:'Compté : initiative +1, tests sans maîtrise +1'},
+    {nom:'Chant reposant', src:'Barde 2', txt:'Pendant un repos court, si toi ou des alliés qui t\'entendent dépensez des dés de vie, chacun récupère 1d6 PV de plus.'},
+    {nom:'Inspiration bardique (d6)', src:'Barde 1', txt:'Action bonus : un allié gagne un d6 à ajouter à une attaque, un test ou une sauvegarde. 4 fois par repos long (ton modificateur de Charisme).', eff:'Dans « Mon tour »'},
+    {nom:'Expertise', src:'Barde 3', txt:'Double ton bonus de maîtrise pour deux compétences que tu maîtrises.', eff:'À choisir : quelles compétences ?'},
+    {nom:'Maîtrises supplémentaires', src:'Collège du Savoir 3', txt:'Trois compétences de plus, au choix.', eff:'À choisir'},
+    {nom:'Mots cinglants', src:'Collège du Savoir 3', txt:'Réaction : dépense une Inspiration pour retirer le dé au jet d\'attaque, au test ou aux dégâts d\'une créature à 18 m.', eff:'Dans « Mon tour »'},
+    {nom:'Raillerie', src:'Kender', txt:'Action bonus : une créature qui t\'entend à 18 m fait une sauvegarde de Sagesse, sinon elle est désavantagée contre les autres que toi. 2 fois par repos long.', eff:'Dans « Mon tour »'},
+    {nom:'Sans peur', src:'Kender', txt:'Avantage aux sauvegardes contre l\'état effrayé. Une fois par repos long, un échec contre la peur peut devenir une réussite.'},
+    {nom:'Aptitude kender', src:'Kender', txt:'Une compétence de plus parmi Perspicacité, Investigation, Escamotage, Discrétion ou Survie.', eff:'À choisir'},
+  ],
+  korgan:[
+    {nom:'Défense sans armure', src:'Barbare 1', txt:'Sans armure, ta CA = 10 + modificateur de Dextérité + modificateur de Constitution.', eff:'Compté : CA 16 (10 + 3 + 3)'},
+    {nom:'Rage', src:'Barbare 1', txt:'Action bonus, 3 fois par repos long : +2 aux dégâts de Force, résistance aux dégâts contondants, perforants et tranchants, avantage en Force.', eff:'Dans « Mon tour »'},
+    {nom:'Attaque téméraire', src:'Barbare 2', txt:'À ta première attaque du tour : avantage à tes attaques de Force, mais les attaques contre toi ont l\'avantage jusqu\'à ton prochain tour.'},
+    {nom:'Sens du danger', src:'Barbare 2', txt:'Avantage aux sauvegardes de Dextérité contre les effets que tu vois (pièges, sorts…), si tu n\'es pas aveuglé, assourdi ou neutralisé.'},
+    {nom:'Fureur divine', src:'Voie du Zélote 3', txt:'En rage, la première créature que tu touches à chaque tour subit 1d6 + 1 dégâts radiants en plus.', eff:'Rappelé quand la Rage est active'},
+    {nom:'Guerrier des dieux', src:'Voie du Zélote 3', txt:'Un sort qui te ramène à la vie n\'a pas besoin de composantes matérielles.'},
+    {nom:'Cornes, Charge cornue, Cornes martelantes', src:'Minotaure', txt:'Attaque naturelle avec tes cornes ; charge après avoir foncé ; repousser une cible touchée.', eff:'Dans « Mon tour »'},
+    {nom:'Mémoire du labyrinthe', src:'Minotaure', txt:'Tu sais toujours où est le nord, et tu as l\'avantage pour t\'orienter ou pister (Sagesse, Survie).'},
+  ],
+  kaelthar:[
+    {nom:'Style de combat : Défense', src:'Paladin 2', txt:'+1 à la CA quand tu portes une armure.', eff:'Compté : CA 19'},
+    {nom:'Sens divin', src:'Paladin 1', txt:'Action : jusqu\'à ton prochain tour, tu repères céleste, fiélon et mort-vivant à 18 m (sauf derrière un abri total). 1 + modificateur de Charisme fois par repos long.'},
+    {nom:'Imposition des mains', src:'Paladin 1', txt:'Réserve de 20 PV par repos long, à donner par le toucher. 5 PV guérissent une maladie ou un poison.', eff:'Dans « Mon tour »'},
+    {nom:'Châtiment divin', src:'Paladin 2', txt:'Après une touche au corps à corps : un emplacement pour +2d8 radiants (+1d8 contre mort-vivant ou fiélon).', eff:'Dans « Mon tour »'},
+    {nom:'Santé divine', src:'Paladin 3', txt:'Tu es immunisé contre les maladies.'},
+    {nom:'Conduit divin : Vœu d\'inimitié, Abjurer l\'ennemi', src:'Serment de Vengeance 3', txt:'Une fois par repos court : avantage contre une cible, ou effrayer et immobiliser un ennemi.', eff:'Dans « Mon tour »'},
+    {nom:'Amélioration de caractéristique ou don', src:'Paladin 4', txt:'Choisi au niveau 4 : +2 à une caractéristique, +1 à deux, ou un don.', eff:'À préciser : qu\'as-tu pris ?'},
+    {nom:'Bénédiction de la Raven Queen', src:'Shadar-kai', txt:'Action bonus : téléportation de 9 m, puis résistance à tous les dégâts jusqu\'à ton prochain tour.', eff:'Dans « Mon tour »'},
+    {nom:'Résistance nécrotique, vision dans le noir, transe', src:'Shadar-kai', txt:'Résistance aux dégâts nécrotiques. Tu vois dans le noir à 18 m. 4 h de transe valent un repos long.'},
+    {nom:'Éveil de Kira (arme d\'alerte)', src:'Objet', txt:'Tes alliés à 9 m ont l\'avantage à l\'initiative.'},
+  ],
+};
+function capacites(){
+  const L=CAPS[S.perso]||[];
+  return `<div class="frame">${L.map(c=>`<div class="cap"><h3>${c.nom}<span class="chip">${c.src}</span></h3><p>${c.txt}</p>${c.eff?`<p class="eff">${c.eff.startsWith('À')?'✎ ':'✓ '}${c.eff}</p>`:''}</div>`).join('')}</div>
+    <button style="width:100%">+ Ajouter un don ou une capacité</button>
+    <div class="note"><b>Idée de Charlie :</b> les capacités et dons qui changent les chiffres sont comptés directement dans la fiche, par exemple Touche-à-tout dans l'initiative. Les lignes « ✎ À choisir » restent à remplir par le joueur.</div>`;
+}
 // Repos : le court rend ce qui revient au repos court, le long rend tout (et les PV)
 function repos(type){
   const id=S.perso, r=R(), rendus=[];
@@ -644,7 +693,7 @@ function accueil(){
     <div class="camp" style="min-height:120px" onclick="choisirRole('mj')"><div class="in"><span class="role mj">MJ</span><h2 style="margin-top:6px">Ma campagne de test</h2><p class="small">Ici, c'est toi qui mènes le jeu.</p></div></div>
     <button style="width:100%">+ Créer une campagne</button>
     <div class="note"><b>Idée :</b> le MJ crée la campagne et envoie un lien d'invitation. On peut être joueur ici et MJ ailleurs.</div>
-    <p class="small" style="text-align:center;margin-top:14px">Version de la maquette : 2026-11-04 c</p>
+    <p class="small" style="text-align:center;margin-top:14px">Version de la maquette : 2026-11-04 d</p>
   </div>`;
 }
 
@@ -658,11 +707,11 @@ function vueJoueur(){
 
 function fiche(){
   const p=PJ[S.perso], on=S.effets[S.perso];
-  const tabs=[['tour','Mon tour'],['carac','Caractéristiques'],['sac','Sac'],['hist','Histoire']];
+  const tabs=[['tour','Mon tour'],['caps','Capacités'],['carac','Caractéristiques'],['sac','Sac'],['hist','Histoire']];
   let c='';
   if(S.sous==='tour') c=`
     <div class="frame"><div class="hp"><button onclick="ouvrirPV('${S.perso}')" aria-label="Retirer des PV">−</button><div class="mid"><strong>${p.pv}</strong> <span class="muted">/ ${p.max} PV</span><div class="bar" style="margin:8px 0 4px"><i class="${cls(p.pv,p.max)}" style="width:${p.pv/p.max*100}%"></i></div><span class="small">PV temporaires : 0</span></div><button onclick="ouvrirPV('${S.perso}')" aria-label="Ajouter des PV">+</button></div></div>
-    <div class="stats"><div><b>${p.ca}</b><small>CA</small></div><div><b>${p.init}</b><small>Initiative</small></div><div><b>${p.vit}</b><small>Vitesse</small></div><div><b>${p.pp}</b><small>Perc. passive</small></div></div>
+    <div class="stats"><div><b>${p.ca}</b><small>CA</small></div><div><b>${p.init}</b><small>Initiative</small>${p.initDetail?`<i class="det">${p.initDetail}</i>`:''}</div><div><b>${p.vit}</b><small>Vitesse</small></div><div><b>${p.pp}</b><small>Perc. passive</small></div></div>
     ${TOUR[S.perso] ? monTour() : `<div class="effets"><button class="${p.effet} ${on?'on':''}" onclick="basculer()">${on?'✦ '+p.effetNom+' en cours':'+ '+p.effetNom}</button><button>+ Bonus / malus</button></div>
     <div class="frame"><div class="round" style="margin:0"><h3 style="font-size:20px;color:var(--gold-hi)">Mon tour</h3><span class="small">Round ${S.round}</span></div>
       <p class="kicker" style="margin-top:10px">Action</p>
@@ -671,6 +720,7 @@ function fiche(){
       ${on?`<p style="margin-top:8px;color:${p.effet==='rage'?'#f0a49a':'#cdbaf5'}">${p.effetTxt}</p>`:''}
     </div>
     <div class="note"><b>Carte vivante :</b> touche « ${p.effetNom} » : le portrait et le cadre changent de couleur. Les dés restent réels, l'app montre quoi lancer.</div>`}`;
+  if(S.sous==='caps') c=capacites();
   if(S.sous==='carac') c=`
     <div class="abil">${['FOR','DEX','CON','INT','SAG','CHA'].map((n,i)=>`<div><small>${n}</small><b>${sg(mod(p.ab[i]))}</b><i>${p.ab[i]}</i></div>`).join('')}</div>
     <div class="frame" style="margin-top:12px"><p class="kicker">Sauvegardes maîtrisées</p>${S.perso==='korgan'?'<div class="line">Force<span>+6</span></div><div class="line">Constitution<span>+5</span></div>':S.perso==='ludo'?'<div class="line">Dextérité<span>+5</span></div><div class="line">Charisme<span>+6</span></div>':'<div class="line">Sagesse<span>+3</span></div><div class="line">Charisme<span>+5</span></div>'}</div>`;
