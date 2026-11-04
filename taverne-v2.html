@@ -281,6 +281,18 @@ input{font:inherit;color:var(--ink);background:#0f0c09;border:1px solid var(--li
 </head>
 <body>
 <div class="app" id="app"><div class="page" style="padding-top:40px;text-align:center"><h1 style="color:#d8b26a">La Taverne</h1><p class="muted" style="margin-top:10px">Ouvre ce fichier dans Chrome ou Safari pour voir la maquette.</p></div></div>
+<script>
+/* Diagnostic : si une erreur arrive (même avant le reste du code), on l'affiche en rouge pour pouvoir la capturer. */
+window.ERREURS = [];
+function montrerErreur(m){
+  window.ERREURS.push(m);
+  var b = document.getElementById('erreurJS');
+  if(!b){ b = document.createElement('div'); b.id = 'erreurJS'; b.setAttribute('style','position:fixed;left:8px;right:8px;top:8px;z-index:99;background:#7a1018;color:#fff;font:13px/1.4 system-ui,sans-serif;padding:10px 12px;border-radius:6px;box-shadow:0 6px 20px #000'); document.body.appendChild(b); }
+  b.textContent = 'Erreur (fais une capture pour l\'agent) : ' + window.ERREURS.join(' | ') + ' · ' + navigator.userAgent;
+}
+window.addEventListener('error', function(e){ montrerErreur((e.message || 'erreur') + ' (ligne ' + (e.lineno || '?') + ')'); });
+window.addEventListener('unhandledrejection', function(e){ montrerErreur(String(e.reason)); });
+</script>
 <div class="veil" id="veil" onclick="closeSheet()"></div>
 <div class="sheet" id="sheet"></div>
 <canvas id="desCanvas" aria-hidden="true"></canvas>
@@ -623,6 +635,7 @@ function accueil(){
     <div class="camp" style="min-height:120px" onclick="role('mj')"><div class="in"><span class="role mj">MJ</span><h2 style="margin-top:6px">Ma campagne de test</h2><p class="small">Ici, c'est toi qui mènes le jeu.</p></div></div>
     <button style="width:100%">+ Créer une campagne</button>
     <div class="note"><b>Idée :</b> le MJ crée la campagne et envoie un lien d'invitation. On peut être joueur ici et MJ ailleurs.</div>
+    <p class="small" style="text-align:center;margin-top:14px">Version de la maquette : 2026-11-04 a</p>
   </div>`;
 }
 
