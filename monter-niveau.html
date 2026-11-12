@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monter de niveau — maquette</title>
+<style>
+  :root {
+    --bg: #0d0b09; --surface: #16120e; --surface-2: #1d1813; --line: #3a2f22;
+    --ink: #ebe2d0; --muted: #a39580; --faint: #76695a;
+    --gold: #d8b26a; --gold-hi: #f4d68f; --gold-lo: #8a6d3b;
+    --life: #6fae6a; --arcane: #a58bdc; --blood: #c0392b;
+    --serif: 'Cormorant Garamond', 'EB Garamond', Garamond, 'Palatino Linotype', Georgia, serif;
+    --sans: system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --touch: 44px;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.45 var(--sans); }
+  .wrap { max-width: 430px; margin: 0 auto; padding: 16px 16px 40px; }
+  .intro h1 { font: 600 24px/1.2 var(--serif); color: var(--gold-hi); margin: 0 0 4px; }
+  .intro p { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
+  .switch { display: flex; gap: 8px; margin-bottom: 14px; }
+  .switch button { flex: 1; min-height: var(--touch); border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 600 14px var(--sans); cursor: pointer; }
+  .switch button[aria-pressed="true"] { border-color: var(--gold); color: var(--gold-hi); background: #2a2116; }
+  .view { display: none; } .view.on { display: block; }
+  h3 { font: 700 26px/1.1 var(--serif); color: var(--gold-hi); margin: 4px 0 6px; }
+  .hint { color: var(--muted); font-size: 13px; margin: 0 0 12px; }
+  h4 { display: flex; align-items: center; gap: 10px; font: 600 12px/1 var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--gold); margin: 18px 0 10px; }
+  h4::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--gold-lo), transparent); }
+  .card { background: linear-gradient(180deg, var(--surface-2), var(--surface)); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; }
+  .btn { width: 100%; min-height: 52px; border-radius: 12px; border: 0; cursor: pointer; font: 700 16px var(--sans);
+    background: linear-gradient(180deg, #e7c27a, #b98f45); color: #1a1208; }
+  .btn.ghost { background: transparent; border: 1px solid var(--line); color: var(--ink); font-weight: 600; }
+  .btn:disabled { opacity: .45; cursor: default; }
+  .row2 { display: flex; gap: 8px; margin-top: 12px; } .row2 > * { flex: 1; }
+  button:focus-visible { outline: 2px solid var(--gold-hi); outline-offset: 2px; }
+
+  /* MJ */
+  .pc { display: flex; align-items: center; gap: 12px; min-height: 60px; cursor: pointer; }
+  .pc input { width: 24px; height: 24px; accent-color: var(--gold); flex: none; }
+  .pc .n { flex: 1; } .pc b { display: block; font: 600 18px/1.2 var(--serif); } .pc small { color: var(--muted); }
+  .lvl { font: 700 18px var(--serif); color: var(--gold-hi); }
+  .stepper { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .stepper button { width: var(--touch); height: var(--touch); border-radius: 10px; border: 1px solid var(--gold-lo); background: #120f0b; color: var(--gold); font-size: 20px; cursor: pointer; }
+  .stepper b { font: 700 28px var(--serif); color: var(--gold-hi); }
+  .sent { display: none; margin-top: 10px; border: 1px solid #6fae6a66; border-radius: 12px; padding: 10px 14px; color: #bfe3b8; background: #142012; }
+
+  /* Joueur */
+  .banner { border: 1px solid var(--gold); border-radius: 14px; padding: 14px; margin-bottom: 14px;
+    background: radial-gradient(120% 140% at 0 0, #3a2c14 0%, var(--surface) 65%); }
+  .banner b { font: 700 22px var(--serif); color: var(--gold-hi); display: block; }
+  .banner small { color: var(--muted); }
+  .dots { display: flex; gap: 6px; margin: 4px 0 14px; }
+  .dots i { flex: 1; height: 4px; border-radius: 99px; background: #2a2219; }
+  .dots i.on { background: var(--gold); }
+  .step { display: none; } .step.on { display: block; }
+  .big { display: flex; align-items: baseline; gap: 10px; }
+  .big b { font: 700 40px var(--serif); color: var(--gold-hi); }
+  .big span { color: var(--muted); }
+  .calc { color: var(--muted); font-size: 13px; margin-top: 6px; }
+  .feat { display: flex; gap: 10px; align-items: flex-start; }
+  .feat .ic { width: 28px; height: 28px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 14px; border: 1px solid var(--gold-lo); color: var(--gold); }
+  .feat b { font: 600 17px/1.2 var(--serif); display: block; } .feat small { color: var(--muted); }
+  .src { display: inline-block; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; border-radius: 99px; padding: 2px 7px; margin-left: 6px; vertical-align: middle; }
+  .src.srd { color: var(--life); border: 1px solid #6fae6a66; } .src.book { color: var(--arcane); border: 1px solid #a58bdc66; }
+  .choice { display: flex; gap: 8px; margin-bottom: 10px; }
+  .choice button { flex: 1; min-height: var(--touch); border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); font: 600 14px var(--sans); cursor: pointer; }
+  .choice button[aria-pressed="true"] { color: var(--gold-hi); border-color: var(--gold); background: #2a2116; }
+  .abil { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .abil button { min-height: 64px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; font: 600 13px var(--sans); }
+  .abil button b { display: block; font: 700 20px var(--serif); color: var(--gold-hi); }
+  .abil button.up { border-color: var(--gold); background: #2a2116; }
+  .abil button.up b::after { content: attr(data-plus); color: var(--life); font-size: 14px; margin-left: 4px; }
+  .abil button:disabled { opacity: .4; }
+  label.f { display: block; font-size: 13px; color: var(--muted); margin: 10px 0 4px; }
+  input.t, textarea.t { width: 100%; border-radius: 10px; border: 1px solid #8c7954; background: #0a0807; color: var(--ink); padding: 10px 12px; font: 15px var(--sans); }
+  textarea.t { min-height: 80px; resize: vertical; }
+  .sum .line { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-top: 1px solid #3a2f2266; }
+  .sum .line:first-child { border-top: 0; }
+  .sum .line span { color: var(--muted); } .sum .line b { text-align: right; }
+  .up-txt { color: var(--life); }
+  .done { display: none; text-align: center; padding: 18px 10px; }
+  .done b { font: 700 26px var(--serif); color: var(--gold-hi); display: block; }
+  .switch { flex-wrap: wrap; } .switch button { flex: 1 1 40%; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .grid2 .k { display: block; color: var(--muted); font-size: 12px; } .grid2 .v { display: block; font: 700 24px var(--serif); color: var(--gold-hi); margin: 2px 0; }
+  .seg { display: flex; flex-wrap: wrap; gap: 6px; }
+  .seg button { flex: 1 1 30%; min-height: var(--touch); border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 600 13px var(--sans); cursor: pointer; }
+  .seg button[aria-pressed="true"] { color: var(--gold-hi); border-color: var(--gold); background: #2a2116; }
+  .sticky { position: sticky; bottom: 0; padding: 12px 0; background: linear-gradient(transparent, var(--bg) 30%); margin-top: 8px; }
+  .hero-mini { border-radius: 14px; padding: 16px; margin-bottom: 12px; background: radial-gradient(120% 90% at 70% 10%, #3b4a63 0%, #1b1f2b 55%, #0d0b09 100%); }
+  .hero-mini b { display: block; font: 700 26px var(--serif); } .hero-mini small { color: #d6d2dc; }
+  .hero-mini .lvl { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--gold); color: #1a1208; font: 700 15px var(--sans); }
+  .todo-head { margin-bottom: 10px; } .todo-head b { font: 600 17px var(--serif); }
+  .bar { height: 6px; border-radius: 99px; background: #2a2219; overflow: hidden; margin-top: 6px; } .bar i { display: block; height: 100%; background: var(--life); transition: width .3s; }
+  .todo { display: block; } .todo.done-item, .todo summary { display: flex; gap: 12px; align-items: flex-start; }
+  .todo summary { list-style: none; cursor: pointer; } .todo summary::-webkit-details-marker { display: none; }
+  .todo b { display: block; font: 600 17px/1.2 var(--serif); } .todo small { color: var(--muted); }
+  .chk { width: 26px; height: 26px; border-radius: 50%; flex: none; border: 2px solid var(--gold-lo); display: grid; place-items: center; color: #1a1208; font-weight: 700; }
+  .done-item .chk, .todo.ok .chk { background: var(--life); border-color: var(--life); }
+  .todo.ok .chk::after { content: "✓"; }
+  .todo.ok b { color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="intro">
+    <h1>Monter de niveau — maquette</h1>
+    <p>Le MJ envoie la montée de niveau, puis le joueur la fait : 3 façons possibles (A, B, C). Exemple : Korgan passe au niveau 4. Tout marche, rien n'est enregistré.</p>
+  </div>
+  <div class="switch" role="group" aria-label="Choisir l'écran">
+    <button aria-pressed="true" data-v="mj">MJ</button>
+    <button aria-pressed="false" data-v="joueur">A · Étapes</button>
+    <button aria-pressed="false" data-v="page">B · Une page</button>
+    <button aria-pressed="false" data-v="liste">C · À cocher</button>
+  </div>
+  <p class="hint" id="vdesc"></p>
+
+  <!-- ===== MJ ===== -->
+  <section class="view on" id="mj">
+    <h3>Monter de niveau</h3>
+    <p class="hint">Groupe › Gérer la campagne. Choisis qui monte et à quel niveau.</p>
+    <h4>Personnages</h4>
+    <label class="card pc"><input type="checkbox" checked data-pc><span class="n"><b>Korgan de-Orilg</b><small>Barbare · Mathieu</small></span><span class="lvl">Niv. 3</span></label>
+    <label class="card pc"><input type="checkbox" checked data-pc><span class="n"><b>Ludo Tire-Gousset</b><small>Barde · Xavier</small></span><span class="lvl">Niv. 3</span></label>
+    <h4>Nouveau niveau</h4>
+    <div class="card stepper"><button aria-label="Moins" id="lvMinus">−</button><b id="lv">4</b><button aria-label="Plus" id="lvPlus">+</button></div>
+    <button class="btn" id="send" style="margin-top:12px">Envoyer la montée de niveau</button>
+    <div class="sent" id="sent" role="status"></div>
+    <p class="hint" style="margin-top:12px">Les joueurs voient un bandeau sur leur fiche. Tant qu'ils n'ont pas fini, leur perso reste au niveau actuel.</p>
+  </section>
+
+  <!-- ===== Joueur ===== -->
+  <section class="view" id="joueur">
+    <div class="banner"><b>Korgan monte au niveau 4 !</b><small>Envoyé par le MJ · 4 étapes, 2 minutes</small></div>
+    <div class="dots" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i></div>
+
+    <div class="step on" data-s="0">
+      <h3>1 · Points de vie</h3>
+      <p class="hint">Règle de la table : la moyenne fixe, pas de jet.</p>
+      <div class="card"><div class="big"><b>+12</b><span>PV</span></div>
+        <div class="calc">7 (moyenne du d12) + 3 (CON) + 2 (Robuste)</div></div>
+      <div class="card"><div class="big"><b>41 → 53</b><span>PV max</span></div><div class="calc">Dés de vie : 3d12 → 4d12</div></div>
+    </div>
+
+    <div class="step" data-s="1">
+      <h3>2 · Ce que tu débloques</h3>
+      <p class="hint">Barbare niveau 4. Maîtrise : reste +2 (passe à +3 au niveau 5).</p>
+      <div class="card feat"><span class="ic">★</span><div><b>Amélioration de caractéristique <span class="src srd">SRD</span></b><small>+2 à une caractéristique, ou +1 à deux, ou un don. Choix à l'étape suivante.</small></div></div>
+      <div class="card feat"><span class="ic">·</span><div><b>Voie du Zélote <span class="src book">Livre</span></b><small>Rien de nouveau au niveau 4 (prochaine capacité au niveau 6).</small></div></div>
+      <h4>Une capacité d'un livre ?</h4>
+      <p class="hint">Si le MJ ou ton livre t'en donne une, ajoute-la ici avec tes mots. L'agent peut t'aider à partir d'une photo.</p>
+      <label class="f" for="cn">Nom</label><input class="t" id="cn" placeholder="ex. : Bénédiction de Kiri-Jolith">
+      <label class="f" for="ct">Ce qu'elle fait</label><textarea class="t" id="ct" placeholder="Quand et comment l'utiliser"></textarea>
+    </div>
+
+    <div class="step" data-s="2">
+      <h3>3 · Ton choix</h3>
+      <div class="choice" role="group">
+        <button aria-pressed="true" data-c="asi">Caractéristiques</button>
+        <button aria-pressed="false" data-c="feat">Un don</button>
+      </div>
+      <div id="asiBox">
+        <p class="hint" id="asiHint">Touche une caractéristique deux fois (+2) ou deux différentes (+1 chacune). Maximum 20.</p>
+        <div class="abil" id="abil"></div>
+        <button class="btn ghost" id="reset" style="margin-top:8px">Recommencer</button>
+      </div>
+      <div id="featBox" style="display:none">
+        <p class="hint">Les dons des livres ne sont pas dans l'app : écris celui que le MJ accepte.</p>
+        <label class="f" for="fn">Nom du don</label><input class="t" id="fn" placeholder="ex. : Great Weapon Master">
+        <label class="f" for="ft">Ce qu'il fait</label><textarea class="t" id="ft"></textarea>
+      </div>
+    </div>
+
+    <div class="step" data-s="3">
+      <h3>4 · Résumé</h3>
+      <p class="hint">Vérifie, puis confirme. Le MJ est prévenu.</p>
+      <div class="card sum" id="sum"></div>
+    </div>
+
+    <div class="row2" id="nav">
+      <button class="btn ghost" id="prev">Retour</button>
+      <button class="btn" id="next">Suivant</button>
+    </div>
+    <div class="done" id="done" role="status"><b>Korgan est niveau 4 ✦</b><p class="hint">Sa fiche est à jour. Le MJ voit « Korgan a fini sa montée de niveau ».</p><button class="btn ghost" id="again">Revoir la maquette</button></div>
+  </section>
+
+  <!-- ===== B : une seule page ===== -->
+  <section class="view" id="page">
+    <div class="banner"><b>Niveau 4 — Korgan</b><small>Tout sur une page. Confirme en bas.</small></div>
+    <div class="grid2">
+      <div class="card"><small class="k">PV max</small><b class="v">41 → 53</b><small class="k">+7 moyenne · +3 CON · +2 Robuste</small></div>
+      <div class="card"><small class="k">Dés de vie</small><b class="v">4d12</b><small class="k">Maîtrise +2</small></div>
+    </div>
+    <h4>Débloqué</h4>
+    <div class="card feat"><span class="ic">★</span><div><b>Amélioration de caractéristique <span class="src srd">SRD</span></b><small>Choisis ci-dessous.</small></div></div>
+    <h4>Ton choix</h4>
+    <div class="seg" role="group">
+      <button aria-pressed="true" data-b="+2 FOR">+2 FOR</button>
+      <button aria-pressed="false" data-b="+1 FOR · +1 CON">+1 FOR · +1 CON</button>
+      <button aria-pressed="false" data-b="Autre">Autre…</button>
+    </div>
+    <p class="hint" id="bEffect">FOR 18 → 20 : Maul +7 · 2d6+5, Athlétisme +7.</p>
+    <h4>Capacité d'un livre (facultatif)</h4>
+    <input class="t" placeholder="Nom, puis touche + pour l'expliquer">
+    <div class="sticky"><button class="btn" id="bOk">Confirmer le niveau 4</button></div>
+    <div class="sent" id="bDone" role="status">Korgan est niveau 4 ✦ Le MJ est prévenu.</div>
+  </section>
+
+  <!-- ===== C : liste à cocher ===== -->
+  <section class="view" id="liste">
+    <div class="hero-mini"><b>Korgan de-Orilg</b><small>Barbare <span class="lvl">4</span> · tout de suite, les choix peuvent attendre</small></div>
+    <div class="todo-head"><b>Niveau 4 : <span id="cCount">1</span> / 3 fait</b><div class="bar"><i id="cBar" style="width:33%"></i></div></div>
+    <div class="card todo done-item"><span class="chk">✓</span><div><b>PV : 41 → 53</b><small>Fait tout seul (moyenne fixe + CON + Robuste).</small></div></div>
+    <details class="card todo" id="cAsi"><summary><span class="chk"></span><div><b>Choisir ton amélioration</b><small>+2 à une caractéristique, +1 à deux, ou un don.</small></div></summary>
+      <div class="seg" role="group" style="margin-top:10px">
+        <button data-c2="FOR +2">FOR +2</button><button data-c2="FOR +1 · CON +1">FOR +1 · CON +1</button><button data-c2="Un don">Un don</button>
+      </div></details>
+    <details class="card todo" id="cBook"><summary><span class="chk"></span><div><b>Capacité d'un livre ?</b><small>Rien au niveau 4 pour le Zélote. Touche « Aucune » ou ajoute-la.</small></div></summary>
+      <div class="row2"><button class="btn ghost" id="cNone">Aucune</button><button class="btn ghost" id="cAdd">Ajouter</button></div></details>
+    <p class="hint">Le MJ voit qui a fini. Un rappel reste sur la fiche tant qu'il manque un choix.</p>
+  </section>
+</div>
+<script>
+  // Écran du MJ
+  let lv = 4;
+  const lvEl = document.getElementById('lv');
+  document.getElementById('lvMinus').onclick = () => { lv = Math.max(2, lv - 1); lvEl.textContent = lv; };
+  document.getElementById('lvPlus').onclick = () => { lv = Math.min(20, lv + 1); lvEl.textContent = lv; };
+  document.getElementById('send').onclick = () => {
+    const n = document.querySelectorAll('[data-pc]:checked').length;
+    const s = document.getElementById('sent');
+    s.textContent = n ? `Envoyé : ${n} personnage${n > 1 ? 's' : ''} → niveau ${lv}. Les joueurs le voient sur leur fiche.` : 'Coche au moins un personnage.';
+    s.style.display = 'block';
+  };
+  document.querySelector('.switch').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    document.querySelectorAll('.switch button').forEach(x => x.setAttribute('aria-pressed', x === b));
+    document.querySelectorAll('.view').forEach(v => v.classList.toggle('on', v.id === b.dataset.v));
+  });
+
+  // Écran du joueur (données fictives de Korgan)
+  const ab = [['FOR', 18], ['DEX', 16], ['CON', 16], ['INT', 14], ['SAG', 14], ['CHA', 14]];
+  let plus = [0, 0, 0, 0, 0, 0], mode = 'asi', step = 0;
+  const spent = () => plus.reduce((a, b) => a + b, 0);
+  function renderAbil() {
+    document.getElementById('abil').innerHTML = ab.map(([k, s], i) => {
+      const full = spent() >= 2 || s + plus[i] >= 20 || (plus[i] === 1 && spent() === 2);
+      return `<button class="${plus[i] ? 'up' : ''}" data-i="${i}" data-plus="+${plus[i]}" ${full && !plus[i] ? 'disabled' : ''} ${spent() >= 2 ? 'disabled' : ''}>${k}<b>${s + plus[i]}</b></button>`;
+    }).join('');
+    document.getElementById('asiHint').textContent = spent() >= 2 ? 'Choix fait. Touche « Suivant ».' : `Encore ${2 - spent()} point${2 - spent() > 1 ? 's' : ''} à placer. Maximum 20.`;
+  }
+  document.getElementById('abil').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b || b.disabled) return;
+    const i = +b.dataset.i; if (ab[i][1] + plus[i] < 20 && spent() < 2) plus[i]++; renderAbil(); nav();
+  });
+  document.getElementById('reset').onclick = () => { plus = [0, 0, 0, 0, 0, 0]; renderAbil(); nav(); };
+  document.querySelector('.choice').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return; mode = b.dataset.c;
+    document.querySelectorAll('.choice button').forEach(x => x.setAttribute('aria-pressed', x === b));
+    document.getElementById('asiBox').style.display = mode === 'asi' ? '' : 'none';
+    document.getElementById('featBox').style.display = mode === 'feat' ? '' : 'none'; nav();
+  });
+  document.getElementById('fn').addEventListener('input', () => nav());
+  const mod = s => Math.floor((s - 10) / 2);
+  function summary() {
+    const rows = [['PV max', '41 → <span class="up-txt">53</span>'], ['Dés de vie', '3d12 → 4d12'], ['Maîtrise', '+2']];
+    if (mode === 'asi') {
+      ab.forEach(([k, s], i) => { if (plus[i]) rows.push([k, `${s} → <span class="up-txt">${s + plus[i]}</span>`]); });
+      const m = mod(18 + plus[0]);
+      if (m !== mod(18)) { rows.push(['Maul', `+${2 + m} · 2d6+${m} <span class="up-txt">(était +6 · 2d6+4)</span>`]); }
+    } else rows.push(['Don', document.getElementById('fn').value || '—']);
+    const cn = document.getElementById('cn').value; if (cn) rows.push(['Capacité ajoutée', cn]);
+    document.getElementById('sum').innerHTML = rows.map(([a, b]) => `<div class="line"><span>${a}</span><b>${b}</b></div>`).join('');
+  }
+  const steps = [...document.querySelectorAll('.step')], dots = [...document.querySelectorAll('.dots i')];
+  function nav() {
+    steps.forEach((s, i) => s.classList.toggle('on', i === step));
+    dots.forEach((d, i) => d.classList.toggle('on', i <= step));
+    document.getElementById('prev').disabled = step === 0;
+    const next = document.getElementById('next');
+    next.textContent = step === 3 ? 'Confirmer le niveau 4' : 'Suivant';
+    next.disabled = step === 2 && (mode === 'asi' ? spent() < 2 : !document.getElementById('fn').value.trim());
+    if (step === 3) summary();
+  }
+  document.getElementById('prev').onclick = () => { if (step > 0) { step--; nav(); } };
+  document.getElementById('next').onclick = () => {
+    if (step < 3) { step++; nav(); window.scrollTo(0, 0); return; }
+    document.getElementById('nav').style.display = 'none';
+    steps.forEach(s => s.classList.remove('on'));
+    document.getElementById('done').style.display = 'block';
+  };
+  document.getElementById('again').onclick = () => {
+    step = 0; plus = [0, 0, 0, 0, 0, 0]; renderAbil();
+    document.getElementById('done').style.display = 'none'; document.getElementById('nav').style.display = ''; nav();
+  };
+  renderAbil(); nav();
+
+  // Descriptions des variantes
+  const vdesc = {
+    mj: 'Le MJ choisit qui monte et à quel niveau. Pareil pour A, B et C.',
+    joueur: 'A · Étapes : un écran à la fois (PV, débloqué, choix, résumé). Le plus guidé.',
+    page: 'B · Une page : tout d’un coup d’œil, choix rapides, un seul bouton pour confirmer.',
+    liste: 'C · À cocher : le perso passe au niveau tout de suite ; les choix restent en rappel sur la fiche et se font quand tu veux.',
+  };
+  const vd = document.getElementById('vdesc'); vd.textContent = vdesc.mj;
+  document.querySelector('.switch').addEventListener('click', e => { const b = e.target.closest('button'); if (b) vd.textContent = vdesc[b.dataset.v]; });
+
+  // B
+  const effects = { '+2 FOR': 'FOR 18 → 20 : Maul +7 · 2d6+5, Athlétisme +7.', '+1 FOR · +1 CON': 'FOR 19 (modificateur inchangé), CON 17 (inchangé) : utile seulement pour un prochain +1.', 'Autre': 'Un champ s’ouvre pour une autre répartition ou un don.' };
+  document.querySelector('#page .seg').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    document.querySelectorAll('#page .seg button').forEach(x => x.setAttribute('aria-pressed', x === b));
+    document.getElementById('bEffect').textContent = effects[b.dataset.b];
+  });
+  document.getElementById('bOk').onclick = () => { document.getElementById('bDone').style.display = 'block'; };
+
+  // C
+  function cCount() {
+    const n = 1 + document.querySelectorAll('#liste .todo.ok').length;
+    document.getElementById('cCount').textContent = n; document.getElementById('cBar').style.width = (n / 3 * 100) + '%';
+  }
+  document.querySelector('#cAsi .seg').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    document.querySelectorAll('#cAsi .seg button').forEach(x => x.setAttribute('aria-pressed', x === b));
+    const d = document.getElementById('cAsi'); d.classList.add('ok'); d.querySelector('summary b').textContent = 'Amélioration : ' + b.dataset.c2; d.open = false; cCount();
+  });
+  const bookDone = t => { const d = document.getElementById('cBook'); d.classList.add('ok'); d.querySelector('summary b').textContent = t; d.open = false; cCount(); };
+  document.getElementById('cNone').onclick = () => bookDone('Capacité d’un livre : aucune');
+  document.getElementById('cAdd').onclick = () => bookDone('Capacité d’un livre : ajoutée');
+</script>
+</body>
+</html>
