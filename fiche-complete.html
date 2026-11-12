@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fiche complète — maquette</title>
+<style>
+  :root {
+    --bg: #0d0b09; --surface: #16120e; --surface-2: #1d1813; --line: #3a2f22;
+    --ink: #ebe2d0; --muted: #a39580; --faint: #76695a;
+    --gold: #d8b26a; --gold-hi: #f4d68f; --gold-lo: #8a6d3b;
+    --life: #6fae6a; --warn: #d99a3a; --arcane: #a58bdc;
+    --serif: 'Cormorant Garamond', 'EB Garamond', Garamond, 'Palatino Linotype', Georgia, serif;
+    --sans: system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --touch: 44px;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  .abil button:active, .skill:active, summary:active { filter: brightness(1.25); }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.45 var(--sans); }
+  .wrap { max-width: 430px; margin: 0 auto; padding: 16px 16px 40px; }
+  .intro h1 { font: 600 24px/1.2 var(--serif); color: var(--gold-hi); margin: 0 0 4px; }
+  .intro p { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
+  .hero { position: relative; border-radius: 16px; overflow: hidden; margin: 4px 0 12px; padding: 70px 16px 16px;
+    background: radial-gradient(120% 90% at 70% 10%, #3b4a63 0%, #1b1f2b 55%, #0d0b09 100%); }
+  .hero h2 { margin: 0; font: 700 30px/1.1 var(--serif); }
+  .hero p { margin: 4px 0 0; font-size: 13px; color: #d6d2dc; }
+  .tabs { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 14px; scrollbar-width: none; }
+  .tabs button { flex: none; min-height: var(--touch); padding: 0 14px; border-radius: 99px; border: 1px solid var(--line);
+    background: var(--surface); color: var(--muted); font: 600 14px var(--sans); cursor: pointer; }
+  .tabs button[aria-selected="true"] { color: var(--gold-hi); border-color: var(--gold); background: #2a2116; }
+  .tabs button.new::after { content: " ✦"; color: var(--arcane); }
+  .pane { display: none; } .pane.on { display: block; }
+  h3 { font: 700 26px/1.1 var(--serif); color: var(--gold-hi); margin: 4px 0 6px; }
+  .hint { color: var(--muted); font-size: 13px; margin: 0 0 12px; }
+  h4 { display: flex; align-items: center; gap: 10px; font: 600 12px/1 var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--gold); margin: 18px 0 10px; }
+  h4::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--gold-lo), transparent); }
+  .new-tag { font: 600 10px var(--sans); letter-spacing: .08em; color: var(--arcane); border: 1px solid #a58bdc66; border-radius: 99px; padding: 2px 7px; text-transform: uppercase; }
+
+  /* Caractéristiques */
+  .abil { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .abil button { all: unset; box-sizing: border-box; cursor: pointer; text-align: center; padding: 12px 8px; border-radius: 12px;
+    border: 1px solid var(--line); background: linear-gradient(180deg, var(--surface-2), var(--surface)); }
+  .abil button.prof { border-color: var(--gold); box-shadow: inset 0 0 0 1px #d8b26a33; }
+  .abil small { display: block; color: var(--muted); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+  .abil b { display: block; font: 700 34px/1.1 var(--serif); color: var(--gold-hi); }
+  .abil .sc { color: var(--faint); font-size: 12px; }
+  .abil .sv { display: block; margin-top: 6px; font-size: 13px; color: var(--ink); }
+  .abil .sv em { font-style: normal; color: var(--gold); font-weight: 700; }
+  .facts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .facts div { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+  .facts .wide { grid-column: 1 / -1; }
+  .facts small { display: block; color: var(--muted); font-size: 12px; }
+  .facts b { font: 700 20px var(--serif); color: var(--ink); }
+  .callout { margin-top: 10px; border: 1px solid var(--gold-lo); border-radius: 12px; padding: 12px 14px;
+    background: radial-gradient(120% 140% at 0 0, #2c2212 0%, var(--surface) 60%); }
+  .callout p { margin: 0; } .callout small { display: block; color: var(--muted); margin-top: 6px; }
+
+  /* Compétences */
+  .skill { all: unset; box-sizing: border-box; display: flex; align-items: center; gap: 10px; width: 100%; min-height: 54px; padding: 6px 14px;
+    border: 1px solid var(--line); border-radius: 12px; background: var(--surface); margin-bottom: 6px; cursor: pointer; }
+  .skill.prof { border-color: var(--gold-lo); background: linear-gradient(180deg, #221a10, var(--surface)); }
+  .skill .n { flex: 1; min-width: 0; } .skill b { display: block; font: 600 17px/1.2 var(--serif); }
+  .skill small { color: var(--muted); font-size: 12px; }
+  .skill .v { font: 700 18px var(--serif); color: var(--gold-hi); min-width: 64px; text-align: right; }
+  .skill .dot { width: 10px; height: 10px; border-radius: 50%; border: 1px solid var(--gold-lo); flex: none; }
+  .skill.prof .dot { background: var(--gold); border-color: var(--gold); }
+  .filter { display: flex; gap: 6px; margin-bottom: 10px; }
+  .filter button { flex: 1; min-height: 40px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); font: 600 13px var(--sans); cursor: pointer; }
+  .filter button[aria-pressed="true"] { color: var(--gold-hi); border-color: var(--gold); }
+
+  /* Capacités */
+  details { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; margin-bottom: 6px; overflow: hidden; }
+  details.added { border-color: #a58bdc55; }
+  summary { list-style: none; display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 6px 14px; cursor: pointer; }
+  summary::-webkit-details-marker { display: none; }
+  summary .n { flex: 1; min-width: 0; } summary b { display: block; font: 600 17px/1.2 var(--serif); }
+  summary small { color: var(--muted); font-size: 12px; }
+  summary::after { content: "›"; color: var(--gold); font-size: 20px; transition: transform .2s; }
+  details[open] summary::after { transform: rotate(90deg); }
+  details .body { padding: 0 14px 12px; color: var(--ink); font-size: 14px; border-top: 1px solid #3a2f2266; }
+  details .body p { margin: 10px 0 0; }
+  .when { display: inline-block; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--gold); border: 1px solid var(--gold-lo); border-radius: 99px; padding: 2px 8px; margin-top: 8px; }
+  .legend { color: var(--muted); font-size: 12px; margin: 14px 0 0; }
+  button:focus-visible, summary:focus-visible { outline: 2px solid var(--gold-hi); outline-offset: 2px; }
+  .toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: #2a2116; border: 1px solid var(--gold); color: var(--gold-hi);
+    padding: 10px 16px; border-radius: 12px; font-weight: 600; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .toast.on { opacity: 1; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="intro">
+    <h1>Fiche complète — maquette</h1>
+    <p>Ce que la fiche de Korgan aurait dans la Taverne, d'après ton autre app. ✦ = nouveau. Touche une carte : le jet se lance (ici, un petit message).</p>
+  </div>
+  <div class="hero"><h2>Korgan de-Orilg</h2><p>Minotaure · Barbare 3 · Voie du Zélote</p></div>
+  <div class="tabs" role="tablist">
+    <button role="tab" aria-selected="false" data-p="tour">Mon tour</button>
+    <button role="tab" aria-selected="true" data-p="stats">Caractéristiques</button>
+    <button role="tab" aria-selected="false" data-p="skills" class="new">Compétences</button>
+    <button role="tab" aria-selected="false" data-p="caps">Capacités</button>
+    <button role="tab" aria-selected="false" data-p="sac">Sac</button>
+  </div>
+
+  <section class="pane" id="tour"><p class="hint">Inchangé (écran actuel de la Taverne).</p></section>
+  <section class="pane" id="sac"><p class="hint">Voir la maquette C du Sac (lot en cours).</p></section>
+
+  <section class="pane on" id="stats">
+    <h3>Caractéristiques</h3>
+    <p class="hint">Gros chiffre = modificateur. Cadre doré = sauvegarde maîtrisée, bonus déjà compté.</p>
+    <div class="abil" id="abil"></div>
+    <h4>Repères <span class="new-tag">nouveau</span></h4>
+    <div class="facts">
+      <div><small>Maîtrise</small><b>+2</b></div>
+      <div><small>Dés de vie</small><b>3d12</b></div>
+      <div><small>DD des cornes</small><b>14</b></div>
+      <div><small>Perception passive</small><b>14</b></div>
+      <div class="wide"><small>Langues</small><b>Commun · Kothian · Solamnique</b></div>
+    </div>
+    <div class="callout">
+      <p><b>Sens du danger :</b> avantage aux sauvegardes de DEX contre ce que tu vois, sauf si tu es aveuglé, assourdi ou neutralisé.</p>
+      <small>Point faible : sauvegarde de SAG sans maîtrise contre le charme et la peur.</small>
+    </div>
+  </section>
+
+  <section class="pane" id="skills">
+    <h3>Compétences</h3>
+    <p class="hint">Touche une compétence pour lancer le jet. Les bonus sont déjà comptés.</p>
+    <div class="filter" role="group">
+      <button aria-pressed="true" data-f="all">Toutes</button>
+      <button aria-pressed="false" data-f="prof">Maîtrisées</button>
+    </div>
+    <div id="skillList"></div>
+    <p class="legend">● doré = maîtrisée (+2 de maîtrise).</p>
+  </section>
+
+  <section class="pane" id="caps">
+    <h3>Capacités</h3>
+    <p class="hint">Touche une capacité pour savoir quand et comment l'utiliser.</p>
+    <div id="capList"></div>
+    <p class="legend">Cadre violet = ajoutée d'après ton autre app. « Labyrinthine Recall » reste (déjà dans la Taverne).</p>
+  </section>
+</div>
+<div class="toast" id="toast" role="status"></div>
+<script>
+  // Données fictives tirées de la fiche publique de Korgan
+  const PROF = 2;
+  const ab = [['Force', 'FOR', 18, true], ['Dextérité', 'DEX', 16, false], ['Constitution', 'CON', 16, true],
+    ['Intelligence', 'INT', 14, false], ['Sagesse', 'SAG', 14, false], ['Charisme', 'CHA', 14, false]];
+  const mod = (s) => Math.floor((s - 10) / 2);
+  const sign = (n) => (n >= 0 ? '+' : '') + n;
+  const abMod = Object.fromEntries(ab.map(([, k, s]) => [k, mod(s)]));
+  document.getElementById('abil').innerHTML = ab.map(([n, k, s, p]) => {
+    const sv = mod(s) + (p ? PROF : 0);
+    return `<button class="${p ? 'prof' : ''}" data-roll="Sauvegarde ${k}" data-b="${sv}"><small>${n}</small><b>${sign(mod(s))}</b><span class="sc">Score ${s}</span><span class="sv">Sauvegarde ${p ? '· maîtrisée ' : ''}<em>1d20${sign(sv)}</em></span></button>`;
+  }).join('');
+
+  const skills = [
+    ['Acrobaties', 'DEX', 'garder l’équilibre, culbuter'], ['Arcanes', 'INT', 'magie, sorts, objets'],
+    ['Athlétisme', 'FOR', 'grimper, nager, lutter', 1], ['Discrétion', 'DEX', 'se cacher, bouger sans bruit'],
+    ['Dressage', 'SAG', 'calmer un animal'], ['Escamotage', 'DEX', 'manipuler sans être vu'],
+    ['Histoire', 'INT', 'se rappeler le passé'], ['Intimidation', 'CHA', 'menacer, faire peur', 1],
+    ['Intuition', 'SAG', 'comprendre les intentions'], ['Investigation', 'INT', 'chercher des indices'],
+    ['Médecine', 'SAG', 'stabiliser, examiner une blessure'], ['Nature', 'INT', 'plantes, bêtes, terrain', 1],
+    ['Perception', 'SAG', 'voir, entendre, repérer', 1], ['Persuasion', 'CHA', 'convaincre, négocier'],
+    ['Religion', 'INT', 'dieux, rites, symboles'], ['Représentation', 'CHA', 'chanter, jouer, divertir'],
+    ['Survie', 'SAG', 'pister, s’orienter, chasser', 1], ['Tromperie', 'CHA', 'mentir, bluffer'],
+  ];
+  let filter = 'all';
+  function renderSkills() {
+    const list = skills.filter(s => filter === 'all' || s[3]);
+    document.getElementById('skillList').innerHTML = list.map(([n, k, d, p]) => {
+      const b = abMod[k] + (p ? PROF : 0);
+      return `<button class="skill ${p ? 'prof' : ''}" data-roll="${n}" data-b="${b}"><span class="dot"></span><span class="n"><b>${n}</b><small>${k} · ${d}</small></span><span class="v">1d20${sign(b)}</span></button>`;
+    }).join('');
+  }
+  renderSkills();
+  document.querySelector('.filter').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return; filter = b.dataset.f;
+    document.querySelectorAll('.filter button').forEach(x => x.setAttribute('aria-pressed', x === b)); renderSkills();
+  });
+
+  const caps = [
+    ['Rage', '+2 dégâts et résistance', 'Action bonus · 3 / repos long', 'Pendant 1 minute : +2 aux dégâts de mêlée avec la FOR, résistance aux dégâts contondants, perforants et tranchants, avantage aux tests et sauvegardes de FOR.'],
+    ['Hammering Horns', 'FOR DD 14 ou poussée de 10 pi', 'Action bonus, après un coup', 'Juste après avoir touché en mêlée avec l’action Attaque : la cible fait une sauvegarde de FOR DD 14 ou tu la repousses de 10 pi.'],
+    ['Goring Rush', 'Cornes : 1d20+6 · 1d6+4 perforant', 'Action bonus, après Dash', 'Après un Dash d’au moins 20 pi : une attaque de cornes en action bonus.'],
+    ['Défense sans armure', 'CA 16', 'Toujours', 'Sans armure : CA = 10 + DEX + CON.'],
+    ['Attaque téméraire', 'Avantage en mêlée avec la FOR', 'À ta 1re attaque', 'Tu as l’avantage sur tes attaques de mêlée avec la FOR ce tour, mais on t’attaque avec avantage jusqu’à ton prochain tour.'],
+    ['Sens du danger', 'Avantage à la sauvegarde', 'Réaction automatique', 'Avantage aux sauvegardes de DEX contre ce que tu vois.'],
+    ['Fureur divine', '+1d6+1 radiants', '1re touche du tour en Rage', 'Pendant ta rage, la première créature que tu touches avec une arme à chaque tour prend +1d6+1 dégâts radiants.'],
+    ['Guerrier des dieux', 'Retour à la vie sans composantes', 'Passif', 'Un sort qui te ramène à la vie n’a pas besoin de composantes matérielles.'],
+    ['Cornes', '1d20+6 · 1d6+4 perforants', 'Action', 'Arme naturelle de mêlée.'],
+    ['Imposing Presence', 'Maîtrise d’Intimidation', 'Passif', 'Tu maîtrises l’Intimidation.', 1],
+    ['Robuste (Tough)', '+2 PV par niveau', 'Passif', 'Tes PV maximum augmentent de 2 par niveau (déjà comptés dans tes 41 PV).', 1],
+    ['Élan Divin (Bottes)', 'Bond de 30 pi pour 10 pi', '1 fois par tour', 'Tu peux sauter jusqu’à 30 pi en ne dépensant que 10 pi de mouvement.', 1],
+    ['Grâce Céleste (Bottes)', 'Aucun dégât de chute', 'Passif', 'Chute de 30 pi ou moins : aucun dégât, tu retombes debout.', 1],
+    ['Fracas Divin (Bottes)', 'Onde de choc autour de toi', '1 / repos court', 'Après un saut d’au moins 10 pi : créatures à 5 pi, sauvegarde de FOR DD 14 ou repoussées de 5 pi.', 1],
+    ['Labyrinthine Recall', 'Tu sais toujours où est le nord', 'Passif', 'Avantage pour t’orienter et ne pas te perdre.'],
+  ];
+  document.getElementById('capList').innerHTML = caps.map(([n, s, w, d, added]) =>
+    `<details class="${added ? 'added' : ''}"><summary><span class="n"><b>${n}${added ? ' <span class="new-tag">nouveau</span>' : ''}</b><small>${s}</small></span></summary><div class="body"><span class="when">${w}</span><p>${d}</p></div></details>`).join('');
+
+  document.querySelector('.tabs').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    document.querySelectorAll('.tabs button').forEach(x => x.setAttribute('aria-selected', x === b));
+    document.querySelectorAll('.pane').forEach(p => p.classList.toggle('on', p.id === b.dataset.p));
+  });
+  const toast = document.getElementById('toast'); let t;
+  document.body.addEventListener('click', e => {
+    const b = e.target.closest('[data-roll]'); if (!b) return;
+    const r = 1 + Math.floor(Math.random() * 20), bonus = +b.dataset.b;
+    toast.textContent = `${b.dataset.roll} : ${r} ${bonus >= 0 ? '+' : '−'} ${Math.abs(bonus)} = ${r + bonus}`;
+    toast.classList.add('on'); clearTimeout(t); t = setTimeout(() => toast.classList.remove('on'), 2500);
+  });
+</script>
+</body>
+</html>
