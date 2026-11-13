@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>En-tête — 3 styles</title>
+<style>
+  :root {
+    --bg: #0d0b09; --surface: #16120e; --surface-2: #1d1813; --line: #3a2f22;
+    --ink: #ebe2d0; --muted: #a39580; --faint: #76695a;
+    --gold: #d8b26a; --gold-hi: #f4d68f; --gold-lo: #8a6d3b;
+    --life: #6fae6a; --blood: #c0392b; --nav-bg: #0a0807;
+    --serif: 'Cormorant Garamond', 'EB Garamond', Garamond, 'Palatino Linotype', Georgia, serif;
+    --sans: system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --touch: 44px;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.45 var(--sans); }
+  .wrap { max-width: 430px; margin: 0 auto; padding: 16px 16px 40px; }
+  .intro h1 { font: 600 24px/1.2 var(--serif); color: var(--gold-hi); margin: 0 0 4px; }
+  .intro p { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
+  .switch { display: flex; gap: 8px; }
+  .switch button { flex: 1; min-height: var(--touch); border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 600 14px var(--sans); cursor: pointer; }
+  .switch button[aria-pressed="true"] { border-color: var(--gold); color: var(--gold-hi); background: #2a2116; }
+  .note { color: var(--muted); font-size: 13px; margin: 10px 0 14px; min-height: 38px; }
+  button { font-family: var(--sans); }
+  button:focus-visible { outline: 2px solid var(--gold-hi); outline-offset: 2px; }
+
+  /* Téléphone */
+  .phone { position: relative; border: 1px solid var(--line); border-radius: 22px; overflow: hidden; background: var(--bg); min-height: 640px; }
+  .view { display: none; } .view.on { display: block; }
+  .icon { width: var(--touch); height: var(--touch); border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--gold); display: inline-grid; place-items: center; cursor: pointer; position: relative; flex: none; }
+  .icon svg { width: 22px; height: 22px; }
+  .badge { position: absolute; top: -5px; right: -5px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 99px; background: var(--blood); color: #fff; font: 700 11px/20px var(--sans); text-align: center; }
+  .hero { position: relative; padding: 70px 16px 14px; background: linear-gradient(90deg, #5a2a22 0%, #2b1a14 60%), #2b1a14; }
+  .hero::before { content: ""; position: absolute; inset: 0; background: radial-gradient(80% 120% at 75% 30%, #8a5a4255, transparent 60%); }
+  .hero > * { position: relative; }
+  .hero small { color: var(--gold); letter-spacing: .12em; font: 600 12px var(--sans); text-transform: uppercase; }
+  .hero h2 { margin: 2px 0 0; font: 700 30px/1.05 var(--serif); color: var(--gold-hi); letter-spacing: .03em; font-variant: small-caps; }
+  .hero p { margin: 2px 0 0; font: italic 16px var(--serif); color: var(--ink); }
+  .tabs { display: flex; gap: 6px; padding: 12px 12px 0; overflow: hidden; }
+  .tabs span { padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; font: 600 15px var(--serif); letter-spacing: .06em; font-variant: small-caps; white-space: nowrap; color: var(--ink); }
+  .tabs span:first-child { border-color: var(--gold); color: var(--gold-hi); background: #2a2116; }
+  .hp { margin: 12px; border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: flex; align-items: center; gap: 10px; }
+  .hp b { flex: 1; text-align: center; font: 700 34px var(--serif); color: var(--gold-hi); }
+  .hp b small { font-size: 16px; color: var(--muted); }
+  .hp i { width: var(--touch); height: var(--touch); border: 1px solid var(--gold-lo); border-radius: 10px; display: grid; place-items: center; font-style: normal; font-size: 22px; }
+  .nav { position: absolute; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-around; padding: 10px 0 14px; background: var(--nav-bg); border-top: 1px solid var(--line); color: var(--muted); font: 600 11px var(--sans); letter-spacing: .08em; }
+  .nav span:first-child { color: var(--gold-hi); }
+
+  /* Menus */
+  .sheet { position: absolute; inset: 0; background: #0008; display: none; z-index: 5; }
+  .sheet.on { display: block; }
+  .sheet .panel { position: absolute; background: var(--surface-2); border: 1px solid var(--gold-lo); border-radius: 14px; padding: 8px; min-width: 230px; box-shadow: 0 10px 30px #000a; }
+  .sheet .panel button { display: flex; align-items: center; gap: 10px; width: 100%; min-height: var(--touch); padding: 0 12px; border: 0; border-radius: 10px; background: transparent; color: var(--ink); font-size: 15px; text-align: left; cursor: pointer; }
+  .sheet .panel button:hover { background: #2a2116; }
+  .sheet .panel .sep { height: 1px; background: var(--line); margin: 6px 4px; }
+  .sheet .panel .who { padding: 8px 12px 6px; color: var(--muted); font-size: 13px; }
+  .sheet .panel .danger { color: #e0998c; }
+  .sheet .panel .cur { color: var(--gold-hi); }
+  .sheet .panel .cur::after { content: "✓"; margin-left: auto; }
+  .rolls p { margin: 0; padding: 8px 12px; border-top: 1px solid #3a2f2266; font-size: 14px; }
+  .rolls p:first-of-type { border-top: 0; }
+  .rolls small { color: var(--muted); display: block; font-size: 12px; }
+  .rolls b { color: var(--gold-hi); }
+
+  /* A : barre compacte */
+  .a-bar { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: var(--nav-bg); border-bottom: 1px solid var(--line); }
+  .a-title { flex: 1; min-width: 0; }
+  .a-title small { display: block; font: 700 11px var(--sans); letter-spacing: .14em; color: var(--gold); }
+  .a-title b { display: block; font: 700 19px/1.1 var(--serif); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .avatar { width: var(--touch); height: var(--touch); border-radius: 50%; background: #2a2116; border: 1px solid var(--gold-lo); color: var(--gold-hi); font: 700 15px var(--sans); display: grid; place-items: center; cursor: pointer; flex: none; }
+
+  /* B : sur le portrait */
+  .b-top { position: absolute; top: 10px; left: 10px; right: 10px; display: flex; gap: 8px; align-items: center; z-index: 2; }
+  .pill { min-height: var(--touch); padding: 0 14px; border-radius: 99px; background: #000a; border: 1px solid #ffffff22; color: var(--ink); font: 600 14px var(--sans); display: inline-flex; align-items: center; gap: 6px; cursor: pointer; backdrop-filter: blur(6px); }
+  .b-top .sp { flex: 1; }
+  .round { width: var(--touch); height: var(--touch); border-radius: 50%; background: #000a; border: 1px solid #ffffff22; color: var(--ink); display: grid; place-items: center; cursor: pointer; position: relative; backdrop-filter: blur(6px); }
+  .round svg { width: 20px; height: 20px; }
+  .b-camp { display: inline-block; margin-bottom: 4px; font: 600 12px var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--gold); }
+
+  /* C : titre sélecteur + dés */
+  .c-bar { display: flex; align-items: center; gap: 8px; padding: 10px 12px 8px; }
+  .c-pick { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; min-height: var(--touch); padding: 0 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; text-align: left; }
+  .c-pick span { flex: 1; min-width: 0; } .c-pick small { display: block; font: 700 10px var(--sans); letter-spacing: .14em; color: var(--gold); }
+  .c-pick b { display: block; font: 700 18px/1.1 var(--serif); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .c-pick i { font-style: normal; color: var(--gold); }
+  .fab { position: absolute; right: 14px; bottom: 76px; display: flex; flex-direction: column; gap: 10px; align-items: flex-end; z-index: 3; }
+  .fab .dice { width: 56px; height: 56px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #e0604f, var(--blood)); border: 2px solid #f4d68f66; color: #fff; display: grid; place-items: center; cursor: pointer; position: relative; }
+  .fab .dice svg { width: 28px; height: 28px; }
+  .fab .hist { min-height: 40px; padding: 0 14px; border-radius: 99px; background: var(--surface-2); border: 1px solid var(--gold-lo); color: var(--gold-hi); font: 600 13px var(--sans); cursor: pointer; position: relative; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="intro">
+    <h1>En-tête de la Taverne — 3 styles</h1>
+    <p>Ce qui change : « Se déconnecter », « Campagnes », « Derniers jets » et le nom de la campagne. Tout se touche (les menus s'ouvrent). Le reste de la fiche ne bouge pas.</p>
+  </div>
+  <div class="switch" role="group" aria-label="Choisir un style">
+    <button aria-pressed="true" data-v="A">A · Barre</button>
+    <button aria-pressed="false" data-v="B">B · Portrait</button>
+    <button aria-pressed="false" data-v="C">C · Sélecteur</button>
+  </div>
+  <p class="note" id="desc"></p>
+
+  <div class="phone" id="phone">
+    <!-- A -->
+    <section class="view on" id="A">
+      <div class="a-bar">
+        <div class="a-title"><small>LA TAVERNE</small><b>Dragonlance</b></div>
+        <button class="icon" aria-label="Derniers jets" data-open="rolls">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg><span class="badge">3</span></button>
+        <button class="icon" aria-label="Campagnes" data-open="camps">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v14H4z"/><path d="M4 9h16"/></svg></button>
+        <button class="avatar" aria-label="Mon compte" data-open="account">CO</button>
+      </div>
+      <div class="hero"><small>Joueur · Alex</small><h2>Korgan de-Orilg</h2><p>Minotaur · Barbarian 3 · Path of the Zealot</p></div>
+      <div class="tabs"><span>Mon tour</span><span>Caractéristiques</span><span>Compétences</span></div>
+      <div class="hp"><i>−</i><b>34 <small>/ 41</small></b><i>+</i></div>
+    </section>
+
+    <!-- B -->
+    <section class="view" id="B">
+      <div class="hero" style="padding-top:76px">
+        <div class="b-top">
+          <button class="pill" data-open="camps">← Campagnes</button><span class="sp"></span>
+          <button class="round" aria-label="Derniers jets" data-open="rolls"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg><span class="badge">3</span></button>
+          <button class="round" aria-label="Mon compte" data-open="account" style="font:700 13px var(--sans);color:var(--gold-hi)">CO</button>
+        </div>
+        <span class="b-camp">Dragonlance · Joueur · Alex</span>
+        <h2>Korgan de-Orilg</h2><p>Minotaur · Barbarian 3 · Path of the Zealot</p>
+      </div>
+      <div class="tabs"><span>Mon tour</span><span>Caractéristiques</span><span>Compétences</span></div>
+      <div class="hp"><i>−</i><b>34 <small>/ 41</small></b><i>+</i></div>
+    </section>
+
+    <!-- C -->
+    <section class="view" id="C">
+      <div class="c-bar">
+        <button class="c-pick" data-open="camps"><span><small>LA TAVERNE</small><b>Dragonlance</b></span><i>▾</i></button>
+        <button class="avatar" aria-label="Mon compte" data-open="account">CO</button>
+      </div>
+      <div class="hero" style="padding-top:44px"><small>Joueur · Alex</small><h2>Korgan de-Orilg</h2><p>Minotaur · Barbarian 3 · Path of the Zealot</p></div>
+      <div class="tabs"><span>Mon tour</span><span>Caractéristiques</span><span>Compétences</span></div>
+      <div class="hp"><i>−</i><b>34 <small>/ 41</small></b><i>+</i></div>
+      <div class="fab">
+        <button class="hist" data-open="rolls">Derniers jets<span class="badge">3</span></button>
+        <button class="dice" aria-label="Lancer un dé"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 2v20M3 7l18 10M21 7L3 17"/></svg></button>
+      </div>
+    </section>
+
+    <nav class="nav"><span>FICHE</span><span>COMBAT</span><span>GROUPE</span><span>JOURNAL</span><span>GRIMOIRE</span></nav>
+
+    <!-- Menus (communs) -->
+    <div class="sheet" id="account"><div class="panel" style="top:62px;right:10px">
+      <div class="who">Connecté : Cout</div>
+      <button>Mes personnages</button><button>Changer de personnage</button>
+      <div class="sep"></div><button class="danger">Se déconnecter</button></div></div>
+    <div class="sheet" id="camps"><div class="panel" style="top:62px;left:10px;right:10px">
+      <div class="who">Mes campagnes</div>
+      <button class="cur">Dragonlance</button><button>Test</button>
+      <div class="sep"></div><button>+ Rejoindre ou créer une campagne</button></div></div>
+    <div class="sheet" id="rolls"><div class="panel rolls" style="top:62px;left:10px;right:10px">
+      <div class="who">Derniers jets · Dragonlance</div>
+      <p><b>Korgan</b> · Maul attaque : 14 + 6 = <b>20</b><small>il y a 1 min</small></p>
+      <p><b>Ludo</b> · Persuasion : 11 + 8 = <b>19</b><small>il y a 2 min</small></p>
+      <p><b>MJ</b> · Baaz Draconian, Shortsword : 9 + 3 = <b>12</b><small>il y a 3 min</small></p></div></div>
+  </div>
+</div>
+<script>
+  const desc = {
+    A: 'A · Barre : une ligne fine en haut. Nom de la campagne à gauche, 3 icônes à droite : Derniers jets (avec compteur), Campagnes, et ton compte (Se déconnecter est dedans). Le portrait remonte.',
+    B: 'B · Portrait : plus de barre. Les boutons flottent sur l’image, comme dans ton autre app (« ← Campagnes » à gauche, jets et compte à droite). Le plus de place gagnée.',
+    C: 'C · Sélecteur : le nom de la campagne devient un bouton pour changer de campagne. « Derniers jets » passe à côté du bouton de dés, en bas à droite. Compte à droite.',
+  };
+  const d = document.getElementById('desc'); d.textContent = desc.A;
+  document.querySelector('.switch').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    document.querySelectorAll('.switch button').forEach(x => x.setAttribute('aria-pressed', x === b));
+    document.querySelectorAll('.view').forEach(v => v.classList.toggle('on', v.id === b.dataset.v));
+    document.querySelectorAll('.sheet').forEach(s => s.classList.remove('on'));
+    d.textContent = desc[b.dataset.v];
+  });
+  const phone = document.getElementById('phone');
+  phone.addEventListener('click', e => {
+    const opener = e.target.closest('[data-open]');
+    if (opener) {
+      document.querySelectorAll('.sheet').forEach(s => s.classList.remove('on'));
+      document.getElementById(opener.dataset.open).classList.add('on');
+      if (opener.dataset.open === 'rolls') document.querySelectorAll('.badge').forEach(x => x.remove());
+      return;
+    }
+    const sheet = e.target.closest('.sheet');
+    if (sheet && (e.target === sheet || e.target.closest('.panel button'))) sheet.classList.remove('on');
+  });
+</script>
+</body>
+</html>
