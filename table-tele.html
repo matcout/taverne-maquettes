@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Taverne · Écran Table + téléphone</title>
+<style>
+:root{--bg:#0b0907;--card:#17130f;--card2:#211b15;--line:#3a2f22;--gold:#c9a96a;--gold2:#e6cf9a;--text:#ece3d3;--muted:#a39580;--bad:#d9675b;--good:#6fbf73;--ally:#5b8fd9;--serif:Georgia,"Times New Roman",serif;--sans:-apple-system,"Segoe UI",Roboto,sans-serif}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans)}
+header{padding:12px 16px;border-bottom:1px solid var(--line)}
+header .t{font-family:var(--serif);letter-spacing:.12em;font-size:13px;color:var(--gold2)}
+header .s{font-family:var(--serif);font-size:15px}
+.intro{padding:8px 16px;color:var(--muted);font-size:13px;line-height:1.45;max-width:1100px}
+.intro b{color:var(--gold2)}
+.wrap{display:flex;gap:20px;padding:8px 16px 30px;align-items:flex-start;flex-wrap:wrap;justify-content:center}
+.lbl{font-family:var(--serif);font-variant:small-caps;letter-spacing:.08em;color:var(--gold);font-size:15px;margin:0 0 6px}
+/* Télé */
+.tv{flex:1 1 640px;max-width:900px;min-width:0}
+.screen{position:relative;aspect-ratio:16/9;border:8px solid #050403;border-radius:14px;overflow:hidden;background:#000;box-shadow:0 0 0 1px var(--line),0 20px 40px rgba(0,0,0,.6)}
+#map{position:absolute;inset:0;width:100%;height:100%}
+.ini{position:absolute;left:0;right:0;top:0;display:flex;gap:6px;padding:6px 8px;background:linear-gradient(#000c,#0000);z-index:4;overflow:hidden}
+.ini div{flex:none;font-size:clamp(9px,1.4vw,13px);padding:3px 8px;border-radius:99px;border:1px solid #fff3;background:#0008}
+.ini .on{border-color:var(--gold2);color:#000;background:var(--gold2);box-shadow:0 0 12px var(--gold2)}
+.ini .en{color:#f3b0a8}
+.tok{position:absolute;width:var(--c);height:var(--c);margin:calc(var(--c)/-2) 0 0 calc(var(--c)/-2);border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:calc(var(--c)*.42);color:#fff;border:2px solid #fff;transition:left .6s ease,top .6s ease;z-index:3;text-shadow:0 1px 2px #000}
+.tok.ally{background:radial-gradient(circle at 35% 30%,#8fb6f0,var(--ally) 60%,#23426e)}
+.tok.en{background:radial-gradient(circle at 35% 30%,#f09a8f,#b8433a 60%,#5a1a14);border-color:#ffd2cc}
+.tok.active{box-shadow:0 0 0 3px var(--gold2),0 0 18px 6px var(--gold2);animation:glow 1.4s ease-in-out infinite}
+@keyframes glow{50%{box-shadow:0 0 0 3px var(--gold2),0 0 28px 10px var(--gold2)}}
+.tok.target{outline:3px dashed #ff6b5b;outline-offset:4px}
+.tok.dead{opacity:.25;filter:grayscale(1)}
+.tok.jump{animation:jump .7s ease}
+@keyframes jump{40%{transform:translateY(-120%) scale(1.25)}100%{transform:none}}
+.tok .hp{position:absolute;bottom:-7px;left:10%;right:10%;height:4px;background:#0009;border-radius:2px;overflow:hidden}
+.tok .hp i{display:block;height:100%;background:var(--good)}
+.fx{position:absolute;z-index:5;pointer-events:none;font-weight:800;font-family:var(--serif);color:#ffdf8a;text-shadow:0 0 6px #000,0 0 2px #000;animation:up 1.4s ease forwards;font-size:clamp(14px,2.6vw,28px)}
+@keyframes up{0%{transform:translate(-50%,0) scale(.6);opacity:0}20%{transform:translate(-50%,-20px) scale(1.2);opacity:1}100%{transform:translate(-50%,-70px);opacity:0}}
+.slash{position:absolute;z-index:5;pointer-events:none;width:calc(var(--c)*1.8);height:calc(var(--c)*1.8);margin:calc(var(--c)*-.9) 0 0 calc(var(--c)*-.9);animation:sl .5s ease forwards}
+@keyframes sl{0%{opacity:0;transform:rotate(-40deg) scale(.4)}40%{opacity:1}100%{opacity:0;transform:rotate(20deg) scale(1.2)}}
+.reach{position:absolute;z-index:2;pointer-events:none;border-radius:50%;border:2px dashed #8fb6f0aa;background:#5b8fd91a}
+.tvbar{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.tvbar button{min-height:36px;padding:0 12px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--muted);font-size:13px}
+.tvbar button.on{border-color:var(--gold);color:var(--gold2)}
+/* Téléphone */
+.phone{flex:0 0 340px;max-width:100%}
+.ph{border:10px solid #050403;border-radius:34px;background:var(--bg);overflow:hidden;box-shadow:0 0 0 1px var(--line),0 20px 40px rgba(0,0,0,.6)}
+.ph .top{padding:12px 14px 8px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.ph .top b{font-family:var(--serif);color:var(--gold2)}
+.ph .top span{font-size:12px;color:var(--muted)}
+.mini{position:relative;aspect-ratio:16/9;margin:10px;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+.mini canvas{position:absolute;inset:0;width:100%;height:100%}
+.mini .tok{--c:22px;border-width:1.5px;cursor:pointer}
+.cellhit{position:absolute;inset:0;z-index:2}
+.state{margin:0 10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);font-size:14px;line-height:1.4;min-height:62px}
+.state small{color:var(--muted)}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px}
+.acts button{min-height:48px;border-radius:10px;border:1px solid var(--gold);background:var(--card2);color:var(--gold2);font-size:15px}
+.acts button.main{background:var(--gold);color:#1a140c;font-weight:700}
+.acts button:disabled{opacity:.4}
+.targets{display:flex;flex-direction:column;gap:6px;padding:0 10px 10px}
+.targets button{display:flex;align-items:center;gap:10px;min-height:48px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--text);font-size:15px;padding:0 12px;text-align:left}
+.targets button.sel{border-color:#ff6b5b;background:#3a1714}
+.targets .d{width:26px;height:26px;border-radius:50%;background:#b8433a;display:grid;place-items:center;font-size:12px;font-weight:700;border:1.5px solid #ffd2cc}
+.targets small{margin-left:auto;color:var(--muted)}
+.log{font-size:12px;color:var(--muted);padding:0 12px 14px;min-height:30px}
+.note{max-width:1100px;margin:0 auto;padding:0 16px 40px;color:var(--muted);font-size:13px;line-height:1.55}
+.note b{color:var(--text)}
+@media (max-width:700px){.wrap{padding:8px 10px 24px}.phone{flex-basis:100%}}
+</style>
+</head>
+<body>
+<header><div class="t">LA TAVERNE · MAQUETTE · VISION</div><div class="s">Écran Table (télé) + téléphone d'un joueur, en temps réel</div></header>
+<p class="intro"><b>Essaie :</b> sur le téléphone de Korgan, touche « Se déplacer » puis une case de la petite carte : le jeton bouge aussi sur la télé. Touche un ennemi, puis « Attaquer » : l'animation et les dégâts apparaissent sur la télé. « Sauter » fait bondir Korgan. Le feu, les arbres, les oiseaux et la lumière bougent tout seuls.</p>
+
+<div class="wrap">
+  <div class="tv">
+    <p class="lbl">📺 La télé (la table)</p>
+    <div class="screen" id="screen">
+      <canvas id="map"></canvas>
+      <div class="ini" id="ini"></div>
+    </div>
+    <div class="tvbar">
+      <button id="bJour" class="on">☀️ Jour</button><button id="bNuit">🌙 Nuit</button>
+      <button id="bGrille" class="on">▦ Grille</button><button id="bTour">⏭ Tour suivant (MJ)</button>
+    </div>
+  </div>
+  <div class="phone">
+    <p class="lbl">📱 Le téléphone de Korgan</p>
+    <div class="ph">
+      <div class="top"><b>Korgan</b><span id="pv">PV 32/32 · Vitesse 30 pi</span></div>
+      <div class="mini" id="mini"><canvas id="miniMap"></canvas><div class="cellhit" id="hit"></div></div>
+      <div class="state" id="state"></div>
+      <div class="acts">
+        <button id="aMove">🦶 Se déplacer</button>
+        <button id="aJump">🤸 Sauter</button>
+        <button id="aAtk" class="main" disabled>⚔️ Attaquer</button>
+        <button id="aEnd">✅ Fin du tour</button>
+      </div>
+      <div class="targets" id="targets"></div>
+      <div class="log" id="log"></div>
+    </div>
+  </div>
+</div>
+
+<div class="note">
+  <b>Ce que montre la maquette</b> : (1) la télé affiche la carte, les jetons et l'initiative, le tour actif brille ; (2) chaque joueur bouge son jeton et choisit sa cible sur son téléphone ; (3) des animations simples (coup, dégâts, saut) ; (4) une carte « vivante » : feu qui crépite, arbres qui bougent, oiseaux, jour / nuit.<br>
+  <b>Dans la vraie app</b> : la télé ouvrirait simplement une page « Table » de l'app (navigateur de la télé, Chromecast ou un portable branché en HDMI). Les cartes seraient des images faites par l'IA ou dessinées en code, avec des couches animées par-dessus. Tout passe par la base en temps réel déjà utilisée par l'app.<br>
+  Carte, personnages et ennemis de démonstration.
+</div>
+
+<script>
+// ---------- État partagé (dans la vraie app : Firestore en temps réel) ----------
+const COLS=16, ROWS=9; // une case = 5 pi
+const S={
+  toks:[
+    {id:'K',nom:'Korgan',ally:1,x:5,y:5,pv:32,max:32,ini:18},
+    {id:'L',nom:'Ludo',ally:1,x:2,y:3,pv:21,max:21,ini:15},
+    {id:'A',nom:'Asterak',ally:1,x:4,y:7,pv:27,max:27,ini:9},
+    {id:'H1',nom:'Hobgobelin',ally:0,x:11,y:4,pv:11,max:11,ini:14,ca:18},
+    {id:'H2',nom:'Hobgobelin 2',ally:0,x:12,y:6,pv:11,max:11,ini:7,ca:18},
+    {id:'B',nom:'Baaz',ally:0,x:13,y:2,pv:22,max:22,ini:12,ca:15},
+  ],
+  tour:0, nuit:false, grille:true, mode:null, cible:null, moved:0,
+};
+const order=()=>[...S.toks].sort((a,b)=>b.ini-a.ini);
+const me=()=>S.toks.find(t=>t.id==='K');
+const $=s=>document.querySelector(s);
+
+// ---------- Carte vivante (canvas) ----------
+const trees=[], birds=[], sparks=[];
+let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+for(let i=0;i<26;i++){const x=rnd(),y=rnd();if(x>.3&&x<.62&&y>.25&&y<.8)continue;trees.push({x,y,r:.035+rnd()*.03,ph:rnd()*6})}
+for(let i=0;i<4;i++)birds.push({x:rnd(),y:.1+rnd()*.3,v:.0006+rnd()*.0006,ph:rnd()*6});
+const fire={x:.47,y:.55};
+function draw(cv,small){
+  const w=cv.width=cv.clientWidth*devicePixelRatio, h=cv.height=cv.clientHeight*devicePixelRatio, c=cv.getContext('2d'), t=performance.now()/1000;
+  // sol
+  const g=c.createRadialGradient(w*.47,h*.55,10,w*.5,h*.5,w*.7);g.addColorStop(0,'#5b6b3a');g.addColorStop(1,'#26331c');c.fillStyle=g;c.fillRect(0,0,w,h);
+  // rivière
+  c.strokeStyle='#2f5f7a';c.lineWidth=h*.07;c.beginPath();c.moveTo(w*.72,-10);c.bezierCurveTo(w*.62,h*.35,w*.86,h*.6,w*.74,h+10);c.stroke();
+  c.strokeStyle='rgba(180,220,240,.25)';c.lineWidth=2*devicePixelRatio;c.setLineDash([10,14]);c.lineDashOffset=-t*30;c.stroke();c.setLineDash([]);
+  // sentier
+  c.strokeStyle='#7a6a48';c.lineWidth=h*.05;c.beginPath();c.moveTo(-10,h*.6);c.quadraticCurveTo(w*.3,h*.5,w*.47,h*.55);c.stroke();
+  // pierres autour du feu
+  c.fillStyle='#6d6a64';for(let i=0;i<8;i++){const a=i/8*6.28;c.beginPath();c.arc(w*fire.x+Math.cos(a)*h*.045,h*fire.y+Math.sin(a)*h*.045,h*.012,0,7);c.fill()}
+  // grille
+  if(S.grille){c.strokeStyle='rgba(255,255,255,.08)';c.lineWidth=1;for(let i=1;i<COLS;i++){c.beginPath();c.moveTo(i*w/COLS,0);c.lineTo(i*w/COLS,h);c.stroke()}for(let j=1;j<ROWS;j++){c.beginPath();c.moveTo(0,j*h/ROWS);c.lineTo(w,j*h/ROWS);c.stroke()}}
+  // arbres qui bougent
+  for(const tr of trees){const sx=Math.sin(t*1.3+tr.ph)*h*.004, X=tr.x*w+sx, Y=tr.y*h, R=tr.r*h*1.6;
+    c.fillStyle='rgba(0,0,0,.35)';c.beginPath();c.ellipse(tr.x*w+R*.25,Y+R*.3,R,R*.6,0,0,7);c.fill();
+    c.fillStyle='#1f4a26';c.beginPath();c.arc(X,Y,R,0,7);c.fill();c.fillStyle='#2f6b35';c.beginPath();c.arc(X-R*.25,Y-R*.25,R*.6,0,7);c.fill()}
+  // feu qui crépite
+  if(!small||sparks.length<40){for(let i=0;i<2;i++)sparks.push({x:fire.x+(Math.random()-.5)*.01,y:fire.y,v:.002+Math.random()*.003,l:1})}
+  const fl=1+Math.sin(t*9)*.08+Math.sin(t*23)*.05;
+  const fg=c.createRadialGradient(w*fire.x,h*fire.y,0,w*fire.x,h*fire.y,h*.06*fl);fg.addColorStop(0,'#fff3b0');fg.addColorStop(.4,'#ff9a2e');fg.addColorStop(1,'rgba(255,80,0,0)');c.fillStyle=fg;c.beginPath();c.arc(w*fire.x,h*fire.y,h*.06*fl,0,7);c.fill();
+  for(const s of sparks){s.y-=s.v;s.x+=(Math.random()-.5)*.002;s.l-=.02;c.fillStyle=`rgba(255,${150+Math.random()*80|0},40,${Math.max(0,s.l)})`;c.fillRect(s.x*w,s.y*h,2*devicePixelRatio,2*devicePixelRatio)}
+  for(let i=sparks.length-1;i>=0;i--)if(sparks[i].l<=0)sparks.splice(i,1);
+  // nuit + lumière du feu
+  if(S.nuit){c.fillStyle='rgba(5,10,30,.62)';c.fillRect(0,0,w,h);c.globalCompositeOperation='lighter';const lg=c.createRadialGradient(w*fire.x,h*fire.y,0,w*fire.x,h*fire.y,h*.45*fl);lg.addColorStop(0,'rgba(255,150,60,.45)');lg.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=lg;c.fillRect(0,0,w,h);c.globalCompositeOperation='source-over'}
+  // oiseaux (de jour)
+  if(!S.nuit)for(const b of birds){b.x+=b.v;if(b.x>1.05)b.x=-.05;const X=b.x*w,Y=(b.y+Math.sin(t+b.ph)*.02)*h,f=Math.sin(t*10+b.ph)*h*.01,s=h*.018;c.strokeStyle='#111';c.lineWidth=1.5*devicePixelRatio;c.beginPath();c.moveTo(X-s,Y-f);c.quadraticCurveTo(X-s/2,Y-s/2,X,Y);c.quadraticCurveTo(X+s/2,Y-s/2,X+s,Y-f);c.stroke()}
+}
+function loop(){draw($('#map'));draw($('#miniMap'),1);requestAnimationFrame(loop)}
+
+// ---------- Jetons sur la télé et le téléphone ----------
+function place(container,c){
+  container.querySelectorAll('.tok,.reach').forEach(e=>e.remove());
+  const r=container.getBoundingClientRect(), cw=r.width/COLS, chh=r.height/ROWS, size=Math.min(cw,chh)*.86;
+  container.style.setProperty('--c',size+'px');
+  const actif=order()[S.tour%S.toks.length];
+  if(S.mode==='move'&&c==='mini'){const m=me(),rad=(6-S.moved)*cw;const d=document.createElement('div');d.className='reach';Object.assign(d.style,{left:((m.x+.5)*cw-rad)+'px',top:((m.y+.5)*chh-rad)+'px',width:rad*2+'px',height:rad*2+'px'});container.appendChild(d)}
+  for(const t of S.toks){const d=document.createElement('div');d.className='tok '+(t.ally?'ally':'en')+(t===actif?' active':'')+(S.cible===t.id?' target':'')+(t.pv<=0?' dead':'');d.dataset.id=t.id;
+    d.style.left=(t.x+.5)*cw+'px';d.style.top=(t.y+.5)*chh+'px';d.innerHTML=(t.ally?t.nom[0]:(t.id.startsWith('H')?'H':'B'))+`<span class="hp"><i style="width:${Math.max(0,t.pv/t.max*100)}%"></i></span>`;
+    if(c==='mini'&&!t.ally&&t.pv>0)d.onclick=e=>{e.stopPropagation();choisir(t.id)};
+    container.appendChild(d)}
+}
+function renderIni(){const o=order(),a=S.tour%o.length;$('#ini').innerHTML=o.map((t,i)=>`<div class="${i===a?'on':''} ${t.ally?'':'en'}">${t.ini} · ${t.nom}</div>`).join('')}
+function render(){place($('#screen'),'tv');place($('#mini'),'mini');renderIni();
+  const m=me(), actif=order()[S.tour%S.toks.length], monTour=actif===m;
+  $('#pv').textContent=`PV ${m.pv}/${m.max} · Vitesse 30 pi`;
+  $('#state').innerHTML=monTour?(S.mode==='move'?`<b>Touche une case</b> dans le cercle bleu.<br><small>Il te reste ${(6-S.moved)*5} pi de mouvement.</small>`:`<b>C'est ton tour !</b><br><small>${(6-S.moved)*5} pi de mouvement · Action disponible</small>`):`<b>Tour de ${actif.nom}</b><br><small>Attends ton tour… (bouton MJ « Tour suivant » sous la télé)</small>`;
+  ['#aMove','#aJump','#aEnd'].forEach(s=>$(s).disabled=!monTour);
+  $('#aAtk').disabled=!(monTour&&S.cible);
+  const ens=S.toks.filter(t=>!t.ally&&t.pv>0);
+  $('#targets').innerHTML=monTour?ens.map(t=>`<button class="${S.cible===t.id?'sel':''}" data-t="${t.id}"><span class="d">${t.id.startsWith('H')?'H':'B'}</span>${t.nom}<small>${Math.round(dist(m,t))} pi · PV ${t.pv}/${t.max}</small></button>`).join(''):'';
+  document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>choisir(b.dataset.t));
+}
+const dist=(a,b)=>Math.max(Math.abs(a.x-b.x),Math.abs(a.y-b.y))*5;
+function choisir(id){S.cible=S.cible===id?null:id;S.mode=null;render()}
+function log(t){$('#log').textContent=t}
+function fx(tok,txt,slash){const sc=$('#screen'),r=sc.getBoundingClientRect(),cw=r.width/COLS,ch=r.height/ROWS,x=(tok.x+.5)*cw,y=(tok.y+.5)*ch;
+  if(slash){const s=document.createElementNS('http://www.w3.org/2000/svg','svg');s.setAttribute('viewBox','0 0 100 100');s.classList.add('slash');s.style.left=x+'px';s.style.top=y+'px';s.innerHTML='<path d="M15 85 L85 15" stroke="#fff" stroke-width="7" stroke-linecap="round"/><path d="M25 90 L90 25" stroke="#ff8a5b" stroke-width="4" stroke-linecap="round"/>';sc.appendChild(s);setTimeout(()=>s.remove(),600)}
+  const d=document.createElement('div');d.className='fx';d.textContent=txt;d.style.left=x+'px';d.style.top=(y-10)+'px';sc.appendChild(d);setTimeout(()=>d.remove(),1500)}
+
+// ---------- Actions du téléphone ----------
+$('#aMove').onclick=()=>{S.mode=S.mode==='move'?null:'move';render()};
+$('#hit').onclick=e=>{if(S.mode!=='move')return;const r=$('#mini').getBoundingClientRect(),x=Math.floor((e.clientX-r.left)/r.width*COLS),y=Math.floor((e.clientY-r.top)/r.height*ROWS),m=me();
+  const d=dist(m,{x,y})/5;if(d>6-S.moved){log('Trop loin : '+d*5+' pi.');return}if(S.toks.some(t=>t.x===x&&t.y===y&&t.pv>0)){log('Case occupée.');return}
+  m.x=x;m.y=y;S.moved+=d;S.mode=null;log(`Korgan avance de ${d*5} pi.`);render()};
+$('#aJump').onclick=()=>{const m=me();render();const el=$('#screen').querySelector('[data-id="K"]');el.classList.add('jump');fx(m,'Saut !');log('Korgan saute (saut en longueur : 16 pi avec élan).')};
+$('#aAtk').onclick=()=>{const m=me(),t=S.toks.find(x=>x.id===S.cible);if(dist(m,t)>5){log(`${t.nom} est à ${dist(m,t)} pi : approche-toi (portée 5 pi).`);return}
+  const d20=Math.ceil(Math.random()*20),tot=d20+7;
+  if(tot<t.ca&&d20!==20){fx(t,'Raté');log(`Maul : ${d20}+7 = ${tot} contre CA ${t.ca}, raté.`);$('#aAtk').disabled=true;return}
+  const dmg=(d20===20?2:1)*(Math.ceil(Math.random()*6)+Math.ceil(Math.random()*6))+4+2;t.pv=Math.max(0,t.pv-dmg);
+  fx(t,(d20===20?'CRITIQUE ':'')+'−'+dmg,true);log(`Maul : ${tot} touche ! ${dmg} dégâts (Rage comprise).${t.pv<=0?' '+t.nom+' tombe !':''}`);if(t.pv<=0)S.cible=null;setTimeout(render,700)};
+function next(){S.tour++;S.moved=0;S.mode=null;let g=0;while(order()[S.tour%S.toks.length].pv<=0&&g++<10)S.tour++;
+  const a=order()[S.tour%S.toks.length];
+  if(!a.ally){setTimeout(()=>{const k=me();const atk=Math.random()<.6;if(atk){const dmg=Math.ceil(Math.random()*8)+1;const net=Math.floor(dmg/2);k.pv=Math.max(0,k.pv-net);fx(k,'−'+net,true);log(`${a.nom} frappe Korgan : ${dmg} tranchant, ${net} avec la Rage.`)}else{fx(k,'Raté');log(`${a.nom} rate Korgan.`)}render()},500)}
+  render()}
+$('#aEnd').onclick=next;$('#bTour').onclick=next;
+$('#bJour').onclick=()=>{S.nuit=false;$('#bJour').classList.add('on');$('#bNuit').classList.remove('on')};
+$('#bNuit').onclick=()=>{S.nuit=true;$('#bNuit').classList.add('on');$('#bJour').classList.remove('on')};
+$('#bGrille').onclick=()=>{S.grille=!S.grille;$('#bGrille').classList.toggle('on',S.grille)};
+addEventListener('resize',render);
+render();loop();
+</script>
+</body>
+</html>
