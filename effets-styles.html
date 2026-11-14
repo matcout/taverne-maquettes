@@ -110,6 +110,13 @@ details[open] summary{border-bottom:1px solid var(--line)}
   <button class="btn full" data-cast="Hold Person">🧊 Ludo lance Hold Person</button>
 </div>
 
+<div class="box">
+  <h2>Le MJ attaque un joueur</h2>
+  <p style="color:var(--muted);font-size:13px;line-height:1.4;margin:8px 0">Idée de Mathieu : le MJ choisit la cible. Si l'attaque touche, le joueur a quelques secondes pour une réaction, puis les dégâts sont retirés tout seuls de ses PV.</p>
+  <div class="active"><div class="n">Korgan <small id="pvK">PV 32 / 32 · CA 15 · en Rage</small></div></div>
+  <button class="btn full" id="mjAtk">👹 Hobgobelin : Longsword</button>
+</div>
+
 <!-- Feuille (A et C) -->
 <div class="sheet-bg" id="bg"></div>
 <div class="sheet" id="sheet">
@@ -298,6 +305,35 @@ function cast(n){
   draw();openSheet();
 }
 document.querySelectorAll('[data-cast]').forEach(b=>b.onclick=()=>cast(b.dataset.cast));
+
+// ---------- Le MJ attaque : cible, toucher, réaction, dégâts automatiques ----------
+let pvK=32;
+function mjAttack(){
+  const cibles=[{nom:'Korgan',ca:15},{nom:'Ludo',ca:14},{nom:'Asterak',ca:18}];
+  $('#sheetHead').innerHTML=`<h2>👹 Hobgobelin attaque</h2><div style="color:var(--muted);font-size:13px;margin-top:4px">Longsword · +3 pour toucher · 1d8 + 1 tranchant · étape 1 : la cible</div>`;
+  $('#sheetList').innerHTML=cibles.map(c=>`<button class="row" data-cible="${c.nom}"><span class="ic">${c.nom[0]}</span><span style="flex:1"><b>${c.nom}</b><small>CA ${c.ca}</small></span></button>`).join('');
+  document.querySelectorAll('[data-cible]').forEach(b=>b.onclick=()=>toucher(cibles.find(c=>c.nom===b.dataset.cible)));
+  openSheet();
+}
+function toucher(c){
+  const d20=14, total=d20+3, touche=total>=c.ca;
+  $('#sheetHead').innerHTML=`<h2>🎲 ${total} contre CA ${c.ca}</h2><div style="color:var(--muted);font-size:13px;margin-top:4px">d20 = ${d20}, +3 · étape 2 : ${touche?'ça touche':'raté'}</div>`;
+  $('#sheetList').innerHTML=touche?`<div class="desc"><b>Écran de ${c.nom}</b> (son téléphone vibre) :<br>« Le Hobgobelin te touche avec 17. Une réaction ? »</div>
+    <div class="seg" style="margin-top:10px"><button id="r1">Pas de réaction</button><button id="r2">Shield (+5 CA)</button><button id="r3">Cutting Words (Ludo)</button></div>
+    <div style="font-size:12px;color:var(--muted);margin-top:8px">⏳ 10 secondes, puis « pas de réaction » par défaut. Le MJ voit « en attente de ${c.nom}… ».</div>`
+    :`<div class="desc">Raté, aucun dégât.</div><button class="btn full" id="fin">Fermer</button>`;
+  if(!touche){$('#fin').onclick=closeSheet;return}
+  $('#r1').onclick=()=>degats(c);
+  $('#r2').onclick=()=>{$('#sheetList').innerHTML=`<div class="desc">Shield : CA ${c.ca+5}. 17 ne touche plus. Attaque annulée ✨</div><button class="btn full" id="fin">Fermer</button>`;$('#fin').onclick=closeSheet};
+  $('#r3').onclick=()=>{$('#sheetList').innerHTML=`<div class="desc">Ludo lance Cutting Words : −1d6 = −4. Total 13 contre CA ${c.ca} : raté ✨</div><button class="btn full" id="fin">Fermer</button>`;$('#fin').onclick=closeSheet};
+}
+function degats(c){
+  const brut=7, rage=c.nom==='Korgan', net=rage?Math.floor(brut/2):brut;
+  $('#sheetHead').innerHTML=`<h2>🩸 Dégâts : ${brut} tranchant</h2><div style="color:var(--muted);font-size:13px;margin-top:4px">1d8 = 6, +1 · étape 3 : retrait automatique</div>`;
+  $('#sheetList').innerHTML=`<div class="desc">${rage?'Korgan est en Rage : résistance au tranchant, 7 ÷ 2 = <b>3</b>.<br>':''}PV de ${c.nom} : ${c.nom==='Korgan'?pvK:'…'} → <b>${c.nom==='Korgan'?pvK-net:'…'}</b></div><button class="btn main full" id="appl">Retirer ${net} PV à ${c.nom}</button><div style="font-size:12px;color:var(--muted);margin-top:8px">Le MJ peut corriger avant de valider (ex. autre résistance).</div>`;
+  $('#appl').onclick=()=>{if(c.nom==='Korgan'){pvK-=net;$('#pvK').textContent=`PV ${pvK} / 32 · CA 15 · en Rage`}closeSheet();toast(`${c.nom} perd ${net} PV`)};
+}
+$('#mjAtk').onclick=mjAttack;
 renderActifs();setStyle('A');
 </script>
 </body>
