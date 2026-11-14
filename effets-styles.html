@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Taverne · Ajouter un effet (3 styles)</title>
+<style>
+:root{
+  --bg:#0d0b09; --card:#17130f; --card2:#211b15; --line:#3a2f22; --gold:#c9a96a; --gold2:#e6cf9a;
+  --text:#ece3d3; --muted:#a39580; --good:#6fbf73; --bad:#d9675b; --spell:#8fa8e0; --class:#d7a24e; --cond:#c47ad1;
+  --r:12px; --serif:Georgia,"Times New Roman",serif; --sans:-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box} html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans)}
+body{max-width:480px;margin:0 auto;min-height:100vh;padding-bottom:40px}
+header{padding:14px 16px 8px;border-bottom:1px solid var(--line)}
+header .t{font-family:var(--serif);letter-spacing:.12em;font-size:13px;color:var(--gold2)}
+header .s{font-family:var(--serif);font-size:15px}
+.tabs{display:flex;gap:6px;padding:12px 16px;position:sticky;top:0;background:var(--bg);z-index:5;border-bottom:1px solid var(--line)}
+.tabs button{flex:1;padding:10px 4px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--muted);font-size:13px}
+.tabs button.on{border-color:var(--gold);color:var(--gold2);background:var(--card2)}
+.intro{padding:10px 16px;color:var(--muted);font-size:13px;line-height:1.4}
+h2{font-family:var(--serif);font-variant:small-caps;letter-spacing:.08em;font-size:19px;margin:0;color:var(--gold2)}
+h3{font-family:var(--serif);font-variant:small-caps;letter-spacing:.06em;font-size:15px;margin:16px 0 8px;color:var(--gold)}
+.box{margin:12px 16px;padding:14px;border:1px solid var(--line);border-radius:var(--r);background:var(--card)}
+.active{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.active:last-of-type{border-bottom:none}
+.active .n{flex:1} .active .n small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.pill{font-size:11px;padding:3px 8px;border-radius:99px;border:1px solid currentColor;white-space:nowrap}
+.good{color:var(--good)} .bad{color:var(--bad)}
+.btn{min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--gold);background:transparent;color:var(--gold2);font-size:15px}
+.btn.full{width:100%;margin-top:12px;background:var(--card2)}
+.btn.main{background:var(--gold);color:#1a140c;border-color:var(--gold);font-weight:600}
+.x{min-width:44px;min-height:44px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--muted);font-size:18px}
+.search{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:0 12px;min-height:46px}
+.search input{flex:1;background:transparent;border:none;color:var(--text);font-size:16px;outline:none}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:10px 0 4px;scrollbar-width:none}
+.chip{flex:none;min-height:36px;padding:0 12px;border-radius:99px;border:1px solid var(--line);background:var(--card);color:var(--muted);font-size:13px}
+.chip.on{border-color:var(--gold);color:var(--gold2)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.k-sort{background:var(--spell)} .k-classe{background:var(--class)} .k-etat{background:var(--cond)}
+/* Style A : feuille avec recherche */
+.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;z-index:20}
+.sheet{position:fixed;left:0;right:0;bottom:0;max-width:480px;margin:0 auto;max-height:86vh;display:flex;flex-direction:column;background:var(--card);border-top:1px solid var(--gold);border-radius:18px 18px 0 0;z-index:21;transform:translateY(105%);transition:transform .25s}
+.sheet.open{transform:none} .sheet-bg.open{display:block}
+.sheet .grab{width:44px;height:5px;border-radius:3px;background:var(--line);margin:8px auto}
+.sheet .head{padding:4px 16px 8px}
+.sheet .list{overflow-y:auto;padding:0 16px 16px}
+.row{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;padding:12px 4px;border:none;border-bottom:1px solid var(--line);background:transparent;color:var(--text)}
+.row .ic{width:34px;height:34px;flex:none;border-radius:9px;display:grid;place-items:center;font-size:18px;background:var(--card2);border:1px solid var(--line)}
+.row b{font-weight:600} .row small{display:block;color:var(--muted);font-size:12.5px;line-height:1.35;margin-top:3px}
+.row .who{font-size:11px;color:var(--gold);margin-top:4px}
+.grp-title{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:14px 0 2px}
+.empty{color:var(--muted);padding:20px 4px;font-size:14px}
+/* Étape réglages */
+.cfg label{display:block;font-size:12px;color:var(--muted);margin:14px 0 6px;letter-spacing:.05em;text-transform:uppercase}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{min-height:40px;padding:0 12px;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:14px}
+.seg button.on{border-color:var(--gold);background:var(--card2);color:var(--gold2)}
+.desc{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13.5px;line-height:1.45;color:var(--text)}
+/* Style B : accordéons par personnage */
+details{border:1px solid var(--line);border-radius:10px;margin-top:8px;background:var(--bg)}
+summary{list-style:none;cursor:pointer;min-height:48px;display:flex;align-items:center;gap:10px;padding:0 12px;font-family:var(--serif);font-size:16px}
+summary::-webkit-details-marker{display:none}
+summary .c{margin-left:auto;font-family:var(--sans);font-size:12px;color:var(--muted)}
+summary .av{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--card2);border:1px solid var(--gold);font-size:13px;color:var(--gold2)}
+details[open] summary{border-bottom:1px solid var(--line)}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px}
+.tile{min-height:64px;text-align:left;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--text);font-size:14px;position:relative}
+.tile small{display:block;color:var(--muted);font-size:11.5px;margin-top:3px;line-height:1.3}
+.tile.good{border-left:3px solid var(--good)} .tile.bad{border-left:3px solid var(--bad)}
+.tile.pick{border-color:var(--gold);background:var(--card2)}
+.tile.pick::after{content:"✓";position:absolute;top:6px;right:9px;color:var(--gold2)}
+.bar{position:sticky;bottom:0;margin:12px -14px -14px;padding:12px 14px;background:var(--card2);border-top:1px solid var(--gold);border-radius:0 0 var(--r) var(--r);display:none;gap:8px;align-items:center}
+.bar.show{display:flex} .bar span{flex:1;font-size:13px;color:var(--gold2)}
+/* Style C : cartes illustrées */
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ecard{aspect-ratio:3/4;border-radius:12px;border:1px solid var(--line);background:linear-gradient(160deg,var(--card2),var(--bg));color:var(--text);padding:8px 6px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;text-align:center;font-size:12.5px}
+.ecard .em{font-size:30px;margin-top:6px}
+.ecard .src{font-size:10px;color:var(--muted)}
+.ecard.sort{border-top:3px solid var(--spell)} .ecard.classe{border-top:3px solid var(--class)} .ecard.etat{border-top:3px solid var(--cond)}
+.ecard.more{border-style:dashed;color:var(--gold2)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--gold);color:#1a140c;padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:opacity .2s;z-index:40;pointer-events:none}
+.toast.show{opacity:1}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:8px}
+.hide{display:none}
+</style>
+</head>
+<body>
+<header><div class="t">LA TAVERNE · MAQUETTE</div><div class="s">Ajouter un effet — 3 styles à comparer</div></header>
+<div class="tabs">
+  <button data-s="A" class="on">A · Recherche</button>
+  <button data-s="B">B · Par personnage</button>
+  <button data-s="C">C · Cartes</button>
+</div>
+<p class="intro" id="intro"></p>
+
+<div class="box">
+  <h2>Effets</h2>
+  <div id="actifs"></div>
+  <button class="btn full" id="ajout">＋ Ajouter un effet</button>
+  <div id="zoneB" class="hide"></div>
+  <div id="zoneC" class="hide"></div>
+</div>
+
+<div class="box">
+  <h2>Lancer un sort sur d'autres</h2>
+  <p style="color:var(--muted);font-size:13px;line-height:1.4;margin:8px 0">Idée de Mathieu : quand Asterak lance Bless, une fenêtre demande sur qui. On touche les personnages, et l'effet apparaît tout seul sur leur fiche. Pareil pour un sort d'attaque sur une créature.</p>
+  <button class="btn full" data-cast="Bless">🙏 Asterak lance Bless</button>
+  <button class="btn full" data-cast="Shield of Faith">🛡️ Asterak lance Shield of Faith</button>
+  <button class="btn full" data-cast="Hold Person">🧊 Ludo lance Hold Person</button>
+</div>
+
+<!-- Feuille (A et C) -->
+<div class="sheet-bg" id="bg"></div>
+<div class="sheet" id="sheet">
+  <div class="grab"></div>
+  <div class="head" id="sheetHead"></div>
+  <div class="list" id="sheetList"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// Données fictives de démonstration : le groupe de la campagne Dragonlance
+const GROUPE = [
+  {id:'korgan', nom:'Korgan', cls:'Barbare (Zealot) 3', av:'K'},
+  {id:'ludo', nom:'Ludo', cls:'Barde 3', av:'L'},
+  {id:'asterak', nom:'Asterak', cls:'Clerc (War) 3', av:'A'},
+];
+const E = [
+  // Du groupe
+  {n:'Rage', k:'classe', em:'🔥', bon:1, who:'korgan', dur:'1 min', d:"Avantage aux tests et sauvegardes de Strength, +2 aux dégâts de mêlée en Strength, résistance aux dégâts contondants, perforants et tranchants."},
+  {n:'Reckless Attack', k:'classe', em:'💢', bon:1, who:'korgan', dur:'1 round', d:"Avantage aux attaques de mêlée en Strength ce tour ; les attaques contre toi ont l'avantage jusqu'à ton prochain tour."},
+  {n:'Divine Fury', k:'classe', em:'⚡', bon:1, who:'korgan', dur:'instant', d:"Pendant la Rage, la première créature touchée à chaque tour subit 1d6 + 1 (½ niveau) dégâts radiants ou nécrotiques."},
+  {n:'Bardic Inspiration', k:'classe', em:'🎵', bon:1, who:'ludo', dur:'10 min', d:"Un d6 à ajouter à un test, une attaque ou une sauvegarde, une fois, dans les 10 minutes."},
+  {n:'Vicious Mockery', k:'sort', em:'🗯️', bon:0, who:'ludo', dur:'1 round', d:"La cible a le désavantage à sa prochaine attaque avant la fin de son prochain tour."},
+  {n:'Faerie Fire', k:'sort', em:'✨', bon:0, who:'ludo', dur:'1 min · conc.', d:"Les cibles brillent : les attaques contre elles ont l'avantage, pas d'invisibilité."},
+  {n:"Tasha's Hideous Laughter", k:'sort', em:'😂', bon:0, who:'ludo', dur:'1 min · conc.', d:"La cible tombe Prone et est Incapacitated ; nouvelle sauvegarde de Wisdom à chaque fin de tour."},
+  {n:'Bless', k:'sort', em:'🙏', bon:1, who:'asterak', dur:'1 min · conc.', d:"+1d4 aux attaques et aux sauvegardes."},
+  {n:'Shield of Faith', k:'sort', em:'🛡️', bon:1, who:'asterak', dur:'10 min · conc.', d:"+2 à la CA."},
+  {n:'Guided Strike', k:'classe', em:'🎯', bon:1, who:'asterak', dur:'instant', d:"Channel Divinity : +10 à un jet d'attaque après l'avoir vu."},
+  {n:'Spiritual Weapon', k:'sort', em:'🗡️', bon:1, who:'asterak', dur:'1 min', d:"Arme spectrale : action bonus pour attaquer, 1d8 + mod. de force."},
+  {n:'Aid', k:'sort', em:'💛', bon:1, who:'asterak', dur:'8 h', d:"+5 PV max et PV actuels pour jusqu'à 3 créatures."},
+  // Autres sorts
+  {n:'Bane', k:'sort', em:'⛓️', bon:0, dur:'1 min · conc.', d:"−1d4 aux attaques et aux sauvegardes."},
+  {n:"Hunter's Mark", k:'sort', em:'🏹', bon:1, dur:'1 h · conc.', d:"+1d6 aux dégâts contre la cible marquée ; avantage pour la pister."},
+  {n:'Hex', k:'sort', em:'🕯️', bon:1, dur:'1 h · conc.', d:"+1d6 nécrotique contre la cible ; désavantage à une caractéristique choisie."},
+  {n:'Haste', k:'sort', em:'💨', bon:1, dur:'1 min · conc.', d:"+2 CA, vitesse doublée, avantage aux sauvegardes de Dexterity, une action de plus."},
+  {n:'Slow', k:'sort', em:'🐌', bon:0, dur:'1 min · conc.', d:"−2 CA et sauvegardes de Dex, vitesse ½, pas de réaction."},
+  {n:'Guidance', k:'sort', em:'🧭', bon:1, dur:'1 min · conc.', d:"+1d4 à un test de caractéristique."},
+  {n:'Heroism', k:'sort', em:'🦁', bon:1, dur:'1 min · conc.', d:"Immunisé à Frightened, PV temporaires = mod. à chaque tour."},
+  {n:'Mage Armor', k:'sort', em:'🔷', bon:1, dur:'8 h', d:"CA de base 13 + Dex sans armure."},
+  {n:'Protection from Evil and Good', k:'sort', em:'✝️', bon:1, dur:'10 min · conc.', d:"Certaines créatures ont le désavantage pour t'attaquer."},
+  {n:'Invisibility', k:'sort', em:'👻', bon:1, dur:'1 h · conc.', d:"Invisible jusqu'à ce que tu attaques ou lances un sort."},
+  {n:'Hold Person', k:'sort', em:'🧊', bon:0, dur:'1 min · conc.', d:"La cible est Paralyzed ; sauvegarde à chaque fin de tour."},
+  // Capacités et actions
+  {n:'Dodge', k:'classe', em:'🌀', bon:1, dur:'1 round', d:"Attaques contre toi au désavantage, avantage aux sauvegardes de Dex."},
+  {n:'Help', k:'classe', em:'🤝', bon:1, dur:'1 round', d:"Un allié a l'avantage à sa prochaine attaque ou son prochain test."},
+  {n:'Inspiration (MJ)', k:'classe', em:'⭐', bon:1, dur:'jusqu\'à usage', d:"Avantage à un jet, donné par le MJ."},
+  // États
+  {n:'Blinded', k:'etat', em:'🙈', bon:0, dur:'variable', d:"Échoue aux tests de vue ; attaques au désavantage, attaques contre toi avec avantage."},
+  {n:'Charmed', k:'etat', em:'💘', bon:0, dur:'variable', d:"Ne peut pas attaquer le charmeur, qui a l'avantage aux tests sociaux."},
+  {n:'Deafened', k:'etat', em:'🔇', bon:0, dur:'variable', d:"Ne peut rien entendre."},
+  {n:'Exhaustion', k:'etat', em:'🥱', bon:0, dur:'repos long', d:"Niveaux 1 à 6, malus croissants."},
+  {n:'Frightened', k:'etat', em:'😱', bon:0, dur:'variable', d:"Désavantage aux tests et attaques tant que la source est en vue ; ne peut pas s'en approcher."},
+  {n:'Grappled', k:'etat', em:'🤼', bon:0, dur:'variable', d:"Vitesse 0."},
+  {n:'Incapacitated', k:'etat', em:'💫', bon:0, dur:'variable', d:"Aucune action ni réaction."},
+  {n:'Invisible', k:'etat', em:'🫥', bon:1, dur:'variable', d:"Avantage aux attaques, attaques contre toi au désavantage."},
+  {n:'Paralyzed', k:'etat', em:'🪨', bon:0, dur:'variable', d:"Incapacitated, échoue Str/Dex, coups au corps à corps = critiques."},
+  {n:'Petrified', k:'etat', em:'🗿', bon:0, dur:'variable', d:"Transformé en pierre, résistance à tout."},
+  {n:'Poisoned', k:'etat', em:'🤢', bon:0, dur:'variable', d:"Désavantage aux attaques et aux tests."},
+  {n:'Prone', k:'etat', em:'🛌', bon:0, dur:'jusqu\'à relevé', d:"Attaques au désavantage ; mêlée contre toi avec avantage, distance avec désavantage."},
+  {n:'Restrained', k:'etat', em:'🕸️', bon:0, dur:'variable', d:"Vitesse 0, attaques au désavantage, désavantage aux sauvegardes de Dex."},
+  {n:'Stunned', k:'etat', em:'😵', bon:0, dur:'variable', d:"Incapacitated, échoue Str/Dex, attaques contre toi avec avantage."},
+  {n:'Unconscious', k:'etat', em:'💤', bon:0, dur:'variable', d:"Inconscient, Prone, coups au corps à corps = critiques."},
+];
+const KN = {sort:'Sort', classe:'Capacité', etat:'État'};
+const actifs = [{n:'Bless', r:'8 rounds', bon:1, src:'Asterak'},{n:'Rage', r:'7 rounds', bon:1, src:'Korgan'}];
+let style = 'A', filtre = 'tout', q = '';
+const $ = (s)=>document.querySelector(s);
+const whoName = (id)=> (GROUPE.find(g=>g.id===id)||{}).nom;
+
+function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1800)}
+function renderActifs(){
+  $('#actifs').innerHTML = actifs.map((a,i)=>`<div class="active"><div class="n">${a.n} <span class="pill ${a.bon?'good':'bad'}">${a.bon?'bonus':'malus'}</span><small>${a.r}${a.src?' · de '+a.src:''}</small></div><button class="x" data-del="${i}" aria-label="Retirer">✕</button></div>`).join('');
+  document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{actifs.splice(+b.dataset.del,1);renderActifs();toast('Effet retiré')});
+}
+function addEffect(e,dur,src){actifs.push({n:e.n,r:dur||e.dur,bon:e.bon,src:src||whoName(e.who)});renderActifs();closeSheet();toast(e.n+' ajouté')}
+
+// ---------- Feuille : liste avec recherche (A) ----------
+function openSheet(){$('#sheet').classList.add('open');$('#bg').classList.add('open')}
+function closeSheet(){$('#sheet').classList.remove('open');$('#bg').classList.remove('open')}
+$('#bg').onclick=closeSheet;
+function sheetSearch(){
+  $('#sheetHead').innerHTML = `<h2>Ajouter un effet</h2>
+   <div class="search" style="margin-top:10px"><span>🔍</span><input id="q" placeholder="Chercher : bless, rage, prone…" value="${q}" autocomplete="off"></div>
+   <div class="chips">${['tout','groupe','sort','classe','etat'].map(f=>`<button class="chip ${filtre===f?'on':''}" data-f="${f}">${{tout:'Tout',groupe:'Du groupe',sort:'Sorts',classe:'Capacités',etat:'États'}[f]}</button>`).join('')}</div>`;
+  const inp=$('#q'); inp.oninput=()=>{q=inp.value;listA()};
+  document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{filtre=b.dataset.f;sheetSearch();listA()});
+  listA();
+}
+function listA(){
+  const qq=q.trim().toLowerCase();
+  let items=E.filter(e=>!qq||e.n.toLowerCase().includes(qq)||e.d.toLowerCase().includes(qq));
+  if(filtre==='groupe') items=items.filter(e=>e.who); else if(filtre!=='tout') items=items.filter(e=>e.k===filtre);
+  const row=e=>`<button class="row" data-n="${e.n}"><span class="ic">${e.em}</span><span style="flex:1"><b>${e.n}</b> <span class="pill ${e.bon?'good':'bad'}">${e.bon?'bonus':'malus'}</span><small>${e.d}</small><div class="who"><span class="dot k-${e.k}"></span>${KN[e.k]} · ${e.dur}${e.who?' · '+whoName(e.who):''}</div></span></button>`;
+  let html='';
+  if(!items.length) html=`<div class="empty">Aucun effet trouvé. <br><br><button class="btn" id="perso">＋ Créer « ${q||'effet perso'} »</button></div>`;
+  else if(filtre==='tout'&&!qq){
+    const g=items.filter(e=>e.who);
+    html+=`<div class="grp-title">Du groupe</div>`+g.map(row).join('');
+    for(const k of ['sort','classe','etat']){const l=items.filter(e=>!e.who&&e.k===k);html+=`<div class="grp-title">${{sort:'Autres sorts',classe:'Actions et capacités',etat:'États'}[k]}</div>`+l.map(row).join('')}
+  } else html=items.map(row).join('');
+  $('#sheetList').innerHTML=html;
+  document.querySelectorAll('#sheetList [data-n]').forEach(b=>b.onclick=()=>config(E.find(e=>e.n===b.dataset.n)));
+  const p=$('#perso'); if(p) p.onclick=()=>config({n:q||'Effet perso',k:'classe',em:'✏️',bon:1,dur:'1 min',d:'Effet personnalisé : écris ce qu\'il fait.'});
+}
+// Étape 2 : réglages
+function config(e){
+  let dur=e.dur.split(' · ')[0], src=whoName(e.who)||'';
+  $('#sheetHead').innerHTML=`<button class="x" id="back" aria-label="Retour" style="float:right">←</button><h2>${e.em} ${e.n}</h2><div class="who" style="color:var(--gold);font-size:12px;margin-top:4px"><span class="dot k-${e.k}"></span>${KN[e.k]}${e.dur.includes('conc')?' · concentration':''}</div>`;
+  const durs=['1 round','1 min','10 min','1 h','8 h','jusqu\'à retrait'];
+  if(!durs.includes(dur)) durs.unshift(dur);
+  $('#sheetList').innerHTML=`<div class="cfg"><div class="desc">${e.d}</div>
+   <label>Durée</label><div class="seg" id="sd">${durs.map(d=>`<button class="${d===dur?'on':''}">${d}</button>`).join('')}</div>
+   <label>Qui le donne ?</label><div class="seg" id="ss">${[...GROUPE.map(g=>g.nom),'MJ'].map(n=>`<button class="${n===src?'on':''}">${n}</button>`).join('')}</div>
+   <label>Sur qui ? (plusieurs possibles)</label><div class="seg" id="sc"><button class="on">Moi</button>${GROUPE.map(g=>`<button>${g.nom}</button>`).join('')}<button>Une créature</button></div>
+   <div style="font-size:12px;color:var(--muted);margin-top:6px">L'effet s'ajoute tout seul sur la fiche de chaque personnage choisi.</div>
+   <button class="btn main full" id="ok" style="margin-top:20px">Ajouter ${e.n}</button></div>`;
+  document.querySelectorAll('#sc button').forEach(b=>b.onclick=()=>b.classList.toggle('on'));
+  for(const id of ['sd','ss']) document.querySelectorAll('#'+id+' button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#'+id+' button').forEach(x=>x.classList.remove('on'));b.classList.add('on');if(id==='sd')dur=b.textContent;if(id==='ss')src=b.textContent});
+  $('#back').onclick=()=>{style==='A'?sheetSearch():style==='C'?sheetAllC():closeSheet()};
+  $('#ok').onclick=()=>addEffect(e,dur==='1 min'?'10 rounds':dur,src);
+  openSheet();
+}
+
+// ---------- Style B : accordéons par personnage, sélection multiple ----------
+let picks=new Set();
+function renderB(){
+  const tile=e=>`<button class="tile ${e.bon?'good':'bad'} ${picks.has(e.n)?'pick':''}" data-t="${e.n}">${e.em} ${e.n}<small>${e.dur}</small></button>`;
+  const sec=(titre,av,c,list,open)=>`<details ${open?'open':''}><summary>${av?`<span class="av">${av}</span>`:''}${titre}<span class="c">${c}</span></summary><div class="tiles">${list.map(tile).join('')}</div></details>`;
+  let h=`<h3>Ce que le groupe peut donner</h3>`;
+  GROUPE.forEach((g,i)=>{const l=E.filter(e=>e.who===g.id);h+=sec(g.nom,g.av,g.cls+' · '+l.length,l,i===0)});
+  h+=`<h3>Tout le reste</h3>`;
+  h+=sec('Sorts','',E.filter(e=>!e.who&&e.k==='sort').length+' effets',E.filter(e=>!e.who&&e.k==='sort'));
+  h+=sec('Actions et capacités','',E.filter(e=>!e.who&&e.k==='classe').length+' effets',E.filter(e=>!e.who&&e.k==='classe'));
+  h+=sec('États (conditions)','',E.filter(e=>e.k==='etat').length+' effets',E.filter(e=>e.k==='etat'));
+  h+=`<div class="legend"><span><span class="dot" style="background:var(--good)"></span>bonus</span><span><span class="dot" style="background:var(--bad)"></span>malus</span><span>Touche plusieurs effets, puis « Ajouter ».</span></div>`;
+  h+=`<div class="bar ${picks.size?'show':''}"><span>${picks.size} effet(s) choisi(s)</span><button class="btn" id="clr">Vider</button><button class="btn main" id="addB">Ajouter</button></div>`;
+  $('#zoneB').innerHTML=h;
+  document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{picks.has(b.dataset.t)?picks.delete(b.dataset.t):picks.add(b.dataset.t);const open=[...document.querySelectorAll('#zoneB details')].map(d=>d.open);renderB();document.querySelectorAll('#zoneB details').forEach((d,i)=>d.open=open[i])});
+  const c=$('#clr'); if(c) c.onclick=()=>{picks.clear();renderB()};
+  const a=$('#addB'); if(a) a.onclick=()=>{const n=picks.size;picks.forEach(p=>{const e=E.find(x=>x.n===p);actifs.push({n:e.n,r:e.dur.split(' · ')[0],bon:e.bon,src:whoName(e.who)})});picks.clear();renderActifs();renderB();toast(n+' effet(s) ajouté(s)')};
+}
+
+// ---------- Style C : cartes illustrées ----------
+function renderC(){
+  const card=e=>`<button class="ecard ${e.k}" data-c="${e.n}"><span class="em">${e.em}</span><span>${e.n}</span><span class="src">${e.who?whoName(e.who):KN[e.k]}</span></button>`;
+  let h=`<h3>Du groupe</h3><div class="cards">${E.filter(e=>e.who).slice(0,8).map(card).join('')}<button class="ecard more" id="moreC"><span class="em">📜</span><span>Tous les effets</span><span class="src">${E.length} au total</span></button></div>`;
+  h+=`<h3>Récents</h3><div class="cards">${['Prone','Poisoned',"Hunter's Mark"].map(n=>card(E.find(e=>e.n===n))).join('')}</div>`;
+  h+=`<div class="legend"><span><span class="dot k-sort"></span>sort</span><span><span class="dot k-classe"></span>capacité</span><span><span class="dot k-etat"></span>état</span></div>`;
+  $('#zoneC').innerHTML=h;
+  document.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>config(E.find(e=>e.n===b.dataset.c)));
+  $('#moreC').onclick=sheetAllC;
+}
+function sheetAllC(){filtre='tout';q='';sheetSearch();openSheet()}
+
+const INTRO={
+  A:"<b>A · Recherche</b> : « Ajouter un effet » ouvre une feuille avec une barre de recherche et des filtres. Le groupe en premier, puis tous les sorts, capacités et états (40+), avec ce que chaque effet fait. On choisit, puis on règle durée, source et cible.",
+  B:"<b>B · Par personnage</b> : tout est déjà visible, rangé par personnage du groupe (Korgan, Ludo, Asterak), puis par famille. Vert = bonus, rouge = malus. On peut en cocher plusieurs d'un coup (ex. Bless + Shield of Faith).",
+  C:"<b>C · Cartes</b> : de grosses cartes avec une icône, couleur par famille (sort, capacité, état). Les effets du groupe et les récents d'abord ; « Tous les effets » ouvre la recherche."
+};
+function setStyle(s){
+  style=s;document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.s===s));
+  $('#intro').innerHTML=INTRO[s];
+  $('#ajout').classList.toggle('hide',s!=='A');
+  $('#zoneB').classList.toggle('hide',s!=='B');$('#zoneC').classList.toggle('hide',s!=='C');
+  closeSheet(); if(s==='B')renderB(); if(s==='C')renderC();
+}
+$('#ajout').onclick=()=>{filtre='tout';q='';sheetSearch();openSheet()};
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>setStyle(b.dataset.s));
+// ---------- Lancer un sort : choix des cibles ----------
+const CAST={'Bless':{max:3,src:'Asterak',cib:'allies',slot:'niveau 1'},'Shield of Faith':{max:1,src:'Asterak',cib:'allies',slot:'niveau 1'},'Hold Person':{max:1,src:'Ludo',cib:'ennemis',slot:'niveau 2',dd:13}};
+const ENNEMIS=[{nom:'Draconien baaz',av:'🐉',pv:'11/11'},{nom:'Hobgobelin',av:'👹',pv:'7/11'},{nom:'Hobgobelin 2',av:'👹',pv:'11/11'}];
+function cast(n){
+  const e=E.find(x=>x.n===n), c=CAST[n]; const sel=new Set();
+  const list=c.cib==='allies'?[{nom:'Moi',av:'🙂'},...GROUPE.filter(g=>g.nom!==c.src).map(g=>({nom:g.nom,av:g.av})),{nom:'Zéphira',av:'Z'}]:ENNEMIS;
+  $('#sheetHead').innerHTML=`<h2>${e.em} ${c.src} lance ${n}</h2><div style="color:var(--muted);font-size:13px;margin-top:4px">Emplacement ${c.slot}${e.dur.includes('conc')?' · concentration':''} · ${c.cib==='allies'?'choisis jusqu\'à '+c.max+' allié(s)':'choisis la cible'}</div>`;
+  const draw=()=>{
+    $('#sheetList').innerHTML=`<div class="desc" style="margin-bottom:10px">${e.d}</div>`+list.map(t=>`<button class="row" data-tg="${t.nom}" style="${sel.has(t.nom)?'background:var(--card2);outline:1px solid var(--gold);border-radius:10px':''}"><span class="ic">${t.av}</span><span style="flex:1"><b>${t.nom}</b>${t.pv?`<small>PV ${t.pv}</small>`:''}</span><span style="font-size:20px;color:var(--gold2)">${sel.has(t.nom)?'✓':''}</span></button>`).join('')+
+    `<button class="btn main full" id="go" ${sel.size?'':'disabled style="opacity:.5"'}>${c.cib==='allies'?`Appliquer à ${sel.size} personnage(s)`:`Lancer : sauvegarde de Wisdom DD ${c.dd}`}</button>`;
+    document.querySelectorAll('[data-tg]').forEach(b=>b.onclick=()=>{const k=b.dataset.tg;if(sel.has(k))sel.delete(k);else{if(sel.size>=c.max){if(c.max===1)sel.clear();else{toast('Maximum '+c.max+' cibles');return}}sel.add(k)}draw()});
+    const g=$('#go'); if(g&&sel.size) g.onclick=()=>{
+      if(sel.has('Moi')) actifs.push({n:e.n,r:e.dur.split(' · ')[0],bon:e.bon,src:c.src});
+      renderActifs();closeSheet();
+      toast(c.cib==='allies'?`${n} ajouté sur : ${[...sel].join(', ')}`:`${[...sel][0]} fait sa sauvegarde…`);
+    };
+  };
+  draw();openSheet();
+}
+document.querySelectorAll('[data-cast]').forEach(b=>b.onclick=()=>cast(b.dataset.cast));
+renderActifs();setStyle('A');
+</script>
+</body>
+</html>
