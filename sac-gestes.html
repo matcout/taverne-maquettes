@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Taverne · Sac : + / − et gestes</title>
+<style>
+:root{--bg:#0d0b09;--card:#17130f;--card2:#211b15;--line:#3a2f22;--gold:#c9a96a;--gold2:#e6cf9a;--text:#ece3d3;--muted:#a39580;--bad:#c4544a;--good:#4f8f57;--blue:#4c6fa8;--serif:Georgia,"Times New Roman",serif;--sans:-apple-system,"Segoe UI",Roboto,sans-serif}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans)}
+body{max-width:480px;margin:0 auto;padding-bottom:60px;user-select:none;-webkit-user-select:none}
+header{padding:14px 16px 8px;border-bottom:1px solid var(--line)}
+header .t{font-family:var(--serif);letter-spacing:.12em;font-size:13px;color:var(--gold2)}
+header .s{font-family:var(--serif);font-size:15px}
+.intro{padding:10px 16px;color:var(--muted);font-size:13px;line-height:1.45}
+.intro b{color:var(--gold2)}
+h2{font-family:var(--serif);font-variant:small-caps;letter-spacing:.08em;font-size:22px;margin:18px 16px 8px;color:var(--gold2)}
+.list{margin:0 16px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.item{position:relative;height:60px;border-bottom:1px solid var(--line);overflow:hidden;touch-action:pan-y}
+.item:last-child{border-bottom:none}
+.under{position:absolute;inset:0;display:flex;justify-content:space-between}
+.under div{display:flex;align-items:center;gap:6px;padding:0 18px;color:#fff;font-size:14px;font-weight:600}
+.under .l{background:var(--good)} .under .r{background:var(--bad);margin-left:auto}
+.front{position:absolute;inset:0;background:var(--card);display:flex;align-items:center;padding:0 6px 0 14px;gap:8px;transition:transform .2s}
+.front.drag{transition:none}
+.front .n{flex:1;font-size:16px;line-height:1.2}
+.front .n small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.qty{display:flex;align-items:center;gap:2px}
+.qty button{width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--card2);color:var(--gold2);font-size:20px;line-height:1}
+.qty span{min-width:34px;text-align:center;font-variant-numeric:tabular-nums;font-size:15px}
+.one{color:var(--muted);font-size:14px;padding-right:10px}
+.pulse{animation:p .25s}
+@keyframes p{50%{transform:scale(1.25);color:var(--gold2)}}
+.legend{margin:14px 16px;padding:12px;border:1px dashed var(--line);border-radius:12px;font-size:13px;line-height:1.6;color:var(--muted)}
+.legend b{color:var(--text)}
+.bg{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;z-index:20}
+.bg.open{display:block}
+.sheet{position:fixed;left:0;right:0;bottom:0;max-width:480px;margin:0 auto;background:var(--card);border-top:1px solid var(--gold);border-radius:18px 18px 0 0;padding:8px 16px 22px;z-index:21;transform:translateY(105%);transition:transform .22s}
+.sheet.open{transform:none}
+.grab{width:44px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 10px}
+.sheet h3{font-family:var(--serif);font-size:19px;margin:4px 0 2px;color:var(--gold2)}
+.sheet p{color:var(--muted);font-size:13px;margin:0 0 12px}
+.act{display:flex;align-items:center;gap:12px;width:100%;min-height:50px;border:none;border-bottom:1px solid var(--line);background:transparent;color:var(--text);font-size:16px;text-align:left;padding:0 4px}
+.act:last-child{border-bottom:none}
+.act .i{width:26px;text-align:center;font-size:18px}
+.act.bad{color:#e08a80}
+.row2{display:flex;gap:8px;margin-top:14px}
+.btn{flex:1;min-height:48px;border-radius:10px;border:1px solid var(--gold);background:transparent;color:var(--gold2);font-size:16px}
+.btn.del{background:var(--bad);border-color:var(--bad);color:#fff;font-weight:600}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--card2);border:1px solid var(--gold);color:var(--text);padding:10px 12px 10px 16px;border-radius:12px;font-size:14px;display:flex;gap:12px;align-items:center;opacity:0;pointer-events:none;transition:opacity .2s;z-index:30;white-space:nowrap}
+.toast.show{opacity:1;pointer-events:auto}
+.toast button{border:none;background:none;color:var(--gold2);font-weight:700;font-size:14px;min-height:36px}
+.hint{display:inline-block;padding:2px 8px;border-radius:99px;border:1px solid var(--line);font-size:12px;margin-right:4px}
+</style>
+</head>
+<body>
+<header><div class="t">LA TAVERNE · MAQUETTE</div><div class="s">Sac : + / − rapides et gestes</div></header>
+<p class="intro"><b>Essaie avec le doigt :</b> + et − à droite des objets qu'on a en plusieurs exemplaires ; <b>glisse vers la gauche</b> pour supprimer (avec confirmation) ; <b>glisse vers la droite</b> pour « Utiliser » (une ration mangée = −1) ; <b>appui long</b> pour toutes les options.</p>
+
+<h2>Objets</h2>
+<div class="list" id="list"></div>
+
+<div class="legend">
+  <b>Les gestes proposés</b><br>
+  <span class="hint">− / +</span> quantité, tout de suite, pour tout objet qu'on peut avoir en plusieurs (rations, torches, flèches, potions…). Un objet unique montre « ×1 » sans boutons ; « + » reste dans l'appui long.<br>
+  <span class="hint">← glisser</span> Supprimer : demande « Supprimer Gourde ? », puis un bouton « Annuler » 5 secondes.<br>
+  <span class="hint">→ glisser</span> Utiliser : retire 1 (ration, potion, flèche) et l'écrit dans l'historique des dés.<br>
+  <span class="hint">appui long</span> Menu : Modifier, Utiliser, Donner à un allié, Équiper / ranger, Dupliquer, Vendre (ajoute l'or à la bourse), Supprimer.<br>
+  Sur ordinateur : clic droit = appui long. Les boutons restent toujours là pour ceux qui n'aiment pas les gestes.
+</div>
+
+<div class="bg" id="bg"></div>
+<div class="sheet" id="sheet"></div>
+<div class="toast" id="toast"><span id="tt"></span><button id="undo">Annuler</button></div>
+
+<script>
+// Objets fictifs de démonstration
+let items=[
+ {n:'Sceau de Kazigaranthi',q:1,u:1},{n:'Cape sombre du clan',q:1,u:1},{n:'Rations',q:7,d:'1 lb chacune · 5 pa'},
+ {n:'Torches',q:10,d:'1 h de lumière'},{n:'Potion of Healing',q:2,d:'2d4 + 2 PV'},{n:'Flèches',q:20},
+ {n:'Gourde',q:1},{n:'Sac de couchage',q:1,u:1},{n:'Piège à gibier',q:1},{n:'Corde de chanvre (50 pi)',q:1}
+];
+const $=s=>document.querySelector(s);
+let undoFn=null,tt=null;
+function toast(msg,undo){$('#tt').textContent=msg;undoFn=undo||null;$('#undo').style.display=undo?'':'none';$('#toast').classList.add('show');clearTimeout(tt);tt=setTimeout(()=>$('#toast').classList.remove('show'),5000)}
+$('#undo').onclick=()=>{if(undoFn)undoFn();$('#toast').classList.remove('show')};
+function render(){
+  $('#list').innerHTML=items.map((it,i)=>`<div class="item" data-i="${i}">
+   <div class="under"><div class="l">🍖 Utiliser</div><div class="r">🗑 Supprimer</div></div>
+   <div class="front"><div class="n">${it.n}${it.d?`<small>${it.d}</small>`:''}</div>
+   ${it.u?`<span class="one">×1</span>`:`<div class="qty"><button data-m="${i}" aria-label="Moins">−</button><span id="q${i}">×${it.q}</span><button data-p="${i}" aria-label="Plus">+</button></div>`}</div></div>`).join('');
+  document.querySelectorAll('[data-m]').forEach(b=>b.onclick=e=>{e.stopPropagation();chg(+b.dataset.m,-1)});
+  document.querySelectorAll('[data-p]').forEach(b=>b.onclick=e=>{e.stopPropagation();chg(+b.dataset.p,1)});
+  document.querySelectorAll('.item').forEach(gest);
+}
+function chg(i,d){const it=items[i];if(it.q+d<0)return;if(it.q+d===0){askDel(i);return}it.q+=d;const s=$('#q'+i);s.textContent='×'+it.q;s.classList.remove('pulse');void s.offsetWidth;s.classList.add('pulse')}
+function use(i){const it=items[i];if(it.q<=1&&it.u){toast(it.n+' : objet unique');return}const before=it.q;chg(i,-1);if(items[i]===it&&it.q!==before)toast(`${it.n} utilisé (×${it.q})`,()=>{it.q=before;render()})}
+function del(i){const [it]=items.splice(i,1);render();toast(it.n+' supprimé',()=>{items.splice(i,0,it);render()})}
+function openSheet(h){$('#sheet').innerHTML='<div class="grab"></div>'+h;$('#sheet').classList.add('open');$('#bg').classList.add('open')}
+function close(){$('#sheet').classList.remove('open');$('#bg').classList.remove('open')}
+$('#bg').onclick=close;
+function askDel(i){const it=items[i];openSheet(`<h3>Supprimer ${it.n} ?</h3><p>${it.u?'Cet objet':'Les '+it.q+' exemplaires'} quitteront le sac. Tu pourras annuler pendant 5 secondes.</p><div class="row2"><button class="btn" id="no">Garder</button><button class="btn del" id="yes">Supprimer</button></div>`);$('#no').onclick=()=>{close();render()};$('#yes').onclick=()=>{close();del(i)}}
+function menu(i){const it=items[i];
+  const acts=[['✏️','Modifier'],['🍖','Utiliser (−1)'],['🤝','Donner à un allié'],['🛡️','Équiper / ranger'],['📄','Dupliquer'],['💰','Vendre'],['🗑','Supprimer','bad']];
+  openSheet(`<h3>${it.n}</h3><p>×${it.q}${it.d?' · '+it.d:''}</p>`+acts.map(([ic,l,c],k)=>`<button class="act ${c||''}" data-a="${k}"><span class="i">${ic}</span>${l}</button>`).join(''));
+  document.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{const k=+b.dataset.a;close();
+    if(k===1)use(i);else if(k===6)askDel(i);else if(k===4){items.splice(i+1,0,{...it});render();toast(it.n+' dupliqué')}
+    else if(k===2)openSheet(`<h3>Donner ${it.n} à…</h3><p>L'objet passe dans le sac de l'allié choisi.</p>`+['Ludo','Asterak','Zéphira'].map(a=>`<button class="act" data-g="${a}"><span class="i">🎒</span>${a}</button>`).join(''))||document.querySelectorAll('[data-g]').forEach(g=>g.onclick=()=>{close();const [x]=items.splice(i,1);render();toast(`${x.n} donné à ${g.dataset.g}`,()=>{items.splice(i,0,x);render()})});
+    else toast(b.textContent.trim()+' : à venir dans l\'app');
+  });
+}
+// Gestes : glisser gauche / droite, appui long
+function gest(el){
+  const i=+el.dataset.i, f=el.querySelector('.front');let x0=0,y0=0,dx=0,on=false,lp=null,moved=false;
+  el.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;on=true;moved=false;x0=e.clientX;y0=e.clientY;dx=0;f.classList.add('drag');
+    lp=setTimeout(()=>{if(!moved){on=false;f.classList.remove('drag');navigator.vibrate&&navigator.vibrate(20);menu(i)}},550)});
+  el.addEventListener('pointermove',e=>{if(!on)return;dx=e.clientX-x0;const dy=e.clientY-y0;if(Math.abs(dx)>8||Math.abs(dy)>8){moved=true;clearTimeout(lp)}
+    if(Math.abs(dy)>Math.abs(dx)&&!f.style.transform)return;f.style.transform=`translateX(${Math.max(-140,Math.min(140,dx))}px)`});
+  const end=()=>{if(!on)return;on=false;clearTimeout(lp);f.classList.remove('drag');f.style.transform='';
+    if(dx<-90)askDel(i);else if(dx>90)use(i)};
+  el.addEventListener('pointerup',end);el.addEventListener('pointercancel',end);el.addEventListener('pointerleave',end);
+  el.addEventListener('contextmenu',e=>{e.preventDefault();clearTimeout(lp);on=false;menu(i)});
+}
+render();
+</script>
+</body>
+</html>
