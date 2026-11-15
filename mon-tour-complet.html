@@ -112,19 +112,19 @@ const S={
     {id:'H2',nom:'Hobgobelin 2',al:0,ini:6,pv:11,max:11,ca:18,fx:[]},
   ],
 };
-// Les actions de Ludo (barde 3, Collège du Savoir) : DD 13, attaque de sort +5
+// Les actions de Ludo (barde 3, Collège du Savoir) : DD 14, attaque de sort +5
 const A=[
  {id:'rap',o:'action',ic:'🗡️',n:'Rapier',d:'Attaque +5 · 1d8+3 perforant · 5 pi',cib:'en',max:1,type:'atk',deg:()=>d(8)+3},
- {id:'vm',o:'action',ic:'🗯️',n:'Vicious Mockery',d:'Cantrip · sauvegarde Wis DD 13 · 1d4 psychique + désavantage à sa prochaine attaque',cib:'en',max:1,type:'save',sv:'Wis',deg:()=>d(4),fx:{n:'Désavantage (Mockery)',t:'mal'},cantrip:1},
- {id:'dw',o:'action',ic:'👂',n:'Dissonant Whispers',d:'Niv. 1 · Wis DD 13 · 3d6 psychique (moitié si réussie), fuit',cib:'en',max:1,type:'save',sv:'Wis',slot:1,deg:()=>d(6)+d(6)+d(6),half:1},
+ {id:'vm',o:'action',ic:'🗯️',n:'Vicious Mockery',d:'Cantrip · sauvegarde Wis DD 14 · 1d4 psychique + désavantage à sa prochaine attaque',cib:'en',max:1,type:'save',sv:'Wis',deg:()=>d(4),fx:{n:'Désavantage (Mockery)',t:'mal'},cantrip:1},
+ {id:'dw',o:'action',ic:'👂',n:'Dissonant Whispers',d:'Niv. 1 · Wis DD 14 · 3d6 psychique (moitié si réussie), fuit',cib:'en',max:1,type:'save',sv:'Wis',slot:1,deg:()=>d(6)+d(6)+d(6),half:1},
  {id:'sl',o:'action',ic:'💤',n:'Sleep',d:'Niv. 1 · 5d8 PV de créatures endormies, en commençant par la plus faible (pas de sauvegarde)',cib:'en',max:3,type:'auto',slot:1,fx:{n:'Unconscious (Sleep)',t:'mal'},sleep:1},
- {id:'hp',o:'action',ic:'🧊',n:'Hold Person',d:'Niv. 2 · concentration · Wis DD 13 · Paralyzed',cib:'en',max:1,type:'save',sv:'Wis',slot:2,conc:1,fx:{n:'Paralyzed',t:'mal'},humanoid:1},
+ {id:'hp',o:'action',ic:'🧊',n:'Hold Person',d:'Niv. 2 · concentration · Wis DD 14 · Paralyzed',cib:'en',max:1,type:'save',sv:'Wis',slot:2,conc:1,fx:{n:'Paralyzed',t:'mal'},humanoid:1},
  {id:'hm',o:'action',ic:'🔥',n:'Heat Metal',d:'Niv. 2 · concentration · 2d8 feu, pas de jet pour toucher',cib:'en',max:1,type:'auto',slot:2,conc:1,deg:()=>d(8)+d(8),fx:{n:'Heat Metal',t:'mal'}},
  {id:'aide',o:'action',ic:'🤝',n:'Help',d:'Un allié a l\'avantage à sa prochaine attaque',cib:'al',max:1,type:'ally',fx:{n:'Avantage (Help)',t:'bon'}},
  {id:'esq',o:'action',ic:'🌀',n:'Dodge',d:'Attaques contre toi au désavantage',cib:'moi',type:'self',fx:{n:'Dodge',t:'bon'}},
  {id:'bi',o:'bonus',ic:'🎵',n:'Bardic Inspiration',d:'Un allié reçoit 1d6 à ajouter à un jet',cib:'al',max:1,type:'ally',bi:1,fx:{n:'Bardic Inspiration d6',t:'bon'},exclMoi:1},
  {id:'hw',o:'bonus',ic:'💚',n:'Healing Word',d:'Niv. 1 · 60 pi · un allié récupère 1d4+3 PV',cib:'al',max:1,type:'heal',slot:1,soin:()=>d(4)+3,spellB:1},
- {id:'taunt',o:'bonus',ic:'😜',n:'Taunt (kender)',d:'Wis DD 13 : la cible a le désavantage contre les autres que toi',cib:'en',max:1,type:'save',sv:'Wis',fx:{n:'Raillé par Ludo',t:'mal'}},
+ {id:'taunt',o:'bonus',ic:'😜',n:'Taunt (kender)',d:'Wis DD 14 : la cible a le désavantage contre les autres que toi',cib:'en',max:1,type:'save',sv:'Wis',fx:{n:'Raillé par Ludo',t:'mal'}},
  {id:'cw',o:'reaction',ic:'✂️',n:'Cutting Words',d:'Quand un ennemi attaque : −1d6 à son jet (Bardic Inspiration)',cib:'en',type:'info',bi:1},
  {id:'mv',o:'mvt',ic:'🦶',n:'Se déplacer',d:'Vitesse 30 pi (sur la carte, plus tard)',type:'mvt'},
  {id:'dash',o:'action',ic:'💨',n:'Dash',d:'Mouvement doublé ce tour',cib:'moi',type:'dash'},
@@ -161,7 +161,7 @@ function cardHTML(c,mode){
 let panneau=false;
 function renderJoueur(){
   const L=ludo(), monTour=actif().id==='L';
-  let h=`<div class="bar"><b>Ludo</b><span>PV ${L.pv}/${L.max} · CA 14 · DD 13</span></div>`;
+  let h=`<div class="bar"><b>Ludo</b><span>PV ${L.pv}/${L.max} · CA 14 · DD 14</span></div>`;
   if(!panneau||!monTour){
     h+=`<h3>Initiative</h3><div class="ini">${ordre().map(c=>cardHTML(c)).join('')}</div>`;
     h+=`<div class="step">${monTour?'<b>C\'est ton tour !</b> Touche ta carte pour voir tes actions.':`<b>Tour de ${actif().nom}</b> · le MJ le joue.`}</div>`;
@@ -206,7 +206,7 @@ function envoyer(){
   use(a);
   const c=cs[0];let txt;
   if(a.type==='atk'){const r=d(20);S.attente={a,c,r,tot:r+5};txt=`Ludo attaque <b>${c.nom}</b> avec ${a.n} : <b>${r+5}</b> pour toucher (d20 = ${r}${r===20?', critique !':''}).`}
-  else if(a.type==='save'){S.attente={a,c};txt=`Ludo lance <b>${a.n}</b> sur <b>${c.nom}</b> : sauvegarde de ${a.sv} DD 13.`}
+  else if(a.type==='save'){S.attente={a,c};txt=`Ludo lance <b>${a.n}</b> sur <b>${c.nom}</b> : sauvegarde de ${a.sv} DD 14.`}
   else {S.attente={a,c,cs,auto:1};txt=`Ludo lance <b>${a.n}</b> sur <b>${cs.map(x=>x.nom).join(', ')}</b> (${a.d}).`}
   S.attente.txt=txt;log('➡️ '+txt.replace(/<[^>]+>/g,''));render();
 }
