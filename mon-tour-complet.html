@@ -197,7 +197,8 @@ function renderJoueur(){
       h+=`<div class="row" style="padding:0 12px 6px"><button class="btn" id="retour">‹ Initiative</button><button class="btn main" id="fin">Fin de mon tour</button></div>`;
     } else {
       const a=S.sel;
-      if(S.attente){h+=`<div class="step">⏳ <b>${a.n}</b> envoyé au MJ.<br><small>En attente de sa décision…</small></div>`}
+      if(S.attente){const insp=S.attente.a.type==='atk'&&!S.attente.insp&&L.fx.some(f=>f.n.startsWith('Bardic Inspiration'));
+        h+=`<div class="step">⏳ <b>${a.n}</b> envoyé au MJ${S.attente.tot?` : <b>${S.attente.tot}</b> pour toucher`:''}.<br><small>En attente de sa décision…</small>${insp?`<div class="row"><button class="btn main" id="useBI">🎵 Ajouter ta Bardic Inspiration (+1d6)</button></div><small>Tu peux l'ajouter après avoir vu le jet, avant que le MJ dise si ça touche.</small>`:''}</div>`}
       else if(a.cib==='moi'){h+=`<div class="step"><b>${a.ic} ${a.n}</b><br>${a.d}</div><div class="row" style="padding:0 12px"><button class="btn" id="annul">Annuler</button><button class="btn main" id="go">Faire</button></div>`}
       else{
         h+=`<div class="step"><b>${a.ic} ${a.n}</b>${a.free?` (${S.fauxPas}/2, repos court)`:''} · touche ${a.cib==='en'?'un ennemi':'un allié'} ci-dessous.<br><small>${a.d}</small></div>`;
@@ -220,6 +221,8 @@ function renderJoueur(){
   const an=$('#annul');if(an)an.onclick=()=>{S.sel=null;S.cible=[];renderJoueur()};
   const g=$('#go');if(g)g.onclick=envoyer;
   document.querySelectorAll('#joueur [data-r]').forEach(b=>b.onclick=()=>reagir(b.dataset.r));
+  const ub=$('#useBI');if(ub)ub.onclick=()=>{const P=S.attente,m=d(6),av=P.tot;P.tot+=m;P.insp=1;vue().fx=vue().fx.filter(f=>!f.n.startsWith('Bardic Inspiration'));
+    P.txt+=` 🎵 + Bardic Inspiration ${m} → <b>${P.tot}</b>`;log(`🎵 ${vue().nom} ajoute sa Bardic Inspiration : ${av} + ${m} = ${P.tot}.`);toast(`+${m} : ${P.tot} pour toucher`);render()};
 }
 function use(a){if(a.free){S.fauxPas--;return}if(a.freeSpell){if(S.langFree>0)S.langFree--;else S.slots[1]--;S.spellAction=true}const k=econKey(a);E()[k]=false;if(a.slot)S.slots[a.slot]--;if(a.bi)S.bi--;if(a.spellB)S.spellBonus=true;if(a.o==='action'&&a.slot)S.spellAction=true;if(a.conc){if(S.conc){S.cr.forEach(c=>c.fx=c.fx.filter(f=>f.n!=='Paralyzed'&&f.n!=='Heat Metal'));log(`Ludo arrête ${S.conc} (une seule concentration).`)}S.conc=a.n}}
 function addFx(c,fx){if(fx&&!c.fx.some(f=>f.n===fx.n))c.fx.push({...fx})}
@@ -232,6 +235,11 @@ function envoyer(){
   const c=cs[0];let txt;
   if(a.type==='atk'){const r=d(20);S.attente={a,c,r,tot:r+5};txt=`${nom} attaque <b>${c.nom}</b> avec ${a.n} : <b>${r+5}</b> pour toucher (d20 = ${r}${r===20?', critique !':''}).`}
   else if(a.type==='save'){S.attente={a,c};txt=`${nom} lance <b>${a.n}</b> sur <b>${c.nom}</b> : sauvegarde de ${a.sv} DD 14.`}
+  else if(a.sleep){const des=[d(8),d(8),d(8),d(8),d(8)];let reste=des.reduce((x,y)=>x+y,0);const total=reste,dorment=[];
+    for(const x of [...cs].sort((u,v)=>u.pv-v.pv)){if(x.pv<=reste){reste-=x.pv;dorment.push(x)}else break}
+    S.attente={a,c,cs:dorment,auto:1};
+    txt=`${nom} lance <b>Sleep</b> 🎲 5d8 : ${des.join(' + ')} = <b>${total}</b> PV de sommeil. En commençant par la plus faible : ${cs.sort((u,v)=>u.pv-v.pv).map(x=>`${x.nom} (${x.pv} PV) ${dorment.includes(x)?'💤':'reste éveillé'}`).join(', ')}.`;
+    if(!dorment.length)S.attente.cs=[];}
   else {S.attente={a,c,cs,auto:1};txt=`${nom} lance <b>${a.n}</b> sur <b>${cs.map(x=>x.nom).join(', ')}</b> (${a.d}).`}
   S.attente.txt=txt;log('➡️ '+txt.replace(/<[^>]+>/g,''));render();
 }
@@ -263,7 +271,7 @@ function decider(ok){
   else if(a.type==='save'){
     if(ok){let g=a.deg?a.deg():0;if(g){c.pv=Math.max(0,c.pv-g)}addFx(c,a.fx);log(`✅ ${c.nom} rate sa sauvegarde${g?` : −${g} PV`:''}${a.fx?' · '+a.fx.n:''}.`);toast(`${a.n} : ça marche !`)}
     else{if(a.half){const g=Math.floor(a.deg()/2);c.pv=Math.max(0,c.pv-g);log(`🛡️ ${c.nom} réussit : moitié des dégâts, −${g} PV.`)}else{log(`🛡️ ${c.nom} réussit sa sauvegarde contre ${a.n}.`);if(a.conc)S.conc=null}}
-  } else {if(ok){if(a.sleep){(p.cs||[c]).forEach(x=>addFx(x,a.fx));log(`💤 Sleep : ${(p.cs||[c]).map(x=>x.nom).join(', ')} ${(p.cs||[c]).length>1?"s'endorment":"s'endort"}.`)}else{const g=a.deg?a.deg():0;c.pv=Math.max(0,c.pv-g);addFx(c,a.fx);log(`✅ ${a.n} : ${c.nom} −${g} PV.`)}}else log(`❌ Le MJ refuse ${a.n}.`)}
+  } else {if(ok){if(a.sleep){const z=p.cs||[];z.forEach(x=>addFx(x,a.fx));log(z.length?`💤 Sleep : ${z.map(x=>x.nom).join(', ')} ${z.length>1?"s'endorment":"s'endort"}.`:'💤 Sleep : pas assez de PV de sommeil, personne ne s\'endort.')}else{const g=a.deg?a.deg():0;c.pv=Math.max(0,c.pv-g);addFx(c,a.fx);log(`✅ ${a.n} : ${c.nom} −${g} PV.`)}}else log(`❌ Le MJ refuse ${a.n}.`)}
   if(c.pv<=0)log(`💀 ${c.nom} tombe !`);
   S.sel=null;S.cible=[];render();
 }
@@ -281,7 +289,7 @@ function finTour(){
   if(S.reac){toast('Ludo doit d\'abord choisir sa réaction');return}
   if(S.attente){toast('Le MJ doit d\'abord valider');return}
   S.tour++;let g=0;while(actif().pv<=0&&g++<10)S.tour++;
-  const a=actif();panneau=false;S.sel=null;S.cible=[];S.mjFait=false;
+  const a=actif();panneau=false;S.sel=null;S.cible=[];S.mjFait=false;S.onglet='action';
   if(a.al){S.ecos[a.id]={action:true,bonus:true,reaction:true,mvt:a.id==='K'?40:30};S.spellBonus=false;S.spellAction=false;}
   if(a.id==='L'){ludo().fx=ludo().fx.filter(f=>f.n!=='Dodge'&&f.n!=='Shield +5 CA');log('— Nouveau round : à toi, Ludo !')}
   else if(!a.al){const m=a.fx.find(f=>f.n==='Paralyzed'||f.n.startsWith('Unconscious'));a.fx=a.fx.filter(f=>f.n!=='Faux Pas');
