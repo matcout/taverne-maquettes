@@ -79,11 +79,11 @@ h3{font-family:var(--serif);font-variant:small-caps;letter-spacing:.06em;font-si
 </head>
 <body>
 <header><div class="t">LA TAVERNE · MAQUETTE</div><div class="s">Mon tour complet : le joueur agit, le MJ valide</div></header>
-<p class="intro"><b>Essaie :</b> c'est le tour de Ludo (il brille). Touche <b>Ludo</b> → choisis une action → touche la cible (ennemi en rouge, allié en bleu) → « Envoyer ». Sur le téléphone du MJ, valide « Réussi / Raté » (ou fais le jet de sauvegarde). Les dégâts et les effets s'appliquent tout seuls. Les aides aux alliés (Bardic Inspiration, Healing Word) passent sans le MJ.</p>
+<p class="intro"><b>Essaie :</b> tu peux jouer tout le monde. Le téléphone de gauche suit l'allié dont c'est le tour (Ludo, Korgan, Asterak) ; au tour d'un ennemi, le MJ choisit qui il attaque. C'est d'abord le tour de Ludo (il brille). Touche <b>Ludo</b> → choisis une action → touche la cible (ennemi en rouge, allié en bleu) → « Envoyer ». Sur le téléphone du MJ, valide « Réussi / Raté » (ou fais le jet de sauvegarde). Les dégâts et les effets s'appliquent tout seuls. Les aides aux alliés (Bardic Inspiration, Healing Word) passent sans le MJ ; après une Bardic Inspiration, les <b>Castagnettes du Faux Pas</b> sont proposées. Si un ennemi touche Ludo, il peut <b>réagir</b> (Shield gratuit, Silvery Barbs, Cutting Words).</p>
 
 <div class="wrap">
   <div class="col">
-    <p class="lbl">📱 Le téléphone de Ludo · onglet Combat</p>
+    <p class="lbl" id="lblJ">📱 Le téléphone de Ludo · onglet Combat</p>
     <div class="ph" id="joueur"></div>
   </div>
   <div class="col">
@@ -102,7 +102,7 @@ h3{font-family:var(--serif);font-variant:small-caps;letter-spacing:.06em;font-si
 // ---------- État de démonstration ----------
 const S={
   tour:0, sel:null, cible:[], onglet:'action', attente:null, log:[],
-  eco:{action:true,bonus:true,reaction:true,mvt:30}, slots:{1:4,2:2}, bi:3, conc:null, spellBonus:false,
+  ecos:{L:{action:true,bonus:true,reaction:true,mvt:30},K:{action:true,bonus:true,reaction:true,mvt:40},A:{action:true,bonus:true,reaction:true,mvt:30}}, mjFait:false, slots:{1:4,2:2}, bi:3, conc:null, spellBonus:false, fauxPas:2, shieldFree:1, langFree:1, reac:null,
   cr:[
     {id:'L',nom:'Ludo',al:1,ini:17,pv:24,max:24,ca:14,fx:[]},
     {id:'H1',nom:'Hobgobelin',al:0,ini:14,pv:11,max:11,ca:18,fx:[]},
@@ -125,11 +125,31 @@ const A=[
  {id:'bi',o:'bonus',ic:'🎵',n:'Bardic Inspiration',d:'Un allié reçoit 1d6 à ajouter à un jet',cib:'al',max:1,type:'ally',bi:1,fx:{n:'Bardic Inspiration d6',t:'bon'},exclMoi:1},
  {id:'hw',o:'bonus',ic:'💚',n:'Healing Word',d:'Niv. 1 · 60 pi · un allié récupère 1d4+3 PV',cib:'al',max:1,type:'heal',slot:1,soin:()=>d(4)+3,spellB:1},
  {id:'taunt',o:'bonus',ic:'😜',n:'Taunt (kender)',d:'Wis DD 14 : la cible a le désavantage contre les autres que toi',cib:'en',max:1,type:'save',sv:'Wis',fx:{n:'Raillé par Ludo',t:'mal'}},
+ {id:'cl',o:'action',ic:'📜',n:'Comprehend Languages',d:'Niv. 1 · comprendre toute langue 1 h · gratuit 1 fois par repos long, sinon emplacement',cib:'moi',type:'self',freeSpell:1,fx:{n:'Comprehend Languages',t:'bon'}},
+ {id:'sh',o:'reaction',ic:'🛡️',n:'Shield',d:'Niv. 1 · quand une attaque te touche : +5 CA jusqu\'à ton prochain tour · gratuit 1 fois par repos long',type:'info'},
+ {id:'sb',o:'reaction',ic:'🪙',n:'Silvery Barbs',d:'Niv. 1 · quand une créature réussit : elle relance et garde le plus bas ; un allié gagne l\'avantage',type:'info'},
  {id:'cw',o:'reaction',ic:'✂️',n:'Cutting Words',d:'Quand un ennemi attaque : −1d6 à son jet (Bardic Inspiration)',cib:'en',type:'info',bi:1},
  {id:'mv',o:'mvt',ic:'🦶',n:'Se déplacer',d:'Vitesse 30 pi (sur la carte, plus tard)',type:'mvt'},
  {id:'dash',o:'action',ic:'💨',n:'Dash',d:'Mouvement doublé ce tour',cib:'moi',type:'dash'},
 ];
+const FP={id:'fp',o:'bonus',ic:'🎶',n:'Castagnettes du Faux Pas',d:'Avec cette Bardic Inspiration : un ennemi visible à 60 pi fait une sauvegarde de Wis DD 14, sinon vitesse ½, pas de réaction et la 1re attaque contre lui a l\'avantage, jusqu\'au début de son prochain tour.',cib:'en',max:1,type:'save',sv:'Wis',free:1,fx:{n:'Faux Pas',t:'mal'}};
 const d=n=>1+Math.floor(Math.random()*n);
+// Actions de Korgan (barbare Zealot 3) et d'Asterak (clerc de la Guerre 3), simplifiées pour la démo
+const AK=[
+ {id:'maul',o:'action',ic:'🔨',n:'Maul',d:'Attaque +5 · 2d6+3, +2 en Rage · 5 pi',cib:'en',max:1,type:'atk',deg:()=>d(6)+d(6)+5},
+ {id:'horn',o:'action',ic:'🐂',n:'Cornes',d:'Attaque +5 · 1d6+3, +2 en Rage',cib:'en',max:1,type:'atk',deg:()=>d(6)+5},
+ {id:'rage',o:'bonus',ic:'🔥',n:'Rage',d:'Résistance contondant / perforant / tranchant, +2 dégâts, avantage en Strength',cib:'moi',type:'self',fx:{n:'Rage',t:'bon'}},
+];
+const AA=[
+ {id:'wh',o:'action',ic:'🔨',n:'Warhammer',d:'Attaque +5 · 1d8+3 contondant',cib:'en',max:1,type:'atk',deg:()=>d(8)+3},
+ {id:'bless',o:'action',ic:'🙏',n:'Bless',d:'Niv. 1 · concentration · jusqu\'à 3 alliés : +1d4 aux attaques et sauvegardes',cib:'al',max:3,type:'ally',fx:{n:'Bless',t:'bon'}},
+ {id:'wp',o:'bonus',ic:'⚔️',n:'War Priest',d:'Attaque d\'arme en action bonus (+5 · 1d8+3)',cib:'en',max:1,type:'atk',deg:()=>d(8)+3},
+ {id:'sof',o:'bonus',ic:'🛡️',n:'Shield of Faith',d:'Niv. 1 · concentration · un allié : +2 CA',cib:'al',max:1,type:'ally',fx:{n:'Shield of Faith',t:'bon'}},
+ {id:'hwa',o:'bonus',ic:'💚',n:'Healing Word',d:'Niv. 1 · un allié récupère 1d4+3 PV',cib:'al',max:1,type:'heal',soin:()=>d(4)+3},
+];
+const vue=()=>actif().al?actif():S.cr.find(c=>c.id==='L');
+const E=()=>S.ecos[vue().id];
+const actionsDe=id=>id==='L'?A:(id==='K'?AK:AA).concat(A.filter(a=>['esq','dash','mv','aide'].includes(a.id)));
 const $=s=>document.querySelector(s);
 const ordre=()=>[...S.cr].sort((a,b)=>b.ini-a.ini);
 const actif=()=>ordre()[S.tour%S.cr.length];
@@ -138,10 +158,12 @@ function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');se
 function log(t){S.log.unshift(t);if(S.log.length>12)S.log.pop()}
 function econKey(a){return a.o==='bonus'?'bonus':a.o==='reaction'?'reaction':'action'}
 function pourquoi(a){
-  if(actif().id!=='L')return 'Pas ton tour';
-  if(a.type==='mvt')return S.eco.mvt<=0?'Plus de mouvement':'';
-  const k=econKey(a);if(a.o!=='mvt'&&!S.eco[k])return k==='bonus'?'Action bonus déjà utilisée':k==='reaction'?'Réaction déjà utilisée':'Action déjà utilisée';
+  if(actif().id!==vue().id)return 'Pas ton tour';
+  if(a.type==='mvt')return E().mvt<=0?'Plus de mouvement':'';
+  const k=econKey(a);if(a.o!=='mvt'&&!E()[k])return k==='bonus'?'Action bonus déjà utilisée':k==='reaction'?'Réaction déjà utilisée':'Action déjà utilisée';
   if(a.type==='info')return 'Se déclenche au tour d\'un ennemi';
+  if(a.freeSpell&&!S.langFree&&!(S.slots[1]>0))return 'Plus de sort gratuit ni d\'emplacement niv. 1';
+  if(a.freeSpell&&S.spellBonus)return 'Sort en action bonus ce tour : seulement un cantrip';
   if(a.slot&&!(S.slots[a.slot]>0))return 'Plus d\'emplacement niv. '+a.slot;
   if(a.bi&&S.bi<=0)return 'Plus de Bardic Inspiration';
   if(a.o==='action'&&a.slot&&S.spellBonus)return 'Sort en action bonus ce tour : seulement un cantrip';
@@ -150,64 +172,67 @@ function pourquoi(a){
 }
 // ---------- Rendu : téléphone du joueur ----------
 function cardHTML(c,mode){
-  const act=actif().id===c.id, sel=S.sel, ciblable=mode==='cible'&&sel&&((sel.cib==='en'&&!c.al)||(sel.cib==='al'&&c.al&&!(sel.exclMoi&&c.id==='L')))&&c.pv>0;
+  const act=actif().id===c.id, sel=S.sel, ciblable=mode==='cible'&&sel&&((sel.cib==='en'&&!c.al)||(sel.cib==='al'&&c.al&&!(sel.exclMoi&&c.id===vue().id)))&&c.pv>0;
   const est=S.cible.includes(c.id);
   return `<button class="card ${c.al?'al':'en'} ${act?'actif':''} ${ciblable?'ciblable':''} ${est?'cible':''} ${c.pv<=0?'mort':''}" data-c="${c.id}">
    <span class="av">${c.nom[0]}</span><span class="info"><b>${c.nom}</b><small>${c.ini} · ${c.al?`PV ${c.pv}/${c.max}`:(c.pv<=0?'hors de combat':'blessé : '+(c.pv<c.max?'oui':'non'))} · CA ${c.al?c.ca:'?'}</small>
    ${c.fx.length?`<span class="chips">${c.fx.map(f=>`<span class="chip c-${f.t}">${f.n}</span>`).join('')}</span>`:''}</span>
    ${c.al?`<span class="hp"><i style="width:${c.pv/c.max*100}%"></i></span>`:''}
-   ${act&&c.id==='L'&&!S.sel?'<span class="tap">Touche-moi ›</span>':''}${ciblable?`<span class="tap">${est?'✓ cible':'Choisir'}</span>`:''}</button>`;
+   ${act&&c.id===vue().id&&!S.sel?'<span class="tap">Touche-moi ›</span>':''}${ciblable?`<span class="tap">${est?'✓ cible':'Choisir'}</span>`:''}</button>`;
 }
 let panneau=false;
 function renderJoueur(){
-  const L=ludo(), monTour=actif().id==='L';
-  let h=`<div class="bar"><b>Ludo</b><span>PV ${L.pv}/${L.max} · CA 14 · DD 14</span></div>`;
+  const L=vue(), monTour=actif().id===L.id;
+  $('#lblJ').textContent=`📱 Le téléphone ${/^[AEIOU]/.test(L.nom)?"d'":'de '}${L.nom} · onglet Combat`;
+  let h=`<div class="bar"><b>${L.nom}</b><span>PV ${L.pv}/${L.max} · CA ${L.ca}${L.id==='L'?' · DD 14':''}</span></div>`;
   if(!panneau||!monTour){
     h+=`<h3>Initiative</h3><div class="ini">${ordre().map(c=>cardHTML(c)).join('')}</div>`;
-    h+=`<div class="step">${monTour?'<b>C\'est ton tour !</b> Touche ta carte pour voir tes actions.':`<b>Tour de ${actif().nom}</b> · le MJ le joue.`}</div>`;
+    h+=`<div class="step">${monTour?'<b>C\'est ton tour !</b> Touche ta carte pour voir tes actions.':`<b>Tour de ${actif().nom}</b> · le MJ choisit sa cible sur son téléphone.`}</div>`;
   } else {
-    h+=`<div class="res"><div>Niv. 1 <b>${'◆'.repeat(S.slots[1])}${'◇'.repeat(4-S.slots[1])}</b></div><div>Niv. 2 <b>${'◆'.repeat(S.slots[2])}${'◇'.repeat(2-S.slots[2])}</b></div><div>Inspiration <b>${'♪'.repeat(S.bi)}</b><span style="color:#6d6253">${'♪'.repeat(3-S.bi)}</span></div>${S.conc?`<div class="c-conc">Concentration : <b>${S.conc}</b></div>`:''}</div>`;
-    h+=`<div class="econ"><div class="${S.eco.action?'':'used'}">Action</div><div class="${S.eco.bonus?'':'used'}">Bonus</div><div class="${S.eco.reaction?'':'used'}">Réaction</div><div class="${S.eco.mvt>0?'':'used'}">${S.eco.mvt} pi</div></div>`;
+    if(L.id==='L')h+=`<div class="res"><div>Niv. 1 <b>${'◆'.repeat(S.slots[1])}${'◇'.repeat(4-S.slots[1])}</b></div><div>Niv. 2 <b>${'◆'.repeat(S.slots[2])}${'◇'.repeat(2-S.slots[2])}</b></div><div>Inspiration <b>${'♪'.repeat(S.bi)}</b><span style="color:#6d6253">${'♪'.repeat(3-S.bi)}</span></div><div>Castagnettes <b>${'●'.repeat(S.fauxPas)}</b><span style="color:#6d6253">${'○'.repeat(2-S.fauxPas)}</span></div><div>Gratuits : Shield <b>${S.shieldFree?'●':'○'}</b> · Comprehend <b>${S.langFree?'●':'○'}</b></div>${S.conc?`<div class="c-conc">Concentration : <b>${S.conc}</b></div>`:''}</div>`;
+    h+=`<div class="econ"><div class="${E().action?'':'used'}">Action</div><div class="${E().bonus?'':'used'}">Bonus</div><div class="${E().reaction?'':'used'}">Réaction</div><div class="${E().mvt>0?'':'used'}">${E().mvt} pi</div></div>`;
     if(!S.sel){
       h+=`<div class="tabs">${[['action','Action'],['bonus','Bonus'],['reaction','Réaction'],['mvt','Mouvement']].map(([k,l])=>`<button class="${S.onglet===k?'on':''}" data-o="${k}">${l}</button>`).join('')}</div>`;
-      h+=`<div class="acts">${A.filter(a=>a.o===S.onglet).map(a=>{const w=pourquoi(a);return `<button class="act" data-a="${a.id}" ${w?'disabled':''}><span class="ic">${a.ic}</span><span><b>${a.n}</b><small>${a.d}</small>${w?`<small class="why">${w}</small>`:''}</span></button>`}).join('')}</div>`;
+      h+=`<div class="acts">${actionsDe(L.id).filter(a=>a.o===S.onglet).map(a=>{const w=pourquoi(a);return `<button class="act" data-a="${a.id}" ${w?'disabled':''}><span class="ic">${a.ic}</span><span><b>${a.n}</b><small>${a.d}</small>${w?`<small class="why">${w}</small>`:''}</span></button>`}).join('')}</div>`;
       h+=`<div class="row" style="padding:0 12px 6px"><button class="btn" id="retour">‹ Initiative</button><button class="btn main" id="fin">Fin de mon tour</button></div>`;
     } else {
       const a=S.sel;
       if(S.attente){h+=`<div class="step">⏳ <b>${a.n}</b> envoyé au MJ.<br><small>En attente de sa décision…</small></div>`}
       else if(a.cib==='moi'){h+=`<div class="step"><b>${a.ic} ${a.n}</b><br>${a.d}</div><div class="row" style="padding:0 12px"><button class="btn" id="annul">Annuler</button><button class="btn main" id="go">Faire</button></div>`}
       else{
-        h+=`<div class="step"><b>${a.ic} ${a.n}</b> · touche ${a.cib==='en'?'un ennemi':'un allié'} ci-dessous.<br><small>${a.d}</small></div>`;
+        h+=`<div class="step"><b>${a.ic} ${a.n}</b>${a.free?` (${S.fauxPas}/2, repos court)`:''} · touche ${a.cib==='en'?'un ennemi':'un allié'} ci-dessous.<br><small>${a.d}</small></div>`;
         h+=`<div class="ini">${ordre().filter(c=>a.cib==='en'?!c.al:c.al).map(c=>cardHTML(c,'cible')).join('')}</div>`;
-        h+=`<div class="row" style="padding:8px 12px"><button class="btn" id="annul">Annuler</button><button class="btn main" id="go" ${S.cible.length?'':'disabled'}>${a.type==='ally'||a.type==='heal'?'Appliquer':'Envoyer au MJ'}</button></div>`;
+        h+=`<div class="row" style="padding:8px 12px"><button class="btn" id="annul">${a.free?'Pas cette fois':'Annuler'}</button><button class="btn main" id="go" ${S.cible.length?'':'disabled'}>${a.type==='ally'||a.type==='heal'?'Appliquer':'Envoyer au MJ'}</button></div>`;
       }
     }
   }
+  if(S.reac){const R=S.reac;h=h.replace('<h3>Initiative</h3>',`<div class="pend">⚠️ <b>${R.en.nom}</b> t'attaque : <b>${R.tot}</b> contre ta CA 14${R.r===20?' (critique)':''}.<br><small>Réaction ? (10 s dans la vraie app)</small><div class="row"><button class="btn" data-r="sh">🛡️ Shield ${S.shieldFree?'(gratuit)':S.slots[1]?'(niv. 1)':'—'}</button><button class="btn" data-r="sb">🪙 Silvery Barbs</button></div><div class="row"><button class="btn" data-r="cw">✂️ Cutting Words (−1d6)</button><button class="btn" data-r="no">Aucune</button></div></div><h3>Initiative</h3>`)}
   h+=`<h3>Journal du combat</h3><div class="log">${S.log.map(l=>`<div>${l}</div>`).join('')||'<div>—</div>'}</div>`;
   $('#joueur').innerHTML=h;
   document.querySelectorAll('#joueur [data-c]').forEach(b=>b.onclick=()=>{const id=b.dataset.c;
-    if(S.sel&&!S.attente){const c=S.cr.find(x=>x.id===id);const a=S.sel;if(c.pv<=0)return;if((a.cib==='en'&&c.al)||(a.cib==='al'&&!c.al))return;if(a.exclMoi&&id==='L'){toast('Bardic Inspiration : pas sur toi-même');return}
+    if(S.sel&&!S.attente){const c=S.cr.find(x=>x.id===id);const a=S.sel;if(c.pv<=0)return;if((a.cib==='en'&&c.al)||(a.cib==='al'&&!c.al))return;if(a.exclMoi&&id===vue().id){toast('Bardic Inspiration : pas sur toi-même');return}
       S.cible=S.cible.includes(id)?S.cible.filter(x=>x!==id):(a.max===1?[id]:[...S.cible,id]);renderJoueur();return}
-    if(id==='L'&&actif().id==='L'){panneau=true;renderJoueur()}});
+    if(id===vue().id&&actif().id===id){panneau=true;renderJoueur()}});
   document.querySelectorAll('#joueur [data-o]').forEach(b=>b.onclick=()=>{S.onglet=b.dataset.o;renderJoueur()});
-  document.querySelectorAll('#joueur [data-a]').forEach(b=>b.onclick=()=>{const a=A.find(x=>x.id===b.dataset.a);if(a.type==='mvt'){toast('Sur la carte de la télé (maquette « télé + téléphone »)');return}if(a.type==='dash'){use(a);S.eco.mvt+=30;log('Ludo fait Dash : 60 pi ce tour.');render();return}S.sel=a;S.cible=[];renderJoueur()});
+  document.querySelectorAll('#joueur [data-a]').forEach(b=>b.onclick=()=>{const a=actionsDe(vue().id).find(x=>x.id===b.dataset.a);if(a.type==='mvt'){toast('Sur la carte de la télé (maquette « télé + téléphone »)');return}if(a.type==='dash'){use(a);E().mvt+=30;log(`${vue().nom} fait Dash.`);render();return}S.sel=a;S.cible=[];renderJoueur()});
   const r=$('#retour');if(r)r.onclick=()=>{panneau=false;renderJoueur()};
   const f=$('#fin');if(f)f.onclick=finTour;
   const an=$('#annul');if(an)an.onclick=()=>{S.sel=null;S.cible=[];renderJoueur()};
   const g=$('#go');if(g)g.onclick=envoyer;
+  document.querySelectorAll('#joueur [data-r]').forEach(b=>b.onclick=()=>reagir(b.dataset.r));
 }
-function use(a){const k=econKey(a);S.eco[k]=false;if(a.slot)S.slots[a.slot]--;if(a.bi)S.bi--;if(a.spellB)S.spellBonus=true;if(a.o==='action'&&a.slot)S.spellAction=true;if(a.conc){if(S.conc){S.cr.forEach(c=>c.fx=c.fx.filter(f=>f.n!=='Paralyzed'&&f.n!=='Heat Metal'));log(`Ludo arrête ${S.conc} (une seule concentration).`)}S.conc=a.n}}
+function use(a){if(a.free){S.fauxPas--;return}if(a.freeSpell){if(S.langFree>0)S.langFree--;else S.slots[1]--;S.spellAction=true}const k=econKey(a);E()[k]=false;if(a.slot)S.slots[a.slot]--;if(a.bi)S.bi--;if(a.spellB)S.spellBonus=true;if(a.o==='action'&&a.slot)S.spellAction=true;if(a.conc){if(S.conc){S.cr.forEach(c=>c.fx=c.fx.filter(f=>f.n!=='Paralyzed'&&f.n!=='Heat Metal'));log(`Ludo arrête ${S.conc} (une seule concentration).`)}S.conc=a.n}}
 function addFx(c,fx){if(fx&&!c.fx.some(f=>f.n===fx.n))c.fx.push({...fx})}
 function envoyer(){
-  const a=S.sel, cs=S.cible.map(id=>S.cr.find(c=>c.id===id));
-  if(a.type==='self'){use(a);addFx(ludo(),a.fx);log(`Ludo fait ${a.n}.`);S.sel=null;render();return}
-  if(a.type==='ally'){use(a);cs.forEach(c=>addFx(c,a.fx));log(`🎵 Ludo : ${a.n} sur ${cs.map(c=>c.nom).join(', ')}. Ajouté sur sa fiche.`);toast(`${a.n} → ${cs[0].nom} (sans le MJ)`);S.sel=null;S.cible=[];render();return}
+  const a=S.sel, cs=S.cible.map(id=>S.cr.find(c=>c.id===id)), P=vue(), nom=P.nom;
+  if(a.type==='self'){use(a);addFx(P,a.fx);log(`${nom} fait ${a.n}.`);S.sel=null;render();return}
+  if(a.type==='ally'){use(a);cs.forEach(c=>addFx(c,a.fx));log(`${a.ic} ${nom} : ${a.n} sur ${cs.map(c=>c.nom).join(', ')}. Ajouté sur ${cs.length>1?'leur fiche':'sa fiche'}.`);toast(`${a.n} → ${cs[0].nom} (sans le MJ)`);S.sel=null;S.cible=[];if(a.id==='bi'&&S.fauxPas>0){S.sel=FP;S.cible=[]}render();return}
   if(a.type==='heal'){use(a);const c=cs[0],s=a.soin(),av=c.pv;c.pv=Math.min(c.max,c.pv+s);log(`💚 Healing Word : ${c.nom} +${c.pv-av} PV (${av} → ${c.pv}).`);toast(`${c.nom} récupère ${c.pv-av} PV`);S.sel=null;S.cible=[];render();return}
   use(a);
   const c=cs[0];let txt;
-  if(a.type==='atk'){const r=d(20);S.attente={a,c,r,tot:r+5};txt=`Ludo attaque <b>${c.nom}</b> avec ${a.n} : <b>${r+5}</b> pour toucher (d20 = ${r}${r===20?', critique !':''}).`}
-  else if(a.type==='save'){S.attente={a,c};txt=`Ludo lance <b>${a.n}</b> sur <b>${c.nom}</b> : sauvegarde de ${a.sv} DD 14.`}
-  else {S.attente={a,c,cs,auto:1};txt=`Ludo lance <b>${a.n}</b> sur <b>${cs.map(x=>x.nom).join(', ')}</b> (${a.d}).`}
+  if(a.type==='atk'){const r=d(20);S.attente={a,c,r,tot:r+5};txt=`${nom} attaque <b>${c.nom}</b> avec ${a.n} : <b>${r+5}</b> pour toucher (d20 = ${r}${r===20?', critique !':''}).`}
+  else if(a.type==='save'){S.attente={a,c};txt=`${nom} lance <b>${a.n}</b> sur <b>${c.nom}</b> : sauvegarde de ${a.sv} DD 14.`}
+  else {S.attente={a,c,cs,auto:1};txt=`${nom} lance <b>${a.n}</b> sur <b>${cs.map(x=>x.nom).join(', ')}</b> (${a.d}).`}
   S.attente.txt=txt;log('➡️ '+txt.replace(/<[^>]+>/g,''));render();
 }
 // ---------- Rendu : téléphone du MJ ----------
@@ -221,13 +246,16 @@ function renderMJ(){
     else if(p.a.type==='save')h+=`<div class="row"><button class="btn" id="jetMJ">🎲 Jet de ${p.a.sv} de ${c.nom}</button></div><div class="row"><button class="btn ok" data-v="1">Sauvegarde ratée</button><button class="btn ko" data-v="0">Sauvegarde réussie</button></div>`;
     else h+=`<div class="row"><button class="btn ok" data-v="1">Appliquer</button><button class="btn ko" data-v="0">Refuser</button></div>`;
     h+=`</div>`;
-  } else h+=`<div class="empty">Rien à valider. Quand un joueur agit sur une créature, sa demande arrive ici.</div>`;
+  } else if(S.reac) h+=`<div class="empty">⏳ ${S.reac.en.nom} attaque Ludo (${S.reac.tot}). En attente de la réaction de Ludo…</div>`;
+  else if(!actif().al&&!S.mjFait&&actif().pv>0&&!actif().fx.some(f=>f.n==='Paralyzed'||f.n.startsWith('Unconscious')))h+=`<div class="pend">👹 <b>Tour de ${actif().nom}</b> : qui attaque-t-il ?<small> (+4 · 1d8+1)</small><div class="row" style="flex-wrap:wrap">${S.cr.filter(c=>c.al&&c.pv>0).map(c=>`<button class="btn" data-atk="${c.id}">${c.nom}</button>`).join('')}</div></div>`;
+  else h+=`<div class="empty">Rien à valider. Quand un joueur agit sur une créature, sa demande arrive ici.</div>`;
   h+=`<h3>Créatures</h3><div class="ini">${S.cr.filter(c=>!c.al).map(c=>`<div class="card en ${c.pv<=0?'mort':''}"><span class="av">${c.nom[0]}</span><span class="info"><b>${c.nom}</b><small>PV ${c.pv}/${c.max} · CA ${c.ca}</small>${c.fx.length?`<span class="chips">${c.fx.map(f=>`<span class="chip c-${f.t}">${f.n}</span>`).join('')}</span>`:''}</span><span class="hp"><i style="width:${c.pv/c.max*100}%"></i></span></div>`).join('')}</div>`;
   h+=`<div class="row" style="padding:10px 12px 14px"><button class="btn" id="suiv">⏭ Tour suivant</button></div>`;
   $('#mj').innerHTML=h;
   document.querySelectorAll('#mj [data-v]').forEach(b=>b.onclick=()=>decider(b.dataset.v==='1'));
   const j=$('#jetMJ');if(j)j.onclick=()=>{const r=d(20),mod=-1,t=r+mod;j.textContent=`🎲 ${t} (d20 = ${r}, −1) → ${t>=13?'réussie':'ratée'}`;j.disabled=true};
   $('#suiv').onclick=finTour;
+  document.querySelectorAll('#mj [data-atk]').forEach(b=>b.onclick=()=>mjAttaque(b.dataset.atk));
 }
 function decider(ok){
   const p=S.attente,a=p.a,c=p.c;S.attente=null;
@@ -239,13 +267,27 @@ function decider(ok){
   if(c.pv<=0)log(`💀 ${c.nom} tombe !`);
   S.sel=null;S.cible=[];render();
 }
+function frapper(en,r,cib){const L=cib||ludo();let g=d(8)+1;if(r===20)g+=d(8);const rage=L.fx.some(f=>f.n==='Rage');if(rage)g=Math.floor(g/2);L.pv=Math.max(0,L.pv-g);log(`💥 ${en.nom} touche ${L.nom} : −${g} PV${rage?' (moitié, Rage)':''}.`);if(L.pv<=0)log(`💀 ${L.nom} tombe à 0 PV !`)}
+function mjAttaque(id){const en=actif(),c=S.cr.find(x=>x.id===id);S.mjFait=true;const dis=en.fx.some(f=>f.n.startsWith('Désavantage'));let r=d(20);if(dis)r=Math.min(r,d(20));const tot=r+4;en.fx=en.fx.filter(f=>!f.n.startsWith('Désavantage'));
+  const ca=c.ca+(c.fx.some(f=>f.n==='Shield of Faith')?2:0)+(c.fx.some(f=>f.n==='Shield +5 CA')?5:0);
+  if(tot>=ca||r===20){if(c.id==='L'&&S.ecos.L.reaction){S.reac={en,r,tot};log(`${en.nom} attaque Ludo : ${tot}${dis?' (désavantage)':''}… réaction ?`)}else frapper(en,r,c)}else log(`${en.nom} attaque ${c.nom} : ${tot} contre CA ${ca}${dis?' (désavantage)':''}, raté.`);render()}
+function reagir(k){const R=S.reac,L=ludo();S.reac=null;const EL=S.ecos.L;
+  if(k==='no'){frapper(R.en,R.r)}
+  else if(k==='sh'){if(!S.shieldFree&&!S.slots[1]){toast('Plus de Shield gratuit ni d\'emplacement');S.reac=R;return}EL.reaction=false;if(S.shieldFree)S.shieldFree--;else S.slots[1]--;addFx(L,{n:'Shield +5 CA',t:'bon'});if(R.tot>=19||R.r===20)frapper(R.en,R.r);else log(`🛡️ Shield : CA 19, ${R.tot} ne touche plus.`)}
+  else if(k==='sb'){if(!S.slots[1]){toast('Plus d\'emplacement niv. 1');S.reac=R;return}EL.reaction=false;S.slots[1]--;const r2=d(20),r=Math.min(R.r,r2),tot=r+4;log(`🪙 Silvery Barbs : relance ${r2}, garde ${r} → ${tot}.`);if(tot>=14||r===20)frapper(R.en,r);else log(`${R.en.nom} rate Ludo.`)}
+  else if(k==='cw'){if(S.bi<=0){toast('Plus de Bardic Inspiration');S.reac=R;return}EL.reaction=false;S.bi--;const m=d(6),tot=R.tot-m;log(`✂️ Cutting Words : −${m} → ${tot}.`);if(tot>=14||R.r===20)frapper(R.en,R.r);else log(`${R.en.nom} rate Ludo.`)}
+  render()}
 function finTour(){
+  if(S.reac){toast('Ludo doit d\'abord choisir sa réaction');return}
   if(S.attente){toast('Le MJ doit d\'abord valider');return}
   S.tour++;let g=0;while(actif().pv<=0&&g++<10)S.tour++;
-  const a=actif();panneau=false;S.sel=null;S.cible=[];
-  if(a.id==='L'){S.eco={action:true,bonus:true,reaction:true,mvt:30};S.spellBonus=false;S.spellAction=false;ludo().fx=ludo().fx.filter(f=>f.n!=='Dodge');log('— Nouveau round : à toi, Ludo !')}
-  else if(!a.al){const m=a.fx.some(f=>f.n==='Paralyzed');log(m?`${a.nom} est paralysé et ne fait rien.`:`${a.nom} attaque Korgan (le MJ le joue).`);a.fx=a.fx.filter(f=>!f.n.startsWith('Désavantage'))}
-  else log(`Tour de ${a.nom}.`);
+  const a=actif();panneau=false;S.sel=null;S.cible=[];S.mjFait=false;
+  if(a.al){S.ecos[a.id]={action:true,bonus:true,reaction:true,mvt:a.id==='K'?40:30};S.spellBonus=false;S.spellAction=false;}
+  if(a.id==='L'){ludo().fx=ludo().fx.filter(f=>f.n!=='Dodge'&&f.n!=='Shield +5 CA');log('— Nouveau round : à toi, Ludo !')}
+  else if(!a.al){const m=a.fx.find(f=>f.n==='Paralyzed'||f.n.startsWith('Unconscious'));a.fx=a.fx.filter(f=>f.n!=='Faux Pas');
+    if(m)log(`${a.nom} est ${m.n==='Paralyzed'?'paralysé':'endormi'} et ne fait rien.`);
+    else log(`Tour de ${a.nom} : le MJ choisit sa cible.`)}
+  else log(`À toi, ${a.nom} !`);
   render();
 }
 function render(){renderJoueur();renderMJ()}
