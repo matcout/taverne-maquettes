@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Taverne · Mon tour complet</title>
+<style>
+:root{--bg:#0b0907;--card:#17130f;--card2:#211b15;--line:#3a2f22;--gold:#c9a96a;--gold2:#e6cf9a;--text:#ece3d3;--muted:#a39580;--bad:#d9675b;--good:#6fbf73;--ally:#5b8fd9;--spell:#9a86e0;--serif:Georgia,"Times New Roman",serif;--sans:-apple-system,"Segoe UI",Roboto,sans-serif}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans)}
+header{padding:12px 16px;border-bottom:1px solid var(--line)}
+header .t{font-family:var(--serif);letter-spacing:.12em;font-size:13px;color:var(--gold2)}
+header .s{font-family:var(--serif);font-size:15px}
+.intro{padding:8px 16px;color:var(--muted);font-size:13px;line-height:1.45;max-width:1000px}
+.intro b{color:var(--gold2)}
+.wrap{display:flex;gap:20px;padding:8px 16px 30px;align-items:flex-start;flex-wrap:wrap;justify-content:center}
+.col{flex:0 1 380px;min-width:0;width:100%}
+.lbl{font-family:var(--serif);font-variant:small-caps;letter-spacing:.08em;color:var(--gold);font-size:15px;margin:0 0 6px}
+.ph{border:9px solid #050403;border-radius:30px;background:var(--bg);overflow:hidden;box-shadow:0 0 0 1px var(--line),0 16px 34px rgba(0,0,0,.6);min-height:300px}
+.bar{padding:10px 12px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.bar b{font-family:var(--serif);color:var(--gold2);font-size:16px}
+.bar span{font-size:12px;color:var(--muted)}
+h3{font-family:var(--serif);font-variant:small-caps;letter-spacing:.06em;font-size:15px;margin:12px 12px 6px;color:var(--gold)}
+/* Initiative */
+.ini{display:flex;flex-direction:column;gap:6px;padding:0 10px}
+.card{display:flex;align-items:center;gap:10px;min-height:52px;padding:6px 10px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--text);text-align:left;width:100%;font-size:14px;position:relative}
+.card .av{width:34px;height:34px;flex:none;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;border:2px solid #fff}
+.card.al .av{background:var(--ally)} .card.en .av{background:#b8433a;border-color:#ffd2cc}
+.card .info{flex:1;min-width:0} .card .info small{display:block;color:var(--muted);font-size:11.5px}
+.card .hp{width:60px;height:6px;border-radius:3px;background:#0008;overflow:hidden;flex:none}
+.card .hp i{display:block;height:100%;background:var(--good)}
+.card.en .hp i{background:var(--bad)}
+.card.actif{border-color:var(--gold2);box-shadow:0 0 0 1px var(--gold2),0 0 18px rgba(230,207,154,.45);animation:gl 1.6s ease-in-out infinite}
+@keyframes gl{50%{box-shadow:0 0 0 1px var(--gold2),0 0 28px rgba(230,207,154,.7)}}
+.card.ciblable{border-color:#ff8a7a;border-style:dashed;cursor:pointer}
+.card.ciblable.al{border-color:#8fb6f0}
+.card.cible{background:#3a1714;border-style:solid}
+.card.cible.al{background:#15253d}
+.card.mort{opacity:.35}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px}
+.chip{font-size:10.5px;padding:1px 6px;border-radius:99px;border:1px solid currentColor}
+.c-bon{color:var(--good)} .c-mal{color:#f08a7c} .c-conc{color:var(--spell)}
+.tap{font-size:11px;color:var(--gold2);margin-left:auto;white-space:nowrap}
+/* Mon tour */
+.res{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px}
+.res div{font-size:12px;padding:4px 8px;border-radius:8px;border:1px solid var(--line);background:var(--card)}
+.res b{color:var(--gold2)}
+.econ{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:8px 12px 0}
+.econ div{text-align:center;font-size:11px;padding:5px 2px;border-radius:8px;border:1px solid var(--gold);color:var(--gold2)}
+.econ div.used{border-color:var(--line);color:#6d6253;text-decoration:line-through}
+.tabs{display:flex;gap:4px;padding:10px 12px 0}
+.tabs button{flex:1;min-height:38px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--muted);font-size:12.5px}
+.tabs button.on{border-color:var(--gold);color:var(--gold2);background:var(--card2)}
+.acts{display:flex;flex-direction:column;gap:6px;padding:8px 12px 12px}
+.act{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;padding:9px 10px;border-radius:11px;border:1px solid var(--line);background:var(--card);color:var(--text);font-size:14px}
+.act .ic{width:30px;height:30px;flex:none;border-radius:8px;display:grid;place-items:center;background:var(--card2);font-size:16px}
+.act small{display:block;color:var(--muted);font-size:11.5px;margin-top:2px;line-height:1.3}
+.act:disabled{opacity:.4}
+.act .why{color:#e0a35b}
+.step{margin:10px 12px;padding:10px 12px;border-radius:11px;border:1px solid var(--gold);background:var(--card2);font-size:13.5px;line-height:1.45}
+.step b{color:var(--gold2)}
+.row{display:flex;gap:6px;margin-top:8px}
+.btn{flex:1;min-height:44px;border-radius:10px;border:1px solid var(--gold);background:transparent;color:var(--gold2);font-size:14px}
+.btn.main{background:var(--gold);color:#1a140c;font-weight:700}
+.btn.ok{background:var(--good);border-color:var(--good);color:#0b1a0c;font-weight:700}
+.btn.ko{background:var(--bad);border-color:var(--bad);color:#200;font-weight:700}
+.btn:disabled{opacity:.4}
+.log{padding:4px 12px 14px;font-size:12px;color:var(--muted);line-height:1.5;max-height:150px;overflow:auto}
+.log div:first-child{color:var(--text)}
+.empty{padding:16px 12px;color:var(--muted);font-size:13px}
+.pend{margin:10px;padding:10px 12px;border-radius:12px;border:1px solid var(--gold2);background:var(--card2);font-size:14px;line-height:1.45;animation:pop .3s}
+@keyframes pop{from{transform:scale(.96);opacity:0}}
+.pend small{color:var(--muted)}
+.note{max-width:1000px;margin:0 auto;padding:0 16px 40px;color:var(--muted);font-size:13px;line-height:1.55}
+.note b{color:var(--text)}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--gold);color:#1a140c;padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:opacity .2s;z-index:40;pointer-events:none;max-width:90vw;text-align:center}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<header><div class="t">LA TAVERNE · MAQUETTE</div><div class="s">Mon tour complet : le joueur agit, le MJ valide</div></header>
+<p class="intro"><b>Essaie :</b> c'est le tour de Ludo (il brille). Touche <b>Ludo</b> → choisis une action → touche la cible (ennemi en rouge, allié en bleu) → « Envoyer ». Sur le téléphone du MJ, valide « Réussi / Raté » (ou fais le jet de sauvegarde). Les dégâts et les effets s'appliquent tout seuls. Les aides aux alliés (Bardic Inspiration, Healing Word) passent sans le MJ.</p>
+
+<div class="wrap">
+  <div class="col">
+    <p class="lbl">📱 Le téléphone de Ludo · onglet Combat</p>
+    <div class="ph" id="joueur"></div>
+  </div>
+  <div class="col">
+    <p class="lbl">📱 Le téléphone du MJ</p>
+    <div class="ph" id="mj"></div>
+  </div>
+</div>
+<div class="note">
+  <b>Idée de Xavier (15 nov.)</b> : le joueur gère tout son tour ; le MJ dit seulement si ça réussit. Cette maquette réunit « Mon tour » (action, action bonus, réaction, mouvement), les sorts lancés sur des alliés et le choix de la cible.<br>
+  <b>Règles gérées dans la démo</b> : une action, une action bonus, une réaction par round ; emplacements de sort ; un seul sort de concentration ; règle 2014 « sort en action bonus → seulement un cantrip en action » ; Bardic Inspiration limitée par ses utilisations.<br>
+  Personnages, statistiques et créatures de démonstration.
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ---------- État de démonstration ----------
+const S={
+  tour:0, sel:null, cible:[], onglet:'action', attente:null, log:[],
+  eco:{action:true,bonus:true,reaction:true,mvt:30}, slots:{1:4,2:2}, bi:3, conc:null, spellBonus:false,
+  cr:[
+    {id:'L',nom:'Ludo',al:1,ini:17,pv:24,max:24,ca:14,fx:[]},
+    {id:'H1',nom:'Hobgobelin',al:0,ini:14,pv:11,max:11,ca:18,fx:[]},
+    {id:'K',nom:'Korgan',al:1,ini:12,pv:24,max:32,ca:15,fx:[{n:'Rage',t:'bon'}]},
+    {id:'B',nom:'Baaz',al:0,ini:10,pv:22,max:22,ca:15,fx:[]},
+    {id:'A',nom:'Asterak',al:1,ini:8,pv:27,max:27,ca:18,fx:[]},
+    {id:'H2',nom:'Hobgobelin 2',al:0,ini:6,pv:11,max:11,ca:18,fx:[]},
+  ],
+};
+// Les actions de Ludo (barde 3, Collège du Savoir) : DD 13, attaque de sort +5
+const A=[
+ {id:'rap',o:'action',ic:'🗡️',n:'Rapier',d:'Attaque +5 · 1d8+3 perforant · 5 pi',cib:'en',max:1,type:'atk',deg:()=>d(8)+3},
+ {id:'vm',o:'action',ic:'🗯️',n:'Vicious Mockery',d:'Cantrip · sauvegarde Wis DD 13 · 1d4 psychique + désavantage à sa prochaine attaque',cib:'en',max:1,type:'save',sv:'Wis',deg:()=>d(4),fx:{n:'Désavantage (Mockery)',t:'mal'},cantrip:1},
+ {id:'dw',o:'action',ic:'👂',n:'Dissonant Whispers',d:'Niv. 1 · Wis DD 13 · 3d6 psychique (moitié si réussie), fuit',cib:'en',max:1,type:'save',sv:'Wis',slot:1,deg:()=>d(6)+d(6)+d(6),half:1},
+ {id:'sl',o:'action',ic:'💤',n:'Sleep',d:'Niv. 1 · 5d8 PV de créatures endormies, en commençant par la plus faible (pas de sauvegarde)',cib:'en',max:3,type:'auto',slot:1,fx:{n:'Unconscious (Sleep)',t:'mal'},sleep:1},
+ {id:'hp',o:'action',ic:'🧊',n:'Hold Person',d:'Niv. 2 · concentration · Wis DD 13 · Paralyzed',cib:'en',max:1,type:'save',sv:'Wis',slot:2,conc:1,fx:{n:'Paralyzed',t:'mal'},humanoid:1},
+ {id:'hm',o:'action',ic:'🔥',n:'Heat Metal',d:'Niv. 2 · concentration · 2d8 feu, pas de jet pour toucher',cib:'en',max:1,type:'auto',slot:2,conc:1,deg:()=>d(8)+d(8),fx:{n:'Heat Metal',t:'mal'}},
+ {id:'aide',o:'action',ic:'🤝',n:'Help',d:'Un allié a l\'avantage à sa prochaine attaque',cib:'al',max:1,type:'ally',fx:{n:'Avantage (Help)',t:'bon'}},
+ {id:'esq',o:'action',ic:'🌀',n:'Dodge',d:'Attaques contre toi au désavantage',cib:'moi',type:'self',fx:{n:'Dodge',t:'bon'}},
+ {id:'bi',o:'bonus',ic:'🎵',n:'Bardic Inspiration',d:'Un allié reçoit 1d6 à ajouter à un jet',cib:'al',max:1,type:'ally',bi:1,fx:{n:'Bardic Inspiration d6',t:'bon'},exclMoi:1},
+ {id:'hw',o:'bonus',ic:'💚',n:'Healing Word',d:'Niv. 1 · 60 pi · un allié récupère 1d4+3 PV',cib:'al',max:1,type:'heal',slot:1,soin:()=>d(4)+3,spellB:1},
+ {id:'taunt',o:'bonus',ic:'😜',n:'Taunt (kender)',d:'Wis DD 13 : la cible a le désavantage contre les autres que toi',cib:'en',max:1,type:'save',sv:'Wis',fx:{n:'Raillé par Ludo',t:'mal'}},
+ {id:'cw',o:'reaction',ic:'✂️',n:'Cutting Words',d:'Quand un ennemi attaque : −1d6 à son jet (Bardic Inspiration)',cib:'en',type:'info',bi:1},
+ {id:'mv',o:'mvt',ic:'🦶',n:'Se déplacer',d:'Vitesse 30 pi (sur la carte, plus tard)',type:'mvt'},
+ {id:'dash',o:'action',ic:'💨',n:'Dash',d:'Mouvement doublé ce tour',cib:'moi',type:'dash'},
+];
+const d=n=>1+Math.floor(Math.random()*n);
+const $=s=>document.querySelector(s);
+const ordre=()=>[...S.cr].sort((a,b)=>b.ini-a.ini);
+const actif=()=>ordre()[S.tour%S.cr.length];
+const ludo=()=>S.cr.find(c=>c.id==='L');
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2200)}
+function log(t){S.log.unshift(t);if(S.log.length>12)S.log.pop()}
+function econKey(a){return a.o==='bonus'?'bonus':a.o==='reaction'?'reaction':'action'}
+function pourquoi(a){
+  if(actif().id!=='L')return 'Pas ton tour';
+  if(a.type==='mvt')return S.eco.mvt<=0?'Plus de mouvement':'';
+  const k=econKey(a);if(a.o!=='mvt'&&!S.eco[k])return k==='bonus'?'Action bonus déjà utilisée':k==='reaction'?'Réaction déjà utilisée':'Action déjà utilisée';
+  if(a.type==='info')return 'Se déclenche au tour d\'un ennemi';
+  if(a.slot&&!(S.slots[a.slot]>0))return 'Plus d\'emplacement niv. '+a.slot;
+  if(a.bi&&S.bi<=0)return 'Plus de Bardic Inspiration';
+  if(a.o==='action'&&a.slot&&S.spellBonus)return 'Sort en action bonus ce tour : seulement un cantrip';
+  if(a.spellB&&S.spellAction)return 'Sort de niveau 1+ en action ce tour : pas de sort en action bonus';
+  return '';
+}
+// ---------- Rendu : téléphone du joueur ----------
+function cardHTML(c,mode){
+  const act=actif().id===c.id, sel=S.sel, ciblable=mode==='cible'&&sel&&((sel.cib==='en'&&!c.al)||(sel.cib==='al'&&c.al&&!(sel.exclMoi&&c.id==='L')))&&c.pv>0;
+  const est=S.cible.includes(c.id);
+  return `<button class="card ${c.al?'al':'en'} ${act?'actif':''} ${ciblable?'ciblable':''} ${est?'cible':''} ${c.pv<=0?'mort':''}" data-c="${c.id}">
+   <span class="av">${c.nom[0]}</span><span class="info"><b>${c.nom}</b><small>${c.ini} · ${c.al?`PV ${c.pv}/${c.max}`:(c.pv<=0?'hors de combat':'blessé : '+(c.pv<c.max?'oui':'non'))} · CA ${c.al?c.ca:'?'}</small>
+   ${c.fx.length?`<span class="chips">${c.fx.map(f=>`<span class="chip c-${f.t}">${f.n}</span>`).join('')}</span>`:''}</span>
+   ${c.al?`<span class="hp"><i style="width:${c.pv/c.max*100}%"></i></span>`:''}
+   ${act&&c.id==='L'&&!S.sel?'<span class="tap">Touche-moi ›</span>':''}${ciblable?`<span class="tap">${est?'✓ cible':'Choisir'}</span>`:''}</button>`;
+}
+let panneau=false;
+function renderJoueur(){
+  const L=ludo(), monTour=actif().id==='L';
+  let h=`<div class="bar"><b>Ludo</b><span>PV ${L.pv}/${L.max} · CA 14 · DD 13</span></div>`;
+  if(!panneau||!monTour){
+    h+=`<h3>Initiative</h3><div class="ini">${ordre().map(c=>cardHTML(c)).join('')}</div>`;
+    h+=`<div class="step">${monTour?'<b>C\'est ton tour !</b> Touche ta carte pour voir tes actions.':`<b>Tour de ${actif().nom}</b> · le MJ le joue.`}</div>`;
+  } else {
+    h+=`<div class="res"><div>Niv. 1 <b>${'◆'.repeat(S.slots[1])}${'◇'.repeat(4-S.slots[1])}</b></div><div>Niv. 2 <b>${'◆'.repeat(S.slots[2])}${'◇'.repeat(2-S.slots[2])}</b></div><div>Inspiration <b>${'♪'.repeat(S.bi)}</b><span style="color:#6d6253">${'♪'.repeat(3-S.bi)}</span></div>${S.conc?`<div class="c-conc">Concentration : <b>${S.conc}</b></div>`:''}</div>`;
+    h+=`<div class="econ"><div class="${S.eco.action?'':'used'}">Action</div><div class="${S.eco.bonus?'':'used'}">Bonus</div><div class="${S.eco.reaction?'':'used'}">Réaction</div><div class="${S.eco.mvt>0?'':'used'}">${S.eco.mvt} pi</div></div>`;
+    if(!S.sel){
+      h+=`<div class="tabs">${[['action','Action'],['bonus','Bonus'],['reaction','Réaction'],['mvt','Mouvement']].map(([k,l])=>`<button class="${S.onglet===k?'on':''}" data-o="${k}">${l}</button>`).join('')}</div>`;
+      h+=`<div class="acts">${A.filter(a=>a.o===S.onglet).map(a=>{const w=pourquoi(a);return `<button class="act" data-a="${a.id}" ${w?'disabled':''}><span class="ic">${a.ic}</span><span><b>${a.n}</b><small>${a.d}</small>${w?`<small class="why">${w}</small>`:''}</span></button>`}).join('')}</div>`;
+      h+=`<div class="row" style="padding:0 12px 6px"><button class="btn" id="retour">‹ Initiative</button><button class="btn main" id="fin">Fin de mon tour</button></div>`;
+    } else {
+      const a=S.sel;
+      if(S.attente){h+=`<div class="step">⏳ <b>${a.n}</b> envoyé au MJ.<br><small>En attente de sa décision…</small></div>`}
+      else if(a.cib==='moi'){h+=`<div class="step"><b>${a.ic} ${a.n}</b><br>${a.d}</div><div class="row" style="padding:0 12px"><button class="btn" id="annul">Annuler</button><button class="btn main" id="go">Faire</button></div>`}
+      else{
+        h+=`<div class="step"><b>${a.ic} ${a.n}</b> · touche ${a.cib==='en'?'un ennemi':'un allié'} ci-dessous.<br><small>${a.d}</small></div>`;
+        h+=`<div class="ini">${ordre().filter(c=>a.cib==='en'?!c.al:c.al).map(c=>cardHTML(c,'cible')).join('')}</div>`;
+        h+=`<div class="row" style="padding:8px 12px"><button class="btn" id="annul">Annuler</button><button class="btn main" id="go" ${S.cible.length?'':'disabled'}>${a.type==='ally'||a.type==='heal'?'Appliquer':'Envoyer au MJ'}</button></div>`;
+      }
+    }
+  }
+  h+=`<h3>Journal du combat</h3><div class="log">${S.log.map(l=>`<div>${l}</div>`).join('')||'<div>—</div>'}</div>`;
+  $('#joueur').innerHTML=h;
+  document.querySelectorAll('#joueur [data-c]').forEach(b=>b.onclick=()=>{const id=b.dataset.c;
+    if(S.sel&&!S.attente){const c=S.cr.find(x=>x.id===id);const a=S.sel;if(c.pv<=0)return;if((a.cib==='en'&&c.al)||(a.cib==='al'&&!c.al))return;if(a.exclMoi&&id==='L'){toast('Bardic Inspiration : pas sur toi-même');return}
+      S.cible=S.cible.includes(id)?S.cible.filter(x=>x!==id):(a.max===1?[id]:[...S.cible,id]);renderJoueur();return}
+    if(id==='L'&&actif().id==='L'){panneau=true;renderJoueur()}});
+  document.querySelectorAll('#joueur [data-o]').forEach(b=>b.onclick=()=>{S.onglet=b.dataset.o;renderJoueur()});
+  document.querySelectorAll('#joueur [data-a]').forEach(b=>b.onclick=()=>{const a=A.find(x=>x.id===b.dataset.a);if(a.type==='mvt'){toast('Sur la carte de la télé (maquette « télé + téléphone »)');return}if(a.type==='dash'){use(a);S.eco.mvt+=30;log('Ludo fait Dash : 60 pi ce tour.');render();return}S.sel=a;S.cible=[];renderJoueur()});
+  const r=$('#retour');if(r)r.onclick=()=>{panneau=false;renderJoueur()};
+  const f=$('#fin');if(f)f.onclick=finTour;
+  const an=$('#annul');if(an)an.onclick=()=>{S.sel=null;S.cible=[];renderJoueur()};
+  const g=$('#go');if(g)g.onclick=envoyer;
+}
+function use(a){const k=econKey(a);S.eco[k]=false;if(a.slot)S.slots[a.slot]--;if(a.bi)S.bi--;if(a.spellB)S.spellBonus=true;if(a.o==='action'&&a.slot)S.spellAction=true;if(a.conc){if(S.conc){S.cr.forEach(c=>c.fx=c.fx.filter(f=>f.n!=='Paralyzed'&&f.n!=='Heat Metal'));log(`Ludo arrête ${S.conc} (une seule concentration).`)}S.conc=a.n}}
+function addFx(c,fx){if(fx&&!c.fx.some(f=>f.n===fx.n))c.fx.push({...fx})}
+function envoyer(){
+  const a=S.sel, cs=S.cible.map(id=>S.cr.find(c=>c.id===id));
+  if(a.type==='self'){use(a);addFx(ludo(),a.fx);log(`Ludo fait ${a.n}.`);S.sel=null;render();return}
+  if(a.type==='ally'){use(a);cs.forEach(c=>addFx(c,a.fx));log(`🎵 Ludo : ${a.n} sur ${cs.map(c=>c.nom).join(', ')}. Ajouté sur sa fiche.`);toast(`${a.n} → ${cs[0].nom} (sans le MJ)`);S.sel=null;S.cible=[];render();return}
+  if(a.type==='heal'){use(a);const c=cs[0],s=a.soin(),av=c.pv;c.pv=Math.min(c.max,c.pv+s);log(`💚 Healing Word : ${c.nom} +${c.pv-av} PV (${av} → ${c.pv}).`);toast(`${c.nom} récupère ${c.pv-av} PV`);S.sel=null;S.cible=[];render();return}
+  use(a);
+  const c=cs[0];let txt;
+  if(a.type==='atk'){const r=d(20);S.attente={a,c,r,tot:r+5};txt=`Ludo attaque <b>${c.nom}</b> avec ${a.n} : <b>${r+5}</b> pour toucher (d20 = ${r}${r===20?', critique !':''}).`}
+  else if(a.type==='save'){S.attente={a,c};txt=`Ludo lance <b>${a.n}</b> sur <b>${c.nom}</b> : sauvegarde de ${a.sv} DD 13.`}
+  else {S.attente={a,c,cs,auto:1};txt=`Ludo lance <b>${a.n}</b> sur <b>${cs.map(x=>x.nom).join(', ')}</b> (${a.d}).`}
+  S.attente.txt=txt;log('➡️ '+txt.replace(/<[^>]+>/g,''));render();
+}
+// ---------- Rendu : téléphone du MJ ----------
+function renderMJ(){
+  let h=`<div class="bar"><b>MJ</b><span>Tour ${Math.floor(S.tour/S.cr.length)+1} · ${actif().nom}</span></div>`;
+  const p=S.attente;
+  if(p){
+    const c=p.c;
+    h+=`<div class="pend">🔔 ${p.txt}<br><small>${c.nom} : CA ${c.ca}, PV ${c.pv}/${c.max}${p.a.humanoid?' · humanoïde : oui':''}</small>`;
+    if(p.a.type==='atk')h+=`<div class="row"><button class="btn ko" data-v="0">Raté</button><button class="btn ok" data-v="1">Touché</button></div><small>Suggestion : ${p.tot>=c.ca||p.r===20?'touché':'raté'} (${p.tot} contre CA ${c.ca}).</small>`;
+    else if(p.a.type==='save')h+=`<div class="row"><button class="btn" id="jetMJ">🎲 Jet de ${p.a.sv} de ${c.nom}</button></div><div class="row"><button class="btn ok" data-v="1">Sauvegarde ratée</button><button class="btn ko" data-v="0">Sauvegarde réussie</button></div>`;
+    else h+=`<div class="row"><button class="btn ok" data-v="1">Appliquer</button><button class="btn ko" data-v="0">Refuser</button></div>`;
+    h+=`</div>`;
+  } else h+=`<div class="empty">Rien à valider. Quand un joueur agit sur une créature, sa demande arrive ici.</div>`;
+  h+=`<h3>Créatures</h3><div class="ini">${S.cr.filter(c=>!c.al).map(c=>`<div class="card en ${c.pv<=0?'mort':''}"><span class="av">${c.nom[0]}</span><span class="info"><b>${c.nom}</b><small>PV ${c.pv}/${c.max} · CA ${c.ca}</small>${c.fx.length?`<span class="chips">${c.fx.map(f=>`<span class="chip c-${f.t}">${f.n}</span>`).join('')}</span>`:''}</span><span class="hp"><i style="width:${c.pv/c.max*100}%"></i></span></div>`).join('')}</div>`;
+  h+=`<div class="row" style="padding:10px 12px 14px"><button class="btn" id="suiv">⏭ Tour suivant</button></div>`;
+  $('#mj').innerHTML=h;
+  document.querySelectorAll('#mj [data-v]').forEach(b=>b.onclick=()=>decider(b.dataset.v==='1'));
+  const j=$('#jetMJ');if(j)j.onclick=()=>{const r=d(20),mod=-1,t=r+mod;j.textContent=`🎲 ${t} (d20 = ${r}, −1) → ${t>=13?'réussie':'ratée'}`;j.disabled=true};
+  $('#suiv').onclick=finTour;
+}
+function decider(ok){
+  const p=S.attente,a=p.a,c=p.c;S.attente=null;
+  if(a.type==='atk'){if(ok){const crit=p.r===20;let g=a.deg();if(crit)g+=d(8);c.pv=Math.max(0,c.pv-g);log(`✅ Touché ! ${c.nom} perd ${g} PV${crit?' (critique)':''}.`);toast(`${c.nom} −${g} PV`)}else log(`❌ ${a.n} rate ${c.nom}.`)}
+  else if(a.type==='save'){
+    if(ok){let g=a.deg?a.deg():0;if(g){c.pv=Math.max(0,c.pv-g)}addFx(c,a.fx);log(`✅ ${c.nom} rate sa sauvegarde${g?` : −${g} PV`:''}${a.fx?' · '+a.fx.n:''}.`);toast(`${a.n} : ça marche !`)}
+    else{if(a.half){const g=Math.floor(a.deg()/2);c.pv=Math.max(0,c.pv-g);log(`🛡️ ${c.nom} réussit : moitié des dégâts, −${g} PV.`)}else{log(`🛡️ ${c.nom} réussit sa sauvegarde contre ${a.n}.`);if(a.conc)S.conc=null}}
+  } else {if(ok){if(a.sleep){(p.cs||[c]).forEach(x=>addFx(x,a.fx));log(`💤 Sleep : ${(p.cs||[c]).map(x=>x.nom).join(', ')} ${(p.cs||[c]).length>1?"s'endorment":"s'endort"}.`)}else{const g=a.deg?a.deg():0;c.pv=Math.max(0,c.pv-g);addFx(c,a.fx);log(`✅ ${a.n} : ${c.nom} −${g} PV.`)}}else log(`❌ Le MJ refuse ${a.n}.`)}
+  if(c.pv<=0)log(`💀 ${c.nom} tombe !`);
+  S.sel=null;S.cible=[];render();
+}
+function finTour(){
+  if(S.attente){toast('Le MJ doit d\'abord valider');return}
+  S.tour++;let g=0;while(actif().pv<=0&&g++<10)S.tour++;
+  const a=actif();panneau=false;S.sel=null;S.cible=[];
+  if(a.id==='L'){S.eco={action:true,bonus:true,reaction:true,mvt:30};S.spellBonus=false;S.spellAction=false;ludo().fx=ludo().fx.filter(f=>f.n!=='Dodge');log('— Nouveau round : à toi, Ludo !')}
+  else if(!a.al){const m=a.fx.some(f=>f.n==='Paralyzed');log(m?`${a.nom} est paralysé et ne fait rien.`:`${a.nom} attaque Korgan (le MJ le joue).`);a.fx=a.fx.filter(f=>!f.n.startsWith('Désavantage'))}
+  else log(`Tour de ${a.nom}.`);
+  render();
+}
+function render(){renderJoueur();renderMJ()}
+render();
+</script>
+</body>
+</html>
