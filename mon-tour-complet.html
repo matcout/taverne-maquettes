@@ -233,7 +233,21 @@ function envoyer(){
   if(a.type==='heal'){use(a);const c=cs[0],s=a.soin(),av=c.pv;c.pv=Math.min(c.max,c.pv+s);log(`💚 Healing Word : ${c.nom} +${c.pv-av} PV (${av} → ${c.pv}).`);toast(`${c.nom} récupère ${c.pv-av} PV`);S.sel=null;S.cible=[];render();return}
   use(a);
   const c=cs[0];let txt;
-  if(a.type==='atk'){const r=d(20);S.attente={a,c,r,tot:r+5};txt=`${nom} attaque <b>${c.nom}</b> avec ${a.n} : <b>${r+5}</b> pour toucher (d20 = ${r}${r===20?', critique !':''}).`}
+  if(a.type==='atk'){
+    // Avantage / désavantage et bonus selon les effets (règles 5e 2014)
+    const has=(x,k)=>x.fx.some(f=>f.n.startsWith(k));
+    const av=[],dv=[];
+    const horsJeu=has(c,'Unconscious')||has(c,'Paralyzed');
+    if(horsJeu)av.push(has(c,'Paralyzed')?'cible paralysée':'cible endormie');
+    if(has(c,'Faux Pas')){av.push('Faux Pas');c.fx=c.fx.filter(f=>f.n!=='Faux Pas')}
+    if(has(P,'Avantage (Help)')){av.push('Help');P.fx=P.fx.filter(f=>f.n!=='Avantage (Help)')}
+    if(has(P,'Désavantage'))dv.push('Vicious Mockery');
+    const r1=d(20),r2=d(20),mode=av.length&&!dv.length?'av':dv.length&&!av.length?'dv':'';
+    const r=mode==='av'?Math.max(r1,r2):mode==='dv'?Math.min(r1,r2):r1;
+    const bless=has(P,'Bless')?d(4):0, tot=r+5+bless;
+    const crit=r===20||(horsJeu&&tot>=c.ca);
+    S.attente={a,c,r,tot,crit,reveil:has(c,'Unconscious')};
+    txt=`${nom} attaque <b>${c.nom}</b> avec ${a.n} : <b>${tot}</b> pour toucher (${mode?`${mode==='av'?'avantage':'désavantage'} : ${r1} / ${r2} → ${r}`:`d20 = ${r}`} + 5${bless?` + Bless ${bless}`:''}${r===20?', critique !':''}).${av.length?`<br><small>Avantage : ${av.join(', ')}.</small>`:''}${dv.length?`<br><small>Désavantage : ${dv.join(', ')}.</small>`:''}${horsJeu?'<br><small>Corps à corps sur une cible endormie ou paralysée : coup critique s\'il touche.</small>':''}`}
   else if(a.type==='save'){S.attente={a,c};txt=`${nom} lance <b>${a.n}</b> sur <b>${c.nom}</b> : sauvegarde de ${a.sv} DD 14.`}
   else if(a.sleep){const des=[d(8),d(8),d(8),d(8),d(8)];let reste=des.reduce((x,y)=>x+y,0);const total=reste,dorment=[];
     for(const x of [...cs].sort((u,v)=>u.pv-v.pv)){if(x.pv<=reste){reste-=x.pv;dorment.push(x)}else break}
@@ -250,7 +264,7 @@ function renderMJ(){
   if(p){
     const c=p.c;
     h+=`<div class="pend">🔔 ${p.txt}<br><small>${c.nom} : CA ${c.ca}, PV ${c.pv}/${c.max}${p.a.humanoid?' · humanoïde : oui':''}</small>`;
-    if(p.a.type==='atk')h+=`<div class="row"><button class="btn ko" data-v="0">Raté</button><button class="btn ok" data-v="1">Touché</button></div><small>Suggestion : ${p.tot>=c.ca||p.r===20?'touché':'raté'} (${p.tot} contre CA ${c.ca}).</small>`;
+    if(p.a.type==='atk')h+=`<div class="row"><button class="btn ko" data-v="0">Raté</button><button class="btn ok" data-v="1">Touché</button></div><small>Suggestion : ${p.tot>=c.ca||p.r===20?'touché'+(p.crit?' (critique)':''):'raté'} (${p.tot} contre CA ${c.ca}).</small>`;
     else if(p.a.type==='save')h+=`<div class="row"><button class="btn" id="jetMJ">🎲 Jet de ${p.a.sv} de ${c.nom}</button></div><div class="row"><button class="btn ok" data-v="1">Sauvegarde ratée</button><button class="btn ko" data-v="0">Sauvegarde réussie</button></div>`;
     else h+=`<div class="row"><button class="btn ok" data-v="1">Appliquer</button><button class="btn ko" data-v="0">Refuser</button></div>`;
     h+=`</div>`;
@@ -267,7 +281,9 @@ function renderMJ(){
 }
 function decider(ok){
   const p=S.attente,a=p.a,c=p.c;S.attente=null;
-  if(a.type==='atk'){if(ok){const crit=p.r===20;let g=a.deg();if(crit)g+=d(8);c.pv=Math.max(0,c.pv-g);log(`✅ Touché ! ${c.nom} perd ${g} PV${crit?' (critique)':''}.`);toast(`${c.nom} −${g} PV`)}else log(`❌ ${a.n} rate ${c.nom}.`)}
+  if(a.type==='atk'){if(ok){const crit=p.crit||p.r===20;let g=a.deg();if(crit)g+=a.deg()-(a.id==='rap'?3:a.id==='maul'||a.id==='horn'?5:3);c.pv=Math.max(0,c.pv-g);
+      if(p.reveil){c.fx=c.fx.filter(f=>!f.n.startsWith('Unconscious'))}
+      log(`✅ Touché ! ${c.nom} perd ${g} PV${crit?' (critique)':''}${p.reveil&&c.pv>0?' et se réveille':''}.`);toast(`${c.nom} −${g} PV`)}else log(`❌ ${a.n} rate ${c.nom}.`)}
   else if(a.type==='save'){
     if(ok){let g=a.deg?a.deg():0;if(g){c.pv=Math.max(0,c.pv-g)}addFx(c,a.fx);log(`✅ ${c.nom} rate sa sauvegarde${g?` : −${g} PV`:''}${a.fx?' · '+a.fx.n:''}.`);toast(`${a.n} : ça marche !`)}
     else{if(a.half){const g=Math.floor(a.deg()/2);c.pv=Math.max(0,c.pv-g);log(`🛡️ ${c.nom} réussit : moitié des dégâts, −${g} PV.`)}else{log(`🛡️ ${c.nom} réussit sa sauvegarde contre ${a.n}.`);if(a.conc)S.conc=null}}
@@ -276,7 +292,13 @@ function decider(ok){
   S.sel=null;S.cible=[];render();
 }
 function frapper(en,r,cib){const L=cib||ludo();let g=d(8)+1;if(r===20)g+=d(8);const rage=L.fx.some(f=>f.n==='Rage');if(rage)g=Math.floor(g/2);L.pv=Math.max(0,L.pv-g);log(`💥 ${en.nom} touche ${L.nom} : −${g} PV${rage?' (moitié, Rage)':''}.`);if(L.pv<=0)log(`💀 ${L.nom} tombe à 0 PV !`)}
-function mjAttaque(id){const en=actif(),c=S.cr.find(x=>x.id===id);S.mjFait=true;const dis=en.fx.some(f=>f.n.startsWith('Désavantage'));let r=d(20);if(dis)r=Math.min(r,d(20));const tot=r+4;en.fx=en.fx.filter(f=>!f.n.startsWith('Désavantage'));
+function mjAttaque(id){const en=actif(),c=S.cr.find(x=>x.id===id);S.mjFait=true;
+  // Effets : Vicious Mockery, Taunt (contre un autre que Ludo), Dodge de la cible → désavantage ; Faux Pas n'empêche pas l'attaque
+  const raisons=[];if(en.fx.some(f=>f.n.startsWith('Désavantage')))raisons.push('Vicious Mockery');
+  if(en.fx.some(f=>f.n==='Raillé par Ludo')&&c.id!=='L')raisons.push('Taunt');
+  if(c.fx.some(f=>f.n==='Dodge'))raisons.push('Dodge');
+  const dis=raisons.length>0;let r=d(20);if(dis)r=Math.min(r,d(20));const bless=0;const tot=r+4+bless;en.fx=en.fx.filter(f=>!f.n.startsWith('Désavantage'));
+  if(dis)log(`${en.nom} a le désavantage (${raisons.join(', ')}).`);
   const ca=c.ca+(c.fx.some(f=>f.n==='Shield of Faith')?2:0)+(c.fx.some(f=>f.n==='Shield +5 CA')?5:0);
   if(tot>=ca||r===20){if(c.id==='L'&&S.ecos.L.reaction){S.reac={en,r,tot};log(`${en.nom} attaque Ludo : ${tot}${dis?' (désavantage)':''}… réaction ?`)}else frapper(en,r,c)}else log(`${en.nom} attaque ${c.nom} : ${tot} contre CA ${ca}${dis?' (désavantage)':''}, raté.`);render()}
 function reagir(k){const R=S.reac,L=ludo();S.reac=null;const EL=S.ecos.L;
